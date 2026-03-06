@@ -13,7 +13,11 @@ import {
     ChevronRight,
     Zap,
     Globe,
-    PieChart as PieIcon
+    PieChart as PieIcon,
+    Cpu,
+    Link as LinkIcon,
+    Star,
+    Users
 } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip } from 'recharts';
 
@@ -25,6 +29,7 @@ interface SubPhase {
 
 interface Phase {
     id: string;
+    category: 'MVP' | 'POST-MVP';
     title: string;
     progress: number;
     objective: string;
@@ -39,8 +44,10 @@ export default function RoadmapPage() {
     const adminUsers = ['Tobias Estivalete', 'Carolina Farah'];
 
     const phases: Phase[] = [
+        // --- MVP SECTION ---
         {
             id: 'p1',
+            category: 'MVP',
             title: 'Base & Arquitetura Multi-tenant',
             progress: 100,
             objective: 'Fundação escalável com isolamento total de dados entre clientes.',
@@ -54,6 +61,7 @@ export default function RoadmapPage() {
         },
         {
             id: 'p2',
+            category: 'MVP',
             title: 'Motores de Inteligência MVP',
             progress: 95,
             objective: 'Processamento de folha e mapeamento automático de cargos.',
@@ -67,6 +75,7 @@ export default function RoadmapPage() {
         },
         {
             id: 'p3',
+            category: 'MVP',
             title: 'Experiência Executiva & Pitch',
             progress: 92,
             objective: 'Interface premium e simulador de mérito para CFOs.',
@@ -80,6 +89,7 @@ export default function RoadmapPage() {
         },
         {
             id: 'p4',
+            category: 'MVP',
             title: 'Infraestrutura Cloud (AWS)',
             progress: 35,
             objective: 'SaaS operante e autogerenciável na nuvem AWS.',
@@ -90,17 +100,60 @@ export default function RoadmapPage() {
                 { title: 'Backend AWS ECS/Fargate', status: 'TODO', details: 'Containers NestJS na AWS Fargate (Próximo).' },
                 { title: 'RDS PostgreSQL Setup', status: 'TODO', details: 'Banco produtivo autogerenciado.' },
             ]
+        },
+        // --- POST-MVP SECTION ---
+        {
+            id: 'p5',
+            category: 'POST-MVP',
+            title: 'Inteligência Preditiva (AI)',
+            progress: 0,
+            objective: 'Modelos de GenAI para previsão de churn e retenção.',
+            icon: <Cpu size={24} />,
+            color: '#f59e0b',
+            subPhases: [
+                { title: 'IA Generativa no Copilot', status: 'TODO', details: 'Respostas profundas sobre tendências de mercado via LLM.' },
+                { title: 'Previsão de Risco de Saída', status: 'TODO', details: 'Detecção de colaboradores com alto risco de turnover por salário.' },
+            ]
+        },
+        {
+            id: 'p6',
+            category: 'POST-MVP',
+            title: 'Ecossistema de Integrações',
+            progress: 0,
+            objective: 'Conectividade nativa com ERPs e HCMs do mercado.',
+            icon: <LinkIcon size={24} />,
+            color: '#10b981',
+            subPhases: [
+                { title: 'Integração SAP / Senior / Workday', status: 'TODO', details: 'Webhook e conectores para leitura automática de folha.' },
+                { title: 'API Pública', status: 'TODO', details: 'Interface para desenvolvedores externos consumirem dados de remuneração.' },
+            ]
+        },
+        {
+            id: 'p7',
+            category: 'POST-MVP',
+            title: 'Portal do Colaborador (Total Rewards)',
+            progress: 0,
+            objective: 'Interface para transparência salarial e benefícios.',
+            icon: <Users size={24} />,
+            color: '#3b82f6',
+            subPhases: [
+                { title: 'Extrato de Remuneração Total', status: 'TODO', details: 'Visão clara para o colaborador sobre seu pacote completo.' },
+                { title: 'Market Positioning Visibility', status: 'TODO', details: 'Autonomia para o colaborador entender sua posição na faixa.' },
+            ]
         }
     ];
 
+    const mvpProgress = Math.round(phases.filter(p => p.category === 'MVP').reduce((acc, p) => acc + p.progress, 0) / 4);
+    const totalProgress = Math.round(phases.reduce((acc, p) => acc + p.progress, 0) / phases.length);
+
     const pieData = [
-        { name: 'Concluído', value: 82, color: '#6366f1' },
-        { name: 'Em Aberto', value: 18, color: '#1e293b' },
+        { name: 'MVP Concluído', value: mvpProgress, color: '#6366f1' },
+        { name: 'Full Project Scope', value: 100 - mvpProgress, color: '#1e293b' },
     ];
 
     return (
         <div style={{ color: '#ffffff', maxWidth: 1200, margin: '0 auto', background: '#020617', padding: '20px', minHeight: '100vh' }}>
-            {/* Header Admin - High Contrast */}
+            {/* Header Admin */}
             <div style={{
                 display: 'flex',
                 justifyContent: 'space-between',
@@ -109,26 +162,31 @@ export default function RoadmapPage() {
                 padding: '32px',
                 background: '#0f172a',
                 borderRadius: '24px',
-                border: '1px solid #1e293b',
-                boxShadow: '0 4px 20px rgba(0,0,0,0.5)'
+                border: '1px solid #1e293b'
             }}>
                 <div>
-                    <h1 style={{ fontSize: 32, fontWeight: 900, color: '#ffffff', marginBottom: 8, letterSpacing: '-0.02em' }}>
-                        Roadmap Estratégico SinSalarial
+                    <h1 style={{ fontSize: 32, fontWeight: 900, color: '#ffffff', marginBottom: 8 }}>
+                        Evolução Estratégica SinSalarial
                     </h1>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: '#94a3b8', fontSize: 14 }}>
                         <Lock size={16} />
                         <span>ADMIN: <strong style={{ color: '#ffffff' }}>Tobias Estivalete & Carolina Farah</strong></span>
                     </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontSize: 12, fontWeight: 700, color: '#6366f1', letterSpacing: '0.1em', marginBottom: 4 }}>STATUS GLOBAL</div>
-                    <div style={{ fontSize: 48, fontWeight: 900, color: '#ffffff', lineHeight: 1 }}>82%</div>
+                <div style={{ textAlign: 'right', display: 'flex', gap: 32 }}>
+                    <div>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#6366f1', letterSpacing: '0.1em', marginBottom: 4 }}>MVP STATUS</div>
+                        <div style={{ fontSize: 40, fontWeight: 900, color: '#ffffff' }}>{mvpProgress}%</div>
+                    </div>
+                    <div style={{ borderLeft: '1px solid #1e293b', paddingLeft: 32 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', letterSpacing: '0.1em', marginBottom: 4 }}>DÉBITO TÉCNICO TOTAL</div>
+                        <div style={{ fontSize: 40, fontWeight: 900, color: '#4b5563' }}>{totalProgress}%</div>
+                    </div>
                 </div>
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 32 }}>
-                {/* Gráfico de Pizza Central */}
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 32, marginBottom: 48 }}>
+                {/* Gráfico Macro */}
                 <div className="card" style={{ background: '#0f172a', padding: '32px', display: 'flex', alignItems: 'center', gap: 32 }}>
                     <div style={{ width: 180, height: 180 }}>
                         <ResponsiveContainer width="100%" height="100%">
@@ -151,82 +209,48 @@ export default function RoadmapPage() {
                         </ResponsiveContainer>
                     </div>
                     <div>
-                        <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>Evolução do Todo</h3>
-                        <p style={{ fontSize: 14, color: '#94a3b8', maxWidth: 200, lineHeight: 1.5 }}>
-                            O MVP funcional está <strong style={{ color: '#fff' }}>82% concluído</strong>, pronto para o pitch de investimento e feedback da Lola.
+                        <h3 style={{ fontSize: 20, fontWeight: 800, marginBottom: 12 }}>Visão de Longo Prazo</h3>
+                        <p style={{ fontSize: 14, color: '#94a3b8', maxWidth: 220, lineHeight: 1.5 }}>
+                            Estamos finalizando o <strong style={{ color: '#6366f1' }}>MVP (Foco Atual)</strong>. O escopo completo do sistema estende-se por mais 3 fases de escala e automação.
                         </p>
                     </div>
                 </div>
 
-                {/* Métricas e OKRs */}
                 <div className="card" style={{ background: '#0f172a', padding: '32px' }}>
-                    <h3 style={{ fontSize: 14, fontWeight: 800, color: '#6366f1', marginBottom: 24, letterSpacing: '0.1em' }}>OBJETIVOS CRÍTICOS</h3>
-                    <div style={{ display: 'grid', gap: 16 }}>
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 15 }}>
-                            <CheckCircle2 size={20} color="#10b981" />
-                            <span>MVP pronto para demonstração executiva</span>
+                    <h3 style={{ fontSize: 14, fontWeight: 800, color: '#6366f1', marginBottom: 24, letterSpacing: '0.1em' }}>MÉTRICAS DE PERFORMANCE</h3>
+                    <div style={{ display: 'grid', gap: 20 }}>
+                        <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginBottom: 6 }}>
+                                <span>Health Score do Projeto</span>
+                                <span style={{ color: '#10b981', fontWeight: 700 }}>EXCELENTE (A+)</span>
+                            </div>
+                            <div style={{ width: '100%', height: 4, background: '#1e293b', borderRadius: 2 }}><div style={{ width: '95%', height: '100%', background: '#10b981', borderRadius: 2 }}></div></div>
                         </div>
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 15 }}>
-                            <CheckCircle2 size={20} color="#10b981" />
-                            <span>Diferenciação via Job Match Algoritmico</span>
-                        </div>
-                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 15 }}>
-                            <Clock size={20} color="#f59e0b" />
-                            <span style={{ color: '#94a3b8' }}>Migração para Infra AWS Gerenciada</span>
+                        <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13, color: '#94a3b8' }}>
+                            <Star size={16} color="#f59e0b" />
+                            <span>Próximo Grande Marco: Lançamento Alpha (Fase Cloud)</span>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Linha do Tempo / Fases */}
-            <div style={{ display: 'grid', gap: 16 }}>
-                {phases.map((phase) => (
-                    <div
-                        key={phase.id}
-                        className="card"
-                        onClick={() => setSelectedPhase(phase)}
-                        style={{
-                            cursor: 'pointer',
-                            padding: '24px 32px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 32,
-                            transition: 'all 0.2s',
-                            background: '#0f172a',
-                            border: '1px solid #1e293b',
-                            borderRadius: '20px'
-                        }}
-                    >
-                        <div style={{
-                            width: 48,
-                            height: 48,
-                            borderRadius: '12px',
-                            background: `${phase.color}20`,
-                            color: phase.color,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            border: `1px solid ${phase.color}40`
-                        }}>
-                            {phase.icon}
-                        </div>
-
-                        <div style={{ flex: 1 }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
-                                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#ffffff' }}>{phase.title}</h3>
-                                <span style={{ fontSize: 16, fontWeight: 900, color: phase.color }}>{phase.progress}%</span>
-                            </div>
-                            <div style={{ width: '100%', height: 6, background: '#1e293b', borderRadius: 4 }}>
-                                <div style={{ width: `${phase.progress}%`, height: '100%', background: phase.color, borderRadius: 4 }}></div>
-                            </div>
-                        </div>
-
-                        <div style={{ color: '#444' }}><ChevronRight /></div>
-                    </div>
+            {/* SECTION: MVP */}
+            <h2 style={{ fontSize: 14, fontWeight: 900, color: '#6366f1', marginBottom: 20, letterSpacing: '0.2em' }}>PHASE 1: MVP (ALVO ATUAL)</h2>
+            <div style={{ display: 'grid', gap: 12, marginBottom: 48 }}>
+                {phases.filter(p => p.category === 'MVP').map((phase) => (
+                    <PhaseCard key={phase.id} phase={phase} onSelect={() => setSelectedPhase(phase)} />
                 ))}
             </div>
 
-            {/* Modal - Improved Readability */}
+            {/* SECTION: POST-MVP */}
+            <h2 style={{ fontSize: 14, fontWeight: 900, color: '#4b5563', marginBottom: 20, letterSpacing: '0.2em' }}>PHASE 2: ESCALA & ECOSSISTEMA (FUTURO)</h2>
+            <div style={{ display: 'grid', gap: 12 }}>
+                {phases.filter(p => p.category === 'POST-MVP').map((phase) => (
+                    <PhaseCard key={phase.id} phase={phase} onSelect={() => setSelectedPhase(phase)} />
+                ))}
+            </div>
+
+            {/* Modal Detalhes */}
             {selectedPhase && (
                 <div style={{
                     position: 'fixed',
@@ -244,8 +268,7 @@ export default function RoadmapPage() {
                         background: '#0f172a',
                         borderRadius: '28px',
                         padding: '40px',
-                        border: '1px solid #1e293b',
-                        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 1)'
+                        border: '1px solid #1e293b'
                     }} onClick={e => e.stopPropagation()}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 20, marginBottom: 32 }}>
                             <div style={{ padding: 14, borderRadius: 16, background: `${selectedPhase.color}20`, color: selectedPhase.color, border: `1px solid ${selectedPhase.color}40` }}>
@@ -254,45 +277,87 @@ export default function RoadmapPage() {
                             <h2 style={{ fontSize: 26, fontWeight: 900, color: '#fff' }}>{selectedPhase.title}</h2>
                         </div>
 
-                        <div style={{ marginBottom: 40 }}>
-                            <div style={{ display: 'grid', gap: 16 }}>
-                                {selectedPhase.subPhases.map((sub, i) => (
-                                    <div key={i} style={{ padding: 20, background: '#1e293b', borderRadius: '20px', border: '1px solid #334155' }}>
-                                        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
-                                            <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>{sub.title}</span>
-                                            <span style={{
-                                                fontSize: 10,
-                                                fontWeight: 900,
-                                                padding: '4px 10px',
-                                                borderRadius: 8,
-                                                background: sub.status === 'DONE' ? '#10b981' : (sub.status === 'DOING' ? '#f59e0b' : '#4b5563'),
-                                                color: '#000'
-                                            }}>
-                                                {sub.status}
-                                            </span>
-                                        </div>
-                                        <p style={{ fontSize: 13, color: '#94a3b8', margin: 0, lineHeight: 1.5 }}>{sub.details}</p>
+                        <div style={{ display: 'grid', gap: 16, marginBottom: 40 }}>
+                            {selectedPhase.subPhases.map((sub, i) => (
+                                <div key={i} style={{ padding: 20, background: '#1e293b', borderRadius: '20px', border: '1px solid #334155' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                                        <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>{sub.title}</span>
+                                        <span style={{
+                                            fontSize: 10,
+                                            fontWeight: 900,
+                                            padding: '4px 10px',
+                                            borderRadius: 8,
+                                            background: sub.status === 'DONE' ? '#10b981' : (sub.status === 'DOING' ? '#f59e0b' : '#4b5563'),
+                                            color: '#000'
+                                        }}>
+                                            {sub.status}
+                                        </span>
                                     </div>
-                                ))}
-                            </div>
+                                    <p style={{ fontSize: 13, color: '#94a3b8', margin: 0 }}>{sub.details}</p>
+                                </div>
+                            ))}
                         </div>
 
                         <button
                             onClick={() => setSelectedPhase(null)}
-                            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#fff', color: '#000', fontWeight: 900, border: 'none', cursor: 'pointer', fontSize: 16 }}
+                            style={{ width: '100%', padding: '16px', borderRadius: 16, background: '#fff', color: '#000', fontWeight: 900, border: 'none', cursor: 'pointer' }}
                         >
-                            FECHAR DETALHES
+                            FECHAR
                         </button>
                     </div>
                 </div>
             )}
 
             <style jsx>{`
-        .card:hover {
-          border-color: #6366f1 !important;
-          transform: scale(1.005);
-        }
+        .card:hover { border-color: #6366f1 !important; transform: scale(1.005); }
       `}</style>
+        </div>
+    );
+}
+
+function PhaseCard({ phase, onSelect }: { phase: Phase, onSelect: () => void }) {
+    return (
+        <div
+            className="card"
+            onClick={onSelect}
+            style={{
+                cursor: 'pointer',
+                padding: '20px 32px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: 24,
+                transition: 'all 0.2s',
+                background: '#0f172a',
+                border: '1px solid #1e293b',
+                borderRadius: '16px',
+                opacity: phase.category === 'POST-MVP' && phase.progress === 0 ? 0.6 : 1
+            }}
+        >
+            <div style={{
+                width: 44,
+                height: 44,
+                borderRadius: '10px',
+                background: `${phase.color}20`,
+                color: phase.color,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                border: `1px solid ${phase.color}40`
+            }}>
+                {phase.icon}
+            </div>
+
+            <div style={{ flex: 1 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+                    <h3 style={{ fontSize: 17, fontWeight: 800, color: '#ffffff' }}>{phase.title}</h3>
+                    <span style={{ fontSize: 14, fontWeight: 900, color: phase.color }}>{phase.progress}%</span>
+                </div>
+                <div style={{ width: '100%', height: 4, background: '#1e293b', borderRadius: 2 }}>
+                    <div style={{ width: `${phase.progress}%`, height: '100%', background: phase.color, borderRadius: 2 }}></div>
+                </div>
+            </div>
+
+            <div style={{ color: '#444' }}><ChevronRight size={20} /></div>
         </div>
     );
 }
