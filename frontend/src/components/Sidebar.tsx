@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Home, Users, BarChart2, TrendingUp, Settings, FileText, Briefcase, Zap, Menu, X } from 'lucide-react';
+import { Home, Users, BarChart2, TrendingUp, Settings, FileText, Briefcase, Zap, Menu, X, Layers } from 'lucide-react';
 
 export default function Sidebar() {
     const pathname = usePathname();
@@ -17,6 +17,7 @@ export default function Sidebar() {
         { name: 'Diagnóstico', icon: <BarChart2 size={20} />, href: '/diagnostics' },
         { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit' },
         { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark' },
+        { name: 'Projeto (Admin)', icon: <Layers size={20} />, href: '/roadmap' },
     ];
 
     return (
