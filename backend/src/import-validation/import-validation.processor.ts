@@ -32,6 +32,10 @@ export class ImportValidationProcessor extends WorkerHost {
                 where: { id: snapshotId },
             });
 
+            if (!snapshot) {
+                throw new Error(`Snapshot ${snapshotId} not found`);
+            }
+
             const key = snapshot.s3_file_key;
             const fileBody = await this.storage.getFile(key);
             const buffer = await this.streamToBuffer(fileBody);
@@ -39,13 +43,15 @@ export class ImportValidationProcessor extends WorkerHost {
             let data: any[] = [];
             if (snapshot.source_type === 'XLSX') {
                 const workbook = new ExcelJS.Workbook();
-                await workbook.xlsx.load(buffer);
+                await workbook.xlsx.load(buffer as any);
                 const worksheet = workbook.getWorksheet(1);
-                const rows = [];
-                worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-                    if (rowNumber === 1) return; // Header
-                    rows.push(row.values);
-                });
+                const rows: any[] = [];
+                if (worksheet) {
+                    worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
+                        if (rowNumber === 1) return; // Header
+                        rows.push(row.values);
+                    });
+                }
                 // Simplistic mapping for MVP
                 data = rows.map(r => ({
                     employee_key: r[1],
@@ -64,7 +70,7 @@ export class ImportValidationProcessor extends WorkerHost {
             }
 
             // 1. Validate and Persist
-            const errors = [];
+            const errors: Record<string, any>[] = []; // Changed type to Record<string, any>[]
             for (const row of data) {
                 try {
                     // Find or create employee
@@ -106,7 +112,7 @@ export class ImportValidationProcessor extends WorkerHost {
                 data: {
                     status: 'COMPLETED',
                     finished_at: new Date(),
-                    error_log: errors.length > 0 ? { errors } : null
+                    error_log: errors.length > 0 ? { errors } : ({} as any)
                 },
             });
 
@@ -132,8 +138,8 @@ export class ImportValidationProcessor extends WorkerHost {
 
     private async streamToBuffer(stream: any): Promise<Buffer> {
         return new Promise((resolve, reject) => {
-            const chunks = [];
-            stream.on('data', (chunk) => chunks.push(chunk));
+            const chunks: any[] = [];
+            stream.on('data', (chunk: any) => chunks.push(chunk));
             stream.on('error', reject);
             stream.on('end', () => resolve(Buffer.concat(chunks)));
         });

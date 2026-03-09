@@ -20,7 +20,7 @@ export class MeritCycleService {
             },
         });
 
-        const results = {};
+        const results: Record<string, any> = {};
 
         for (const scenario of scenarios) {
             results[scenario] = this.runScenario(scenario, budget, compensations);

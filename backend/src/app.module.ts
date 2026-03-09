@@ -17,6 +17,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
 import { StorageModule } from './storage/storage.module';
+import { SalaryEngineModule } from './salary-engine/salary-engine.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { StorageModule } from './storage/storage.module';
         connection: {
           host: config.get('REDIS_HOST', 'localhost'),
           port: config.get('REDIS_PORT', 6379),
+          password: config.get('REDIS_PASSWORD'),
         },
       }),
     }),
@@ -43,6 +45,7 @@ import { StorageModule } from './storage/storage.module';
     CopilotModule,
     PrismaModule,
     StorageModule,
+    SalaryEngineModule,
   ],
   controllers: [AppController],
   providers: [AppService],

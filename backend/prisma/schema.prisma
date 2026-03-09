@@ -52,6 +52,7 @@ model Tenant {
   diagnostics      CompanyDiagnostic[]
   area_diagnostics AreaDiagnostic[]
   audit_events     AuditEvent[]
+  salary_structures SalaryStructure[]
 
   @@map("tenants")
 }
@@ -85,6 +86,7 @@ model PayrollSnapshot {
   diagnostics      CompanyDiagnostic[]
   area_diagnostics AreaDiagnostic[]
   merit_cycles     MeritCycle[]
+  salary_structures SalaryStructure[]
 
   @@map("payroll_snapshots")
 }
@@ -235,6 +237,68 @@ model MeritRecommendation {
   created_at            DateTime   @default(now())
 
   @@map("merit_recommendations")
+}
+
+
+model SalaryStructure {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  snapshot_id String
+  snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  name        String
+  type        String   @default("CLT") // CLT, PJ
+  is_active   Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  grades      SalaryGrade[]
+  steps       SalaryStep[]
+  entries     SalaryTableEntry[]
+
+  @@map("salary_structures")
+}
+
+model SalaryGrade {
+  id             String   @id @default(uuid())
+  structure_id   String
+  structure      SalaryStructure @relation(fields: [structure_id], references: [id])
+  grade_label    String   // e.g., "G1", "Grade 1"
+  midpoint       Float
+  range_spread   Float    // percentage (e.g., 0.4 for 40%)
+  created_at     DateTime @default(now())
+
+  entries        SalaryTableEntry[]
+
+  @@map("salary_grades")
+}
+
+model SalaryStep {
+  id                String   @id @default(uuid())
+  structure_id      String
+  structure         SalaryStructure @relation(fields: [structure_id], references: [id])
+  step_label        String   // e.g., "A", "B", "1"
+  percent_increment Float    // percentage from midpoint or previous step
+  created_at        DateTime @default(now())
+
+  entries           SalaryTableEntry[]
+
+  @@map("salary_steps")
+}
+
+model SalaryTableEntry {
+  id             String   @id @default(uuid())
+  structure_id   String
+  structure      SalaryStructure @relation(fields: [structure_id], references: [id])
+  grade_id       String
+  grade          SalaryGrade @relation(fields: [grade_id], references: [id])
+  step_id        String
+  step           SalaryStep @relation(fields: [step_id], references: [id])
+  value          Float
+  created_at     DateTime @default(now())
+
+  @@unique([structure_id, grade_id, step_id])
+  @@map("salary_table_entries")
 }
 
 model CompanyDiagnostic {

@@ -1,0 +1,53 @@
+import { Injectable, Logger } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+
+@Injectable()
+export class SalaryEngineService {
+    private readonly logger = new Logger(SalaryEngineService.name);
+
+    constructor(private prisma: PrismaService) { }
+
+    /**
+     * Passo 3: Cálculo Tabela
+     * Realiza a regressão linear simples entre Grades e Salários
+     * return { slope, intercept, rSquared }
+     */
+    calculateRegression(data: { x: number; y: number }[]) {
+        const n = data.length;
+        if (n < 2) return { slope: 0, intercept: 0, rSquared: 0 };
+
+        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+
+        for (const point of data) {
+            sumX += point.x;
+            sumY += point.y;
+            sumXY += point.x * point.y;
+            sumX2 += point.x * point.x;
+            sumY2 += point.y * point.y;
+        }
+
+        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const intercept = (sumY - slope * sumX) / n;
+
+        // Cálculo do R²
+        const num = (n * sumXY - sumX * sumY) ** 2;
+        const den = (n * sumX2 - sumX * sumX) * (n * sumY2 - sumY * sumY);
+        const rSquared = den === 0 ? 0 : num / den;
+
+        return { slope, intercept, rSquared };
+    }
+
+    /**
+     * Passo 4: Estrutura Salarial
+     * Gera uma sugestão de tabela baseada no midpoint e range spread
+     */
+    generateTableEntry(midpoint: number, stepIndex: number, totalSteps: number, rangeSpread: number) {
+        // Exemplo: Se rangeSpread é 40% (0.4), o mínimo é midpoint / (1 + rangeSpread/2)
+        const min = midpoint / (1 + rangeSpread / 2);
+        const max = min * (1 + rangeSpread);
+
+        // Distribuição linear entre min e max para os steps
+        const stepValue = min + ((max - min) / (totalSteps - 1)) * stepIndex;
+        return Math.round(stepValue * 100) / 100;
+    }
+}
