@@ -122,6 +122,7 @@ let PayrollService = class PayrollService {
         const employeeMap = new Map(existingEmployees.map(e => [e.employee_key, e.id]));
         const compensationData = [];
         const newEmployees = [];
+        const jobCatalog = await this.prisma.jobCatalog.findMany();
         for (const row of body.data) {
             const key = String(row.id || row.key || row.matricula || row.Matrícula || row.Code || 'MISSING');
             let empId = employeeMap.get(key);
@@ -146,6 +147,20 @@ let PayrollService = class PayrollService {
                 variable_value: 0,
                 total_cash: salary,
             });
+            const title = String(row.cargo || row.job_title || row['Cargo'] || row.Title || '').toLowerCase();
+            const matchedJob = jobCatalog.find(j => title.includes(j.title_std.toLowerCase()) ||
+                (title.includes('eng') && j.title_std.includes('Engineer')));
+            if (matchedJob) {
+                await this.prisma.jobMatch.create({
+                    data: {
+                        employee_id: empId,
+                        snapshot_id: snapshot.id,
+                        job_catalog_id: matchedJob.id,
+                        confidence: 0.9,
+                        method: 'AUTO_LOCAL'
+                    }
+                });
+            }
         }
         if (compensationData.length > 0) {
             await this.prisma.compensation.createMany({ data: compensationData });

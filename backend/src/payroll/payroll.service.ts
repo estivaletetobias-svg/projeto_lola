@@ -129,14 +129,14 @@ export class PayrollService {
         const compensationData = [];
         const newEmployees = [];
 
+        // Fetch Job Catalog for auto-matching
+        const jobCatalog = await this.prisma.jobCatalog.findMany();
+
         for (const row of body.data) {
             const key = String(row.id || row.key || row.matricula || row.Matrícula || row.Code || 'MISSING');
             let empId = employeeMap.get(key);
 
             if (!empId) {
-                // If it's a new employee, we create them on the fly for simplicity in this MVP sync version
-                // but let's try to batch it if possible. 
-                // For "Manda Ver" speed, we'll keep it simple but slightly better.
                 const newEmp = await this.prisma.employee.create({
                     data: {
                         tenant_id: tenantId,
@@ -159,12 +159,32 @@ export class PayrollService {
                 variable_value: 0,
                 total_cash: salary,
             });
+
+            // Auto-matching logic
+            const title = String(row.cargo || row.job_title || row['Cargo'] || row.Title || '').toLowerCase();
+            const matchedJob = jobCatalog.find(j =>
+                title.includes(j.title_std.toLowerCase()) ||
+                (title.includes('eng') && j.title_std.includes('Engineer'))
+            );
+
+            if (matchedJob) {
+                await this.prisma.jobMatch.create({
+                    data: {
+                        employee_id: empId,
+                        snapshot_id: snapshot.id,
+                        job_catalog_id: matchedJob.id,
+                        confidence: 0.9,
+                        method: 'AUTO_LOCAL'
+                    }
+                });
+            }
         }
 
         // Batch create compensations
         if (compensationData.length > 0) {
             await this.prisma.compensation.createMany({ data: compensationData });
         }
+
 
         console.timeEnd('PayrollSync');
         return { status: 'success', snapshotId: snapshot.id, count: body.data.length };
