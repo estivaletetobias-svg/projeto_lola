@@ -107,6 +107,8 @@ export class PayrollService {
     }
 
     async createAndProcessLocal(tenantId: string, body: { fileName: string, periodDate: string, data: any[] }) {
+        console.time('PayrollSync');
+
         // 1. Create Snapshot
         const snapshot = await this.prisma.payrollSnapshot.create({
             data: {
@@ -118,33 +120,54 @@ export class PayrollService {
             },
         });
 
-        // 2. Direct Persist (Bypassing background jobs for "Manda ver" speed)
-        for (const row of body.data) {
-            let employee = await this.prisma.employee.findUnique({
-                where: { tenant_id_employee_key: { tenant_id: tenantId, employee_key: String(row.id || row.key || row.matricula) } }
-            });
+        // 2. Fetch all existing employees to avoid repetitive lookups
+        const existingEmployees = await this.prisma.employee.findMany({
+            where: { tenant_id: tenantId },
+            select: { id: true, employee_key: true }
+        });
 
-            if (!employee) {
-                employee = await this.prisma.employee.create({
+        const employeeMap = new Map(existingEmployees.map(e => [e.employee_key, e.id]));
+        const compensationData = [];
+        const newEmployees = [];
+
+        for (const row of body.data) {
+            const key = String(row.id || row.key || row.matricula || row.Matrícula || row.Code || 'MISSING');
+            let empId = employeeMap.get(key);
+
+            if (!empId) {
+                // If it's a new employee, we create them on the fly for simplicity in this MVP sync version
+                // but let's try to batch it if possible. 
+                // For "Manda Ver" speed, we'll keep it simple but slightly better.
+                const newEmp = await this.prisma.employee.create({
                     data: {
                         tenant_id: tenantId,
-                        employee_key: String(row.id || row.key || row.matricula),
-                        full_name: row.nome || row.name,
-                        area: row.area || row.departamento || 'Geral',
+                        employee_key: key,
+                        full_name: row.nome || row.name || row['Nome Completo'] || row.Nome || 'N/A',
+                        area: row.area || row.departamento || row['Área/Unidade'] || row.Area || 'Geral',
                     }
                 });
+                empId = newEmp.id;
+                employeeMap.set(key, empId);
             }
 
-            await this.prisma.compensation.create({
-                data: {
-                    employee_id: employee.id,
-                    snapshot_id: snapshot.id,
-                    base_salary: parseFloat(row.salario || row.base_salary || 0),
-                    total_cash: parseFloat(row.salario || row.base_salary || 0),
-                }
+            const salary = parseFloat(row.salario || row.base_salary || row['Salário Base'] || row.Salario || row.Remuneração || 0);
+
+            compensationData.push({
+                employee_id: empId,
+                snapshot_id: snapshot.id,
+                base_salary: salary,
+                benefits_value: 0,
+                variable_value: 0,
+                total_cash: salary,
             });
         }
 
+        // Batch create compensations
+        if (compensationData.length > 0) {
+            await this.prisma.compensation.createMany({ data: compensationData });
+        }
+
+        console.timeEnd('PayrollSync');
         return { status: 'success', snapshotId: snapshot.id, count: body.data.length };
     }
 }
