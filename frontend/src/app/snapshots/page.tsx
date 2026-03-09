@@ -39,7 +39,8 @@ export default function SnapshotsPage() {
         setAnalyzeProgress(10);
 
         try {
-            const response = await fetch('http://127.0.0.1:3000/payroll/upload-local', {
+            const host = window.location.hostname;
+            const response = await fetch(`http://${host}:3000/payroll/upload-local`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -59,7 +60,8 @@ export default function SnapshotsPage() {
             }
         } catch (err) {
             console.error('Fetch error:', err);
-            alert('Falha na comunicação com o servidor. Verifique se o backend está rodando em http://127.0.0.1:3000');
+            const host = window.location.hostname;
+            alert(`Falha na comunicação com o servidor. Verifique se o backend está rodando em http://${host}:3000`);
             setStep(1);
         }
     };
