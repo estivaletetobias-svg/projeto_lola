@@ -13,5 +13,5 @@ export declare class StorageService {
     uploadFile(key: string, body: Buffer | string, contentType?: string): Promise<import("@aws-sdk/client-s3").PutObjectCommandOutput | {
         status: string;
     }>;
-    getFile(key: string): Promise<fs.ReadStream | (Readable & import("@smithy/types").SdkStreamMixin) | (ReadableStream<any> & import("@smithy/types").SdkStreamMixin) | (Blob & import("@smithy/types").SdkStreamMixin) | undefined>;
+    getFile(key: string): Promise<(Readable & import("@smithy/types").SdkStreamMixin) | (Blob & import("@smithy/types").SdkStreamMixin) | (ReadableStream<any> & import("@smithy/types").SdkStreamMixin) | fs.ReadStream | undefined>;
 }
