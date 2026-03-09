@@ -142,7 +142,7 @@ let ImportValidationProcessor = ImportValidationProcessor_1 = class ImportValida
                 data: {
                     status: 'COMPLETED',
                     finished_at: new Date(),
-                    error_log: errors.length > 0 ? { errors } : {}
+                    error_log: errors.length > 0 ? JSON.stringify({ errors }) : ''
                 },
             });
             await this.prisma.payrollSnapshot.update({
@@ -155,7 +155,7 @@ let ImportValidationProcessor = ImportValidationProcessor_1 = class ImportValida
             this.logger.error(`Error processing job: ${error.message}`);
             await this.prisma.payrollImportJob.update({
                 where: { id: jobId },
-                data: { status: 'FAILED', error_log: { error: error.message } },
+                data: { status: 'FAILED', error_log: JSON.stringify({ error: error.message }) },
             });
             await this.prisma.payrollSnapshot.update({
                 where: { id: snapshotId },

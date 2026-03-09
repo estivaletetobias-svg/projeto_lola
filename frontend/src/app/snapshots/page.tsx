@@ -39,7 +39,7 @@ export default function SnapshotsPage() {
         setAnalyzeProgress(10);
 
         try {
-            const response = await fetch('http://localhost:3000/payroll/upload-local', {
+            const response = await fetch('http://127.0.0.1:3000/payroll/upload-local', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -53,11 +53,13 @@ export default function SnapshotsPage() {
                 setAnalyzeProgress(100);
                 setTimeout(() => setStep(4), 1000);
             } else {
-                alert('Erro ao processar folha. Verifique se o backend está ligado.');
+                const errData = await response.json().catch(() => ({}));
+                alert(`Erro no Servidor: ${errData.message || 'Erro desconhecido'}`);
                 setStep(1);
             }
         } catch (err) {
-            alert('Falha na comunicação com o servidor.');
+            console.error('Fetch error:', err);
+            alert('Falha na comunicação com o servidor. Verifique se o backend está rodando em http://127.0.0.1:3000');
             setStep(1);
         }
     };

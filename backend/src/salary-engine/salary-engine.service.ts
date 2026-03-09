@@ -26,7 +26,10 @@ export class SalaryEngineService {
             sumY2 += point.y * point.y;
         }
 
-        const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+        const denominator = (n * sumX2 - sumX * sumX);
+        if (denominator === 0) return { slope: 0, intercept: 0, rSquared: 0 };
+
+        const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
 
         // Cálculo do R²
@@ -35,6 +38,49 @@ export class SalaryEngineService {
         const rSquared = den === 0 ? 0 : num / den;
 
         return { slope, intercept, rSquared };
+    }
+
+    /**
+     * Coleta pontos (Grade, Salário) de um Snapshot para análise
+     */
+    async getAnalysisPoints(snapshotId: string) {
+        // Busca compensações e tenta mapear para grades baseadas no nível do cargo (JobMatch)
+        const compensations = await this.prisma.compensation.findMany({
+            where: { snapshot_id: snapshotId },
+            include: {
+                employee: {
+                    include: {
+                        job_matches: {
+                            where: { snapshot_id: snapshotId },
+                            include: { job_catalog: true }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Mapeamento básico de Nível para número (Grade)
+        // Em um sistema real, isso viria de uma tabela de configuração de grades
+        const levelToGrade = (level: string): number => {
+            const l = level.toLowerCase();
+            if (l.includes('intern') || l.includes('estagi')) return 1;
+            if (l.includes('jr') || l.includes('junior')) return 2;
+            if (l.includes('pl') || l.includes('pleno')) return 3;
+            if (l.includes('sr') || l.includes('senior')) return 4;
+            if (l.includes('spec') || l.includes('especialista')) return 5;
+            if (l.includes('coord')) return 6;
+            if (l.includes('manager') || l.includes('gerente')) return 7;
+            if (l.includes('director') || l.includes('diretor')) return 8;
+            return 3; // Default pleno
+        };
+
+        return compensations
+            .filter(c => c.employee.job_matches.length > 0)
+            .map(c => ({
+                x: levelToGrade(c.employee.job_matches[0].job_catalog.level),
+                y: c.base_salary,
+                name: c.employee.full_name
+            }));
     }
 
     /**
@@ -51,3 +97,4 @@ export class SalaryEngineService {
         return Math.round(stepValue * 100) / 100;
     }
 }
+

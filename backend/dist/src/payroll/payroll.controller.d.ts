@@ -3,6 +3,9 @@ import { CreatePayrollSnapshotDto } from './dto/create-snapshot.dto';
 export declare class PayrollController {
     private readonly payrollService;
     constructor(payrollService: PayrollService);
+    ping(): {
+        status: string;
+    };
     createSnapshot(tenantId: string, dto: CreatePayrollSnapshotDto): Promise<{
         snapshot: {
             id: string;

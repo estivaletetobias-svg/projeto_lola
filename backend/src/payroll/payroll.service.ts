@@ -4,7 +4,6 @@ import { StorageService } from '../storage/storage.service';
 import { CreatePayrollSnapshotDto } from './dto/create-snapshot.dto';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
-import { SnapshotStatus } from '@prisma/client';
 import { ImportValidationProcessor } from '../import-validation/import-validation.processor';
 import { Optional } from '@nestjs/common';
 

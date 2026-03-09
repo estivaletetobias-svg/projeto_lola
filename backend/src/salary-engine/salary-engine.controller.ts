@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Logger } from '@nestjs/common';
+import { Controller, Post, Body, Get, Param, Logger } from '@nestjs/common';
 import { SalaryEngineService } from './salary-engine.service';
 
 @Controller('salary-engine')
@@ -20,9 +20,27 @@ export class SalaryEngineController {
         }
     ) {
         this.logger.log('Receiving request for salary analysis...');
-
         const { points, stepsCount, rangeSpread } = body;
+        return this.processAnalysis(points, stepsCount, rangeSpread);
+    }
 
+    @Get('analyze/:snapshotId')
+    async analyzeSnapshot(@Param('snapshotId') snapshotId: string) {
+        this.logger.log(`Analyzing snapshot ${snapshotId}...`);
+
+        const points = await this.salaryEngine.getAnalysisPoints(snapshotId);
+
+        if (points.length === 0) {
+            return {
+                status: 'error',
+                message: 'No mapped payroll data found for this snapshot. Run job-match first.'
+            };
+        }
+
+        return this.processAnalysis(points, 5, 0.4);
+    }
+
+    private processAnalysis(points: { x: number; y: number }[], stepsCount: number, rangeSpread: number) {
         // 1. Passo 3: Cálculo da Regressão (Lógica Carolina)
         const regression = this.salaryEngine.calculateRegression(points);
 
@@ -57,6 +75,7 @@ export class SalaryEngineController {
             status: 'success',
             diagnostics: {
                 regressionCurve: regression,
+                pointsCount: points.length,
                 recommendation: regression.rSquared > 0.8
                     ? 'Estrutura Financeira Coesa'
                     : regression.rSquared > 0.5
@@ -67,3 +86,4 @@ export class SalaryEngineController {
         };
     }
 }
+

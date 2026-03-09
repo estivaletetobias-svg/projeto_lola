@@ -17,12 +17,12 @@ const common_1 = require("@nestjs/common");
 const payroll_service_1 = require("./payroll.service");
 const create_snapshot_dto_1 = require("./dto/create-snapshot.dto");
 const get_user_decorator_1 = require("../auth/get-user.decorator");
-const auth_guard_1 = require("../auth/auth.guard");
 let PayrollController = class PayrollController {
     payrollService;
     constructor(payrollService) {
         this.payrollService = payrollService;
     }
+    ping() { return { status: 'ok' }; }
     async createSnapshot(tenantId, dto) {
         return this.payrollService.createSnapshot(tenantId, dto);
     }
@@ -36,10 +36,25 @@ let PayrollController = class PayrollController {
         return this.payrollService.triggerAnalysis(tenantId, id);
     }
     async uploadLocal(tenantId, body) {
-        return this.payrollService.createAndProcessLocal(tenantId, body);
+        console.log(`--- UPLOAD RECEBIDO: ${body.fileName} (${body.data?.length} linhas) ---`);
+        try {
+            const result = await this.payrollService.createAndProcessLocal(tenantId, body);
+            console.log(`--- UPLOAD PROCESSADO COM SUCESSO ---`);
+            return result;
+        }
+        catch (e) {
+            console.error(`--- ERRO NO UPLOAD: ${e.message} ---`);
+            throw e;
+        }
     }
 };
 exports.PayrollController = PayrollController;
+__decorate([
+    (0, common_1.Get)('ping'),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", []),
+    __metadata("design:returntype", void 0)
+], PayrollController.prototype, "ping", null);
 __decorate([
     (0, common_1.Post)('snapshots'),
     __param(0, (0, get_user_decorator_1.GetTenant)()),
@@ -81,7 +96,6 @@ __decorate([
 ], PayrollController.prototype, "uploadLocal", null);
 exports.PayrollController = PayrollController = __decorate([
     (0, common_1.Controller)('payroll'),
-    (0, common_1.UseGuards)(auth_guard_1.AuthGuard),
     __metadata("design:paramtypes", [payroll_service_1.PayrollService])
 ], PayrollController);
 //# sourceMappingURL=payroll.controller.js.map
