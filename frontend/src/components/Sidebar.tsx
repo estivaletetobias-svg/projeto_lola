@@ -11,13 +11,13 @@ export default function Sidebar() {
 
     const menuItems = [
         { name: 'Dashboard', icon: <Home size={20} />, href: '/' },
-        { name: 'Onboarding', icon: <Settings size={20} />, href: '/onboarding' },
         { name: 'Folha de Pagamento', icon: <FileText size={20} />, href: '/snapshots' },
         { name: 'Mapeamento (Job Match)', icon: <Briefcase size={20} />, href: '/job-match' },
         { name: 'Diagnóstico', icon: <BarChart2 size={20} />, href: '/diagnostics' },
+        { name: 'Estrutura Salarial', icon: <Layers size={20} />, href: '/salary-structure' },
         { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit' },
         { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark' },
-        { name: 'Projeto (Admin)', icon: <Layers size={20} />, href: '/roadmap' },
+        { name: 'Projeto (Admin)', icon: <Settings size={20} />, href: '/roadmap' },
     ];
 
     return (
