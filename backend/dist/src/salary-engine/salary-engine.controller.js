@@ -25,6 +25,20 @@ let SalaryEngineController = SalaryEngineController_1 = class SalaryEngineContro
     async testAnalysis(body) {
         this.logger.log('Receiving request for salary analysis...');
         const { points, stepsCount, rangeSpread } = body;
+        return this.processAnalysis(points, stepsCount, rangeSpread);
+    }
+    async analyzeSnapshot(snapshotId) {
+        this.logger.log(`Analyzing snapshot ${snapshotId}...`);
+        const points = await this.salaryEngine.getAnalysisPoints(snapshotId);
+        if (points.length === 0) {
+            return {
+                status: 'error',
+                message: 'No mapped payroll data found for this snapshot. Run job-match first.'
+            };
+        }
+        return this.processAnalysis(points, 5, 0.4);
+    }
+    processAnalysis(points, stepsCount, rangeSpread) {
         const regression = this.salaryEngine.calculateRegression(points);
         const distinctGrades = Array.from(new Set(points.map(p => p.x))).sort((a, b) => a - b);
         const suggestedTable = distinctGrades.map(grade => {
@@ -46,6 +60,7 @@ let SalaryEngineController = SalaryEngineController_1 = class SalaryEngineContro
             status: 'success',
             diagnostics: {
                 regressionCurve: regression,
+                pointsCount: points.length,
                 recommendation: regression.rSquared > 0.8
                     ? 'Estrutura Financeira Coesa'
                     : regression.rSquared > 0.5
@@ -64,6 +79,13 @@ __decorate([
     __metadata("design:paramtypes", [Object]),
     __metadata("design:returntype", Promise)
 ], SalaryEngineController.prototype, "testAnalysis", null);
+__decorate([
+    (0, common_1.Get)('analyze/:snapshotId'),
+    __param(0, (0, common_1.Param)('snapshotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], SalaryEngineController.prototype, "analyzeSnapshot", null);
 exports.SalaryEngineController = SalaryEngineController = SalaryEngineController_1 = __decorate([
     (0, common_1.Controller)('salary-engine'),
     __metadata("design:paramtypes", [salary_engine_service_1.SalaryEngineService])

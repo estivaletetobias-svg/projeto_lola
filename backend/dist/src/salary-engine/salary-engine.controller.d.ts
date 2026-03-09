@@ -18,6 +18,7 @@ export declare class SalaryEngineController {
                 intercept: number;
                 rSquared: number;
             };
+            pointsCount: number;
             recommendation: string;
         };
         suggestedSalaryStructure: {
@@ -29,4 +30,28 @@ export declare class SalaryEngineController {
             }[];
         }[];
     }>;
+    analyzeSnapshot(snapshotId: string): Promise<{
+        status: string;
+        diagnostics: {
+            regressionCurve: {
+                slope: number;
+                intercept: number;
+                rSquared: number;
+            };
+            pointsCount: number;
+            recommendation: string;
+        };
+        suggestedSalaryStructure: {
+            grade: string;
+            midpoint: number;
+            steps: {
+                stepLabel: string;
+                value: number;
+            }[];
+        }[];
+    } | {
+        status: string;
+        message: string;
+    }>;
+    private processAnalysis;
 }

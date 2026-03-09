@@ -11,5 +11,10 @@ export declare class SalaryEngineService {
         intercept: number;
         rSquared: number;
     };
+    getAnalysisPoints(snapshotId: string): Promise<{
+        x: number;
+        y: number;
+        name: string | null;
+    }[]>;
     generateTableEntry(midpoint: number, stepIndex: number, totalSteps: number, rangeSpread: number): number;
 }

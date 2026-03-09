@@ -30,8 +30,12 @@ import { SalaryEngineModule } from './salary-engine/salary-engine.module';
           host: config.get('REDIS_HOST', 'localhost'),
           port: config.get('REDIS_PORT', 6379),
           password: config.get('REDIS_PASSWORD'),
-          maxRetriesPerRequest: null, // Critical for BullMQ not to error immediately
-          connectTimeout: 1000,
+          maxRetriesPerRequest: null,
+          connectTimeout: 2000,
+          retryStrategy: (times: number) => {
+            if (times > 3) return null; // stop retrying after 3 times to let the app run (with reduced functionality)
+            return Math.min(times * 100, 2000);
+          }
         },
       }),
     }),

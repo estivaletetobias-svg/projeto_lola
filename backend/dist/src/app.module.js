@@ -42,7 +42,12 @@ exports.AppModule = AppModule = __decorate([
                         port: config.get('REDIS_PORT', 6379),
                         password: config.get('REDIS_PASSWORD'),
                         maxRetriesPerRequest: null,
-                        connectTimeout: 1000,
+                        connectTimeout: 2000,
+                        retryStrategy: (times) => {
+                            if (times > 3)
+                                return null;
+                            return Math.min(times * 100, 2000);
+                        }
                     },
                 }),
             }),
