@@ -33,6 +33,13 @@ export default function DiagnosticsPage() {
                 // 2. Pegar análise do Salary Engine
                 const analysisRes = await fetch(`http://${host}:3000/salary-engine/analyze/${latest.id}`);
                 const analysisData = await analysisRes.json();
+
+                if (analysisData.status === 'error') {
+                    setError(analysisData.message || 'Erro ao processar inteligência salarial.');
+                    setLoading(false);
+                    return;
+                }
+
                 setAnalysis(analysisData);
                 setLoading(false);
             } catch (err) {
