@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
     Layers,
     Target,
@@ -29,25 +29,45 @@ import {
 
 export default function SalaryStructurePage() {
     const [activeStep, setActiveStep] = useState(3); // Mostramos o passo 3 direto
+    const [isDemo, setIsDemo] = useState(true);
+    const [data, setData] = useState({
+        regression: { slope: 1500, intercept: 3000, rSquared: 0.92 },
+        points: [
+            { grade: 1, salary: 4200, predicted: 4500 },
+            { grade: 2, salary: 5800, predicted: 5900 },
+            { grade: 3, salary: 7100, predicted: 7300 },
+            { grade: 4, salary: 9500, predicted: 8700 },
+            { grade: 5, salary: 10200, predicted: 10100 },
+            { grade: 6, salary: 12500, predicted: 11500 },
+            { grade: 7, salary: 14000, predicted: 12900 },
+        ],
+        table: [
+            { grade: 'G1', min: '3.750', p50: '4.500', max: '5.250', steps: ['3.750', '4.125', '4.500', '4.875', '5.250'] },
+            { grade: 'G2', min: '4.910', p50: '5.900', max: '6.890', steps: ['4.910', '5.405', '5.900', '6.395', '6.890'] },
+            { grade: 'G3', min: '6.080', p50: '7.300', max: '8.520', steps: ['6.080', '6.690', '7.300', '7.910', '8.520'] },
+            { grade: 'G4', min: '7.250', p50: '8.700', max: '10.150', steps: ['7.250', '7.975', '8.700', '9.425', '10.150'] },
+            { grade: 'G5', min: '8.410', p50: '10.100', max: '11.790', steps: ['8.410', '9.255', '10.100', '10.945', '11.790'] },
+        ]
+    });
 
-    // Dados de simulação baseados na lógica Carolina / Lumis
-    const regressionData = [
-        { grade: 1, salary: 4200, predicted: 4500 },
-        { grade: 2, salary: 5800, predicted: 5900 },
-        { grade: 3, salary: 7100, predicted: 7300 },
-        { grade: 4, salary: 9500, predicted: 8700 },
-        { grade: 5, salary: 10200, predicted: 10100 },
-        { grade: 6, salary: 12500, predicted: 11500 },
-        { grade: 7, salary: 14000, predicted: 12900 },
-    ];
-
-    const salaryTable = [
-        { grade: 'G1', min: 'R$ 3.750', p50: 'R$ 4.500', max: 'R$ 5.250', steps: ['3.750', '4.125', '4.500', '4.875', '5.250'] },
-        { grade: 'G2', min: 'R$ 4.910', p50: 'R$ 5.900', max: 'R$ 6.890', steps: ['4.910', '5.405', '5.900', '6.395', '6.890'] },
-        { grade: 'G3', min: 'R$ 6.080', p50: 'R$ 7.300', max: 'R$ 8.520', steps: ['6.080', '6.690', '7.300', '7.910', '8.520'] },
-        { grade: 'G4', min: 'R$ 7.250', p50: 'R$ 8.700', max: 'R$ 10.150', steps: ['7.250', '7.975', '8.700', '9.425', '10.150'] },
-        { grade: 'G5', min: 'R$ 8.410', p50: 'R$ 10.100', max: 'R$ 11.790', steps: ['8.410', '9.255', '10.100', '10.945', '11.790'] },
-    ];
+    useEffect(() => {
+        // Tenta carregar dados reais do backend primeiro
+        fetch('http://localhost:3000/salary-engine/current-analysis')
+            .then(res => res.json())
+            .then(result => {
+                if (result && result.status === 'success' && !result.isDemo) {
+                    setData({
+                        regression: result.diagnostics.regressionCurve,
+                        points: result.points,
+                        table: result.suggestedSalaryStructure
+                    });
+                    setIsDemo(false);
+                }
+            })
+            .catch(() => {
+                console.log('Mantendo modo DEMO - Ambiente de teste ativo.');
+            });
+    }, []);
 
     const steps = [
         { id: 1, title: 'Estrutura de Cargos', icon: <Layers size={18} />, status: 'DONE' },
@@ -112,14 +132,16 @@ export default function SalaryStructurePage() {
                             <p style={{ fontSize: 13, color: '#64748b' }}>Consistência da Estrutura Atual</p>
                         </div>
                         <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: 24, fontWeight: 800, color: '#4f46e5' }}>0.92</div>
-                            <div style={{ fontSize: 10, fontWeight: 700, color: '#10b981', background: '#f0fdf4', padding: '2px 8px', borderRadius: 4 }}>EXCELENTE</div>
+                            <div style={{ fontSize: 24, fontWeight: 800, color: '#4f46e5' }}>{data.regression.rSquared.toFixed(2)}</div>
+                            <div style={{ fontSize: 10, fontWeight: 700, color: data.regression.rSquared > 0.8 ? '#10b981' : '#f59e0b', background: data.regression.rSquared > 0.8 ? '#f0fdf4' : '#fffbeb', padding: '2px 8px', borderRadius: 4 }}>
+                                {data.regression.rSquared > 0.8 ? 'EXCELENTE' : 'CONSISTENTE'}
+                            </div>
                         </div>
                     </div>
 
                     <div style={{ width: '100%', height: 300, marginBottom: 20 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <ComposedChart data={regressionData}>
+                            <ComposedChart data={data.points}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                 <XAxis dataKey="grade" label={{ value: 'Grades', position: 'bottom', fontSize: 12 }} />
                                 <YAxis label={{ value: 'Salário (R$)', angle: -90, position: 'insideLeft', fontSize: 12 }} />
@@ -209,14 +231,14 @@ export default function SalaryStructurePage() {
                             </tr>
                         </thead>
                         <tbody>
-                            {salaryTable.map((row, i) => (
+                            {data.table.map((row: any, i: number) => (
                                 <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td style={{ padding: '16px', fontWeight: 800, color: '#1e293b' }}>{row.grade}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[0]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[1]}</td>
-                                    <td style={{ padding: '16px', color: '#1e293b', fontWeight: 700, background: '#f5f7ff' }}>R$ {row.steps[2]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[3]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[4]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[0].value || row.steps[0]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[1].value || row.steps[1]}</td>
+                                    <td style={{ padding: '16px', color: '#1e293b', fontWeight: 700, background: '#f5f7ff' }}>R$ {row.steps[2].value || row.steps[2]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[3].value || row.steps[3]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[4].value || row.steps[4]}</td>
                                 </tr>
                             ))}
                         </tbody>
