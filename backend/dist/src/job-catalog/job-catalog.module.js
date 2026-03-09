@@ -8,10 +8,14 @@ var __decorate = (this && this.__decorate) || function (decorators, target, key,
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.JobCatalogModule = void 0;
 const common_1 = require("@nestjs/common");
+const job_catalog_service_1 = require("./job-catalog.service");
 let JobCatalogModule = class JobCatalogModule {
 };
 exports.JobCatalogModule = JobCatalogModule;
 exports.JobCatalogModule = JobCatalogModule = __decorate([
-    (0, common_1.Module)({})
+    (0, common_1.Module)({
+        providers: [job_catalog_service_1.JobCatalogService],
+        exports: [job_catalog_service_1.JobCatalogService],
+    })
 ], JobCatalogModule);
 //# sourceMappingURL=job-catalog.module.js.map

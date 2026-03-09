@@ -1,19 +1,29 @@
-import { PrismaService } from '../prisma/prisma.service';
-export declare class JobMatchService {
-    private prisma;
-    constructor(prisma: PrismaService);
-    getMatchesForSnapshot(snapshotId: string): Promise<{
+import { JobMatchService } from './job-match.service';
+import { JobCatalogService } from '../job-catalog/job-catalog.service';
+export declare class JobMatchController {
+    private readonly jobMatchService;
+    private readonly jobCatalogService;
+    constructor(jobMatchService: JobMatchService, jobCatalogService: JobCatalogService);
+    getCatalog(): Promise<{
+        id: string;
+        family: string;
+        title_std: string;
+        level: string;
+        cbo_code: string | null;
+        created_at: Date;
+    }[]>;
+    getMatches(snapshotId: string): Promise<{
         employeeId: string;
         employeeName: string | null;
         internalTitle: string;
         match: {
             job_catalog: {
                 id: string;
-                created_at: Date;
                 family: string;
                 title_std: string;
                 level: string;
                 cbo_code: string | null;
+                created_at: Date;
             };
         } & {
             id: string;
@@ -27,7 +37,7 @@ export declare class JobMatchService {
             reviewed_at: Date | null;
         };
     }[]>;
-    upsertMatch(data: {
+    approveMatch(body: {
         employeeId: string;
         snapshotId: string;
         jobCatalogId: string;
@@ -43,5 +53,4 @@ export declare class JobMatchService {
         reviewed_by_user_id: string | null;
         reviewed_at: Date | null;
     }>;
-    autoMatch(snapshotId: string): Promise<number>;
 }

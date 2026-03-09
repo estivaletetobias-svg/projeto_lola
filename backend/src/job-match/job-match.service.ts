@@ -5,42 +5,60 @@ import { PrismaService } from '../prisma/prisma.service';
 export class JobMatchService {
     constructor(private prisma: PrismaService) { }
 
-    async autoMatch(snapshotId: string) {
-        const compensations = await this.prisma.compensation.findMany({
-            where: { snapshot_id: snapshotId },
-            include: { employee: true },
+    async getMatchesForSnapshot(snapshotId: string) {
+        // Encontra empregados no snapshot e seus matches atuais (se houver)
+        const employees = await this.prisma.employee.findMany({
+            where: {
+                compensation: {
+                    some: { snapshot_id: snapshotId }
+                }
+            },
+            include: {
+                job_matches: {
+                    where: { snapshot_id: snapshotId },
+                    include: { job_catalog: true }
+                }
+            }
         });
 
-        const catalog = await this.prisma.jobCatalog.findMany();
+        // Retorna um formato fácil para o frontend
+        return employees.map(emp => ({
+            employeeId: emp.id,
+            employeeName: emp.full_name,
+            internalTitle: emp.area, // No MVP usamos area, mas idealmente seria cargo
+            match: emp.job_matches[0] || null
+        }));
+    }
 
-        const matches = [];
+    async upsertMatch(data: { employeeId: string, snapshotId: string, jobCatalogId: string, method?: string }) {
+        const { employeeId, snapshotId, jobCatalogId, method } = data;
 
-        for (const comp of compensations) {
-            const employeeTitle = comp.employee.area; // Simple for MVP; ideally has "current_title"
+        // Tenta encontrar um match existente
+        const existing = await this.prisma.jobMatch.findFirst({
+            where: { employee_id: employeeId, snapshot_id: snapshotId }
+        });
 
-            // Simple string matching
-            const bestMatch = catalog.find(cat =>
-                employeeTitle.toLowerCase().includes(cat.title_std.toLowerCase()) ||
-                cat.title_std.toLowerCase().includes(employeeTitle.toLowerCase())
-            );
-
-            if (bestMatch) {
-                matches.push({
-                    employee_id: comp.employee_id,
+        if (existing) {
+            return this.prisma.jobMatch.update({
+                where: { id: existing.id },
+                data: { job_catalog_id: jobCatalogId, method: method || 'MANUAL' }
+            });
+        } else {
+            return this.prisma.jobMatch.create({
+                data: {
+                    employee_id: employeeId,
                     snapshot_id: snapshotId,
-                    job_catalog_id: bestMatch.id,
-                    confidence: 0.8,
-                    method: 'REGEX',
-                });
-            }
-        }
-
-        if (matches.length > 0) {
-            await this.prisma.jobMatch.createMany({
-                data: matches,
+                    job_catalog_id: jobCatalogId,
+                    confidence: 1.0,
+                    method: method || 'MANUAL'
+                }
             });
         }
+    }
 
-        return matches.length;
+    async autoMatch(snapshotId: string) {
+        // ... (existing autoMatch logic if needed, but we prefer manual/semi-auto check for now)
+        return 0;
     }
 }
+

@@ -1,75 +1,151 @@
 'use client';
 
-import { Check, Edit2, AlertTriangle, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Check, Edit2, AlertTriangle, Search, Loader2 } from 'lucide-react';
 
 export default function JobMatchPage() {
+    const [loading, setLoading] = useState(true);
+    const [employees, setEmployees] = useState<any[]>([]);
+    const [catalog, setCatalog] = useState<any[]>([]);
+    const [snapshotId, setSnapshotId] = useState<string | null>(null);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const host = window.location.hostname;
+
+                // 1. Pegar último snapshot
+                const snapRes = await fetch(`http://${host}:3000/payroll/snapshots`);
+                const snapshots = await snapRes.json();
+
+                if (snapshots.length === 0) {
+                    setError('Nenhuma folha encontrada. Faça o upload primeiro.');
+                    setLoading(false);
+                    return;
+                }
+                const sid = snapshots[0].id;
+                setSnapshotId(sid);
+
+                // 2. Pegar catálogo de cargos
+                const catalogRes = await fetch(`http://${host}:3000/job-match/catalog`);
+                const catalogData = await catalogRes.json();
+                setCatalog(catalogData);
+
+                // 3. Pegar matches atuais
+                const matchesRes = await fetch(`http://${host}:3000/job-match/${sid}`);
+                const matchesData = await matchesRes.json();
+                setEmployees(matchesData);
+
+                setLoading(false);
+            } catch (err) {
+                console.error('Error fetching job match data:', err);
+                setError('Erro de conexão com o servidor.');
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, []);
+
+    const handleApprove = async (employeeId: string, catalogId: string) => {
+        try {
+            const host = window.location.hostname;
+            await fetch(`http://${host}:3000/job-match/approve`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    employeeId,
+                    snapshotId,
+                    jobCatalogId: catalogId,
+                    method: 'MANUAL_UI'
+                }),
+            });
+
+            // Update local state to show as approved
+            setEmployees(prev => prev.map(emp =>
+                emp.employeeId === employeeId
+                    ? { ...emp, match: { ...emp.match, job_catalog_id: catalogId, method: 'MANUAL_UI' } }
+                    : emp
+            ));
+        } catch (err) {
+            console.error('Error approving match:', err);
+            alert('Erro ao salvar mapeamento.');
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '60vh' }}>
+                <Loader2 className="animate-spin" size={48} color="#4f46e5" />
+                <p style={{ marginTop: 16, color: '#64748b' }}>Carregando Colaboradores...</p>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="card" style={{ textAlign: 'center', padding: 40 }}>
+                <AlertTriangle size={48} color="#f59e0b" style={{ margin: '0 auto 16px' }} />
+                <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Aviso</h3>
+                <p style={{ color: '#64748b', marginBottom: 24 }}>{error}</p>
+                <a href="/snapshots" className="btn btn-primary">Ir para Snapshots</a>
+            </div>
+        );
+    }
+
     return (
-        <div style={{ maxWidth: 1000 }}>
+        <div style={{ maxWidth: 1000, paddingBottom: 100 }}>
             <div style={{ marginBottom: 40 }}>
                 <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Mapeamento de Cargos</h1>
                 <p style={{ color: '#64748b' }}>Revise as sugestões de cargos padronizados para garantir a acurácia do mercado.</p>
             </div>
 
             <div className="card" style={{ marginBottom: 32 }}>
-                <div style={{ display: 'flex', gap: 16, marginBottom: 24, padding: '0 8px' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                        <Search size={18} style={{ position: 'absolute', left: 12, top: 12, color: '#94a3b8' }} />
-                        <input
-                            type="text"
-                            placeholder="Buscar colaborador ou cargo..."
-                            style={{ width: '100%', padding: '10px 10px 10px 40px', borderRadius: 8, border: '1px solid #e2e8f0' }}
-                        />
-                    </div>
-                    <button className="btn btn-secondary">Filtrar por Área</button>
-                </div>
-
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr style={{ textAlign: 'left', borderBottom: '2px solid #f1f5f9' }}>
-                            <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b' }}>Cargo Interno</th>
-                            <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b' }}>Sugestão Padronizada</th>
-                            <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b' }}>Confiança</th>
+                            <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b' }}>Colaborador / Cargo Interno</th>
+                            <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b' }}>Sugestão Padronizada (Grades)</th>
                             <th style={{ padding: '12px 12px', fontSize: 13, color: '#64748b', textAlign: 'right' }}>Ações</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {[
-                            { internal: 'Engenheiro de Software I', std: 'Software Engineer I (Junior)', confidence: 95, status: 'HIGH' },
-                            { internal: 'Analista de Sistemas Pleno', std: 'Software Engineer II (Pleno)', confidence: 82, status: 'HIGH' },
-                            { internal: 'Gerente de Contas B2B', std: 'Account Executive', confidence: 64, status: 'MEDIUM' },
-                            { internal: 'Coordenador Administrativo', std: 'Office Manager', confidence: 42, status: 'LOW' },
-                        ].map((row, i) => (
+                        {employees.map((row, i) => (
                             <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                <td style={{ padding: '16px 12px', fontWeight: 600 }}>{row.internal}</td>
                                 <td style={{ padding: '16px 12px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        {row.std}
-                                        <Edit2 size={12} style={{ color: '#94a3b8', cursor: 'pointer' }} />
-                                    </div>
+                                    <div style={{ fontWeight: 600 }}>{row.employeeName}</div>
+                                    <div style={{ fontSize: 12, color: '#64748b' }}>{row.internalTitle}</div>
                                 </td>
                                 <td style={{ padding: '16px 12px' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                        <div style={{ width: 60, height: 6, background: '#f1f5f9', borderRadius: 3, overflow: 'hidden' }}>
-                                            <div style={{ width: `${row.confidence}%`, height: '100%', background: row.confidence > 80 ? '#10b981' : (row.confidence > 50 ? '#f59e0b' : '#ef4444') }}></div>
-                                        </div>
-                                        <span style={{ fontSize: 12, fontWeight: 600 }}>{row.confidence}%</span>
-                                    </div>
+                                    <select
+                                        defaultValue={row.match?.job_catalog_id || ''}
+                                        onChange={(e) => handleApprove(row.employeeId, e.target.value)}
+                                        style={{ width: '100%', padding: '8px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#fff' }}
+                                    >
+                                        <option value="">-- Selecione um Cargo --</option>
+                                        {catalog.map(cat => (
+                                            <option key={cat.id} value={cat.id}>
+                                                {cat.title_std} (Grade {cat.grade})
+                                            </option>
+                                        ))}
+                                    </select>
                                 </td>
                                 <td style={{ padding: '16px 12px', textAlign: 'right' }}>
-                                    <button className="btn btn-primary" style={{ padding: '4px 12px', fontSize: 12, background: '#10b981', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                                        <Check size={14} /> Aprovar
-                                    </button>
+                                    {row.match ? (
+                                        <span style={{ color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+                                            <Check size={16} /> Salvo
+                                        </span>
+                                    ) : (
+                                        <span style={{ color: '#f59e0b', fontSize: 12 }}>Pendente</span>
+                                    )}
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
-
-            <div style={{ display: 'flex', justifyContent: 'center', gap: 12 }}>
-                <button className="btn btn-secondary">Anterior</button>
-                <button className="btn btn-secondary">Próximo</button>
-            </div>
         </div>
     );
 }
+
