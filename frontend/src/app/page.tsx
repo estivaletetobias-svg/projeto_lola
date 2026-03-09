@@ -1,32 +1,58 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import { BarChart2, Users, TrendingUp, Zap, FileText, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function Home() {
+  const [stats, setStats] = useState({
+    totalEmployees: 30,
+    avgGap: -8.4,
+    monthlyCostP50: 14200,
+    lastSnapshotDate: 'Mar/2026',
+    isDemo: true
+  });
+
+  useEffect(() => {
+    fetch('http://localhost:3000/diagnostics/dashboard-stats')
+      .then(res => res.json())
+      .then(data => {
+        setStats({
+          ...data,
+          lastSnapshotDate: data.lastSnapshotDate
+            ? new Date(data.lastSnapshotDate).toLocaleDateString('pt-BR', { month: 'short', year: 'numeric' })
+            : 'N/A'
+        });
+      })
+      .catch(err => console.error('Error fetching stats:', err));
+  }, []);
+
   return (
     <div style={{ maxWidth: 1200 }}>
       <div style={{ marginBottom: 40 }}>
         <h1 style={{ fontSize: 36, fontWeight: 700, marginBottom: 8 }}>Bem-vindo, Tobias</h1>
-        <p style={{ color: '#64748b', fontSize: 18 }}>Aqui está o status da inteligência salarial da <strong>Lola Tech Ltd</strong>.</p>
+        <p style={{ color: '#64748b', fontSize: 18 }}>
+          Aqui está o status da inteligência salarial da <strong>Lola Tech Ltd</strong>.
+          {stats.isDemo && <span style={{ marginLeft: 12, fontSize: 12, background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 4 }}>DEMO MODE</span>}
+        </p>
       </div>
 
       <div className="grid-4" style={{ marginBottom: 40 }}>
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ padding: 8, background: '#eef2ff', borderRadius: 8 }}><Users color="#4f46e5" size={20} /></div>
-            <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>+2 este mês</span>
+            <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>{stats.isDemo ? '+2 este mês' : 'Atualizado'}</span>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>30</div>
+          <div style={{ fontSize: 28, fontWeight: 700 }}>{stats.totalEmployees}</div>
           <div style={{ fontSize: 13, color: '#64748b' }}>Colaboradores Ativos</div>
         </div>
 
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
             <div style={{ padding: 8, background: '#fef2f2', borderRadius: 8 }}><TrendingUp color="#ef4444" size={20} /></div>
-            <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>12% em risco</span>
+            <span style={{ fontSize: 12, color: '#ef4444', fontWeight: 600 }}>{stats.avgGap < -10 ? 'Ação Necessária' : 'Monitorando'}</span>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>-8.4%</div>
+          <div style={{ fontSize: 28, fontWeight: 700 }}>{stats.avgGap}%</div>
           <div style={{ fontSize: 13, color: '#64748b' }}>Gap Médio vs Mercado</div>
         </div>
 
@@ -35,7 +61,7 @@ export default function Home() {
             <div style={{ padding: 8, background: '#f0fdf4', borderRadius: 8 }}><Zap color="#10b981" size={20} /></div>
             <span style={{ fontSize: 12, color: '#64748b' }}>Sugerido</span>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>R$ 14,2k</div>
+          <div style={{ fontSize: 28, fontWeight: 700 }}>R$ {(stats.monthlyCostP50 / 1000).toFixed(1)}k</div>
           <div style={{ fontSize: 13, color: '#64748b' }}>Custo mensal p/ P50</div>
         </div>
 
@@ -44,7 +70,7 @@ export default function Home() {
             <div style={{ padding: 8, background: '#fffbeb', borderRadius: 8 }}><FileText color="#f59e0b" size={20} /></div>
             <span style={{ fontSize: 12, color: '#10b981', fontWeight: 600 }}>95% match</span>
           </div>
-          <div style={{ fontSize: 28, fontWeight: 700 }}>Mar/2026</div>
+          <div style={{ fontSize: 28, fontWeight: 700, textTransform: 'capitalize' }}>{stats.lastSnapshotDate}</div>
           <div style={{ fontSize: 13, color: '#64748b' }}>Último Snapshot</div>
         </div>
       </div>
