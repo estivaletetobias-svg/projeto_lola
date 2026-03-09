@@ -28,9 +28,9 @@ export declare class JobMatchController {
         } & {
             id: string;
             created_at: Date;
+            job_catalog_id: string;
             snapshot_id: string;
             employee_id: string;
-            job_catalog_id: string;
             confidence: number;
             method: string;
             reviewed_by_user_id: string | null;
@@ -45,9 +45,9 @@ export declare class JobMatchController {
     }): Promise<{
         id: string;
         created_at: Date;
+        job_catalog_id: string;
         snapshot_id: string;
         employee_id: string;
-        job_catalog_id: string;
         confidence: number;
         method: string;
         reviewed_by_user_id: string | null;

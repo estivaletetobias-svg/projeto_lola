@@ -10,11 +10,13 @@ exports.JobMatchModule = void 0;
 const common_1 = require("@nestjs/common");
 const job_match_controller_1 = require("./job-match.controller");
 const job_match_service_1 = require("./job-match.service");
+const job_catalog_module_1 = require("../job-catalog/job-catalog.module");
 let JobMatchModule = class JobMatchModule {
 };
 exports.JobMatchModule = JobMatchModule;
 exports.JobMatchModule = JobMatchModule = __decorate([
     (0, common_1.Module)({
+        imports: [job_catalog_module_1.JobCatalogModule],
         controllers: [job_match_controller_1.JobMatchController],
         providers: [job_match_service_1.JobMatchService],
         exports: [job_match_service_1.JobMatchService],
