@@ -78,49 +78,52 @@ export default function SalaryStructurePage() {
 
     return (
         <div style={{ maxWidth: 1200 }}>
-            {/* Header com os 4 Passos da Carolina */}
-            <div style={{ marginBottom: 40 }}>
-                <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 24 }}>Inteligência de Estrutura Salarial</h1>
+            <div style={{ marginBottom: 32 }}>
+                <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>
+                    Estrutura Salarial
+                    {isDemo && <span style={{ marginLeft: 12, fontSize: 12, background: '#fef3c7', color: '#92400e', padding: '2px 8px', borderRadius: 4, verticalAlign: 'middle', fontWeight: 600 }}>DEMO MODE</span>}
+                </h1>
+                <p style={{ color: '#64748b' }}>Definição de grades, amplitudes e degraus de carreira.</p>
+            </div>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-                    {steps.map((step) => (
-                        <div
-                            key={step.id}
-                            style={{
-                                padding: '16px 20px',
-                                borderRadius: 12,
-                                background: step.status === 'ACTIVE' ? '#4f46e5' : 'white',
-                                color: step.status === 'ACTIVE' ? 'white' : '#1e293b',
-                                border: '1px solid #e2e8f0',
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 12,
-                                cursor: 'pointer',
-                                transition: '0.2s',
-                                boxShadow: step.status === 'ACTIVE' ? '0 10px 15px -3px rgba(79, 70, 229, 0.2)' : 'none'
-                            }}
-                            onClick={() => setActiveStep(step.id)}
-                        >
-                            <div style={{
-                                width: 32,
-                                height: 32,
-                                borderRadius: 8,
-                                background: step.status === 'ACTIVE' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                color: step.status === 'ACTIVE' ? 'white' : '#4f46e5'
-                            }}>
-                                {step.icon}
-                            </div>
-                            <div style={{ flex: 1 }}>
-                                <div style={{ fontSize: 11, opacity: 0.7, fontWeight: 600 }}>PASSO 0{step.id}</div>
-                                <div style={{ fontSize: 14, fontWeight: 700 }}>{step.title}</div>
-                            </div>
-                            {step.status === 'DONE' && <CheckCircle2 size={16} color="#10b981" />}
+            <div style={{ marginBottom: 40, display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+                {steps.map((step) => (
+                    <div
+                        key={step.id}
+                        style={{
+                            padding: '16px 20px',
+                            borderRadius: 12,
+                            background: step.status === 'ACTIVE' ? '#4f46e5' : 'white',
+                            color: step.status === 'ACTIVE' ? 'white' : '#1e293b',
+                            border: '1px solid #e2e8f0',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            cursor: 'pointer',
+                            transition: '0.2s',
+                            boxShadow: step.status === 'ACTIVE' ? '0 10px 15px -3px rgba(79, 70, 229, 0.2)' : 'none'
+                        }}
+                        onClick={() => setActiveStep(step.id)}
+                    >
+                        <div style={{
+                            width: 32,
+                            height: 32,
+                            borderRadius: 8,
+                            background: step.status === 'ACTIVE' ? 'rgba(255,255,255,0.2)' : '#f1f5f9',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: step.status === 'ACTIVE' ? 'white' : '#4f46e5'
+                        }}>
+                            {step.icon}
                         </div>
-                    ))}
-                </div>
+                        <div style={{ flex: 1 }}>
+                            <div style={{ fontSize: 11, opacity: 0.7, fontWeight: 600 }}>PASSO 0{step.id}</div>
+                            <div style={{ fontSize: 14, fontWeight: 700 }}>{step.title}</div>
+                        </div>
+                        {step.status === 'DONE' && <CheckCircle2 size={16} color="#10b981" />}
+                    </div>
+                ))}
             </div>
 
             <div className="grid-2">
@@ -234,11 +237,11 @@ export default function SalaryStructurePage() {
                             {data.table.map((row: any, i: number) => (
                                 <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <td style={{ padding: '16px', fontWeight: 800, color: '#1e293b' }}>{row.grade}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[0].value || row.steps[0]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[1].value || row.steps[1]}</td>
-                                    <td style={{ padding: '16px', color: '#1e293b', fontWeight: 700, background: '#f5f7ff' }}>R$ {row.steps[2].value || row.steps[2]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[3].value || row.steps[3]}</td>
-                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[4].value || row.steps[4]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[0]?.value || row.steps[0]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[1]?.value || row.steps[1]}</td>
+                                    <td style={{ padding: '16px', color: '#1e293b', fontWeight: 700, background: '#f5f7ff' }}>R$ {row.steps[2]?.value || row.steps[2]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[3]?.value || row.steps[3]}</td>
+                                    <td style={{ padding: '16px', color: '#64748b', fontSize: 14 }}>R$ {row.steps[4]?.value || row.steps[4]}</td>
                                 </tr>
                             ))}
                         </tbody>

@@ -18,13 +18,17 @@ const prisma_service_1 = require("../prisma/prisma.service");
 const storage_service_1 = require("../storage/storage.service");
 const bullmq_1 = require("@nestjs/bullmq");
 const bullmq_2 = require("bullmq");
+const import_validation_processor_1 = require("../import-validation/import-validation.processor");
+const common_2 = require("@nestjs/common");
 let PayrollService = class PayrollService {
     prisma;
     storage;
+    processor;
     analysisQueue;
-    constructor(prisma, storage, analysisQueue) {
+    constructor(prisma, storage, processor, analysisQueue) {
         this.prisma = prisma;
         this.storage = storage;
+        this.processor = processor;
         this.analysisQueue = analysisQueue;
     }
     async createSnapshot(tenantId, dto) {
@@ -78,20 +82,72 @@ let PayrollService = class PayrollService {
                 status: 'PENDING',
             },
         });
-        await this.analysisQueue.add('analyze', {
-            snapshotId: id,
-            jobId: job.id,
-            tenantId,
+        if (this.analysisQueue) {
+            try {
+                await this.analysisQueue.add('analyze', {
+                    snapshotId: id,
+                    jobId: job.id,
+                    tenantId,
+                });
+                return { message: 'Analysis started (Async)', jobId: job.id };
+            }
+            catch (e) {
+                console.warn('BullMQ failed, falling back to sync processing');
+            }
+        }
+        this.processor.process({
+            data: {
+                snapshotId: id,
+                jobId: job.id,
+                tenantId,
+            }
         });
-        return { message: 'Analysis started', jobId: job.id };
+        return { message: 'Analysis processed (Sync)', jobId: job.id };
+    }
+    async createAndProcessLocal(tenantId, body) {
+        const snapshot = await this.prisma.payrollSnapshot.create({
+            data: {
+                tenant_id: tenantId,
+                period_date: new Date(body.periodDate),
+                source_type: 'LOCAL',
+                s3_file_key: `local/${body.fileName}`,
+                status: 'READY',
+            },
+        });
+        for (const row of body.data) {
+            let employee = await this.prisma.employee.findUnique({
+                where: { tenant_id_employee_key: { tenant_id: tenantId, employee_key: String(row.id || row.key || row.matricula) } }
+            });
+            if (!employee) {
+                employee = await this.prisma.employee.create({
+                    data: {
+                        tenant_id: tenantId,
+                        employee_key: String(row.id || row.key || row.matricula),
+                        full_name: row.nome || row.name,
+                        area: row.area || row.departamento || 'Geral',
+                    }
+                });
+            }
+            await this.prisma.compensation.create({
+                data: {
+                    employee_id: employee.id,
+                    snapshot_id: snapshot.id,
+                    base_salary: parseFloat(row.salario || row.base_salary || 0),
+                    total_cash: parseFloat(row.salario || row.base_salary || 0),
+                }
+            });
+        }
+        return { status: 'success', snapshotId: snapshot.id, count: body.data.length };
     }
 };
 exports.PayrollService = PayrollService;
 exports.PayrollService = PayrollService = __decorate([
     (0, common_1.Injectable)(),
-    __param(2, (0, bullmq_1.InjectQueue)('payroll-analysis')),
+    __param(3, (0, common_2.Optional)()),
+    __param(3, (0, bullmq_1.InjectQueue)('payroll-analysis')),
     __metadata("design:paramtypes", [prisma_service_1.PrismaService,
         storage_service_1.StorageService,
+        import_validation_processor_1.ImportValidationProcessor,
         bullmq_2.Queue])
 ], PayrollService);
 //# sourceMappingURL=payroll.service.js.map

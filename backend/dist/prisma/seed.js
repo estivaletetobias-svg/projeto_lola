@@ -13,11 +13,12 @@ async function main() {
         { family: 'Finance', title_std: 'Financial Analyst', level: 'Pleno', cbo_code: '252205' },
     ];
     for (const job of jobs) {
-        await prisma.jobCatalog.upsert({
-            where: { id: job.title_std + job.level },
-            update: {},
-            create: job,
+        const existing = await prisma.jobCatalog.findFirst({
+            where: { title_std: job.title_std, level: job.level }
         });
+        if (!existing) {
+            await prisma.jobCatalog.create({ data: job });
+        }
     }
     const catalog = await prisma.jobCatalog.findMany();
     for (const item of catalog) {

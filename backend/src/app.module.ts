@@ -30,6 +30,8 @@ import { SalaryEngineModule } from './salary-engine/salary-engine.module';
           host: config.get('REDIS_HOST', 'localhost'),
           port: config.get('REDIS_PORT', 6379),
           password: config.get('REDIS_PASSWORD'),
+          maxRetriesPerRequest: null, // Critical for BullMQ not to error immediately
+          connectTimeout: 1000,
         },
       }),
     }),

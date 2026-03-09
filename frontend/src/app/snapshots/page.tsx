@@ -2,33 +2,64 @@
 
 import { useState } from 'react';
 import { Upload, FileText, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import * as XLSX from 'xlsx';
 import Link from 'next/link'; // Added Link import for step 4
 
 export default function SnapshotsPage() {
     const [isUploading, setIsUploading] = useState(false);
     const [step, setStep] = useState(1); // 1: Upload, 2: Mapping, 3: Success, 4: Finished
+    const [fileName, setFileName] = useState('');
+    const [fileData, setFileData] = useState<any[]>([]);
 
-    const handleUpload = () => {
+    const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        setFileName(file.name);
         setIsUploading(true);
-        setTimeout(() => {
+
+        const reader = new FileReader();
+        reader.onload = (evt) => {
+            const bstr = evt.target?.result;
+            const wb = XLSX.read(bstr, { type: 'binary' });
+            const wsname = wb.SheetNames[0];
+            const ws = wb.Sheets[wsname];
+            const data = XLSX.utils.sheet_to_json(ws);
+            setFileData(data);
             setIsUploading(false);
             setStep(2);
-        }, 2500); // Changed timeout duration
+        };
+        reader.readAsBinaryString(file);
     };
 
-    const [analyzeProgress, setAnalyzeProgress] = useState(0); // New state for analysis progress
+    const [analyzeProgress, setAnalyzeProgress] = useState(0);
 
-    const startAnalysis = () => {
+    const startAnalysis = async () => {
         setStep(3);
-        let prog = 0;
-        const interval = setInterval(() => {
-            prog += 5;
-            setAnalyzeProgress(prog);
-            if (prog >= 100) {
-                clearInterval(interval);
-                setTimeout(() => setStep(4), 1000); // 4: Finished simulation
+        setAnalyzeProgress(10);
+
+        try {
+            const response = await fetch('http://localhost:3000/payroll/upload-local', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    fileName,
+                    periodDate: new Date().toISOString(),
+                    data: fileData
+                })
+            });
+
+            if (response.ok) {
+                setAnalyzeProgress(100);
+                setTimeout(() => setStep(4), 1000);
+            } else {
+                alert('Erro ao processar folha. Verifique se o backend está ligado.');
+                setStep(1);
             }
-        }, 150);
+        } catch (err) {
+            alert('Falha na comunicação com o servidor.');
+            setStep(1);
+        }
     };
 
     return (
@@ -60,7 +91,7 @@ export default function SnapshotsPage() {
                             <div style={{ width: 32, height: 32, background: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}> {/* New wrapper for CheckCircle */}
                                 <CheckCircle color="#10b981" size={18} /> {/* Changed CheckCircle size */}
                             </div>
-                            <h3 style={{ fontSize: 18, fontWeight: 600 }}>Arquivo recebido: folha_março_2026.xlsx</h3>
+                            <h3 style={{ fontSize: 18, fontWeight: 600 }}>Arquivo recebido: {fileName}</h3>
                         </div>
 
                         <p style={{ color: '#64748b', marginBottom: 20 }}>Mapeamos as colunas automaticamente. Por favor, revise:</p>

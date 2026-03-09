@@ -15,11 +15,12 @@ async function main() {
     ];
 
     for (const job of jobs) {
-        await prisma.jobCatalog.upsert({
-            where: { id: job.title_std + job.level }, // Use a unique way or just create
-            update: {},
-            create: job,
+        const existing = await prisma.jobCatalog.findFirst({
+            where: { title_std: job.title_std, level: job.level }
         });
+        if (!existing) {
+            await prisma.jobCatalog.create({ data: job });
+        }
     }
 
     // 2. Create Market Benchmarks

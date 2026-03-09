@@ -37,4 +37,13 @@ export class PayrollController {
     ) {
         return this.payrollService.triggerAnalysis(tenantId, id);
     }
+
+    @Post('upload-local')
+    async uploadLocal(
+        @GetTenant() tenantId: string,
+        @Body() body: { fileName: string, periodDate: string, data: any[] }
+    ) {
+        // This is a helper for the "Manda ver" mode where we bypass complex upload flows
+        return this.payrollService.createAndProcessLocal(tenantId, body);
+    }
 }

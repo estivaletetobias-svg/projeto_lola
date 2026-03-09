@@ -17,6 +17,7 @@ exports.ImportValidationModule = ImportValidationModule = __decorate([
     (0, common_1.Module)({
         imports: [storage_module_1.StorageModule],
         providers: [import_validation_processor_1.ImportValidationProcessor],
+        exports: [import_validation_processor_1.ImportValidationProcessor],
     })
 ], ImportValidationModule);
 //# sourceMappingURL=import-validation.module.js.map

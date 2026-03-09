@@ -5,5 +5,6 @@ import { ImportValidationProcessor } from './import-validation.processor';
 @Module({
     imports: [StorageModule],
     providers: [ImportValidationProcessor],
+    exports: [ImportValidationProcessor],
 })
 export class ImportValidationModule { }

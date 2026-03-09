@@ -35,6 +35,9 @@ let PayrollController = class PayrollController {
     async runAnalysis(tenantId, id) {
         return this.payrollService.triggerAnalysis(tenantId, id);
     }
+    async uploadLocal(tenantId, body) {
+        return this.payrollService.createAndProcessLocal(tenantId, body);
+    }
 };
 exports.PayrollController = PayrollController;
 __decorate([
@@ -68,6 +71,14 @@ __decorate([
     __metadata("design:paramtypes", [String, String]),
     __metadata("design:returntype", Promise)
 ], PayrollController.prototype, "runAnalysis", null);
+__decorate([
+    (0, common_1.Post)('upload-local'),
+    __param(0, (0, get_user_decorator_1.GetTenant)()),
+    __param(1, (0, common_1.Body)()),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String, Object]),
+    __metadata("design:returntype", Promise)
+], PayrollController.prototype, "uploadLocal", null);
 exports.PayrollController = PayrollController = __decorate([
     (0, common_1.Controller)('payroll'),
     (0, common_1.UseGuards)(auth_guard_1.AuthGuard),

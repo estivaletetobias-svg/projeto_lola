@@ -3,33 +3,14 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider = "sqlite"
+  url      = "file:./dev.db"
 }
 
-enum Role {
-  OWNER
-  CFO
-  HR_ADMIN
-  HR_USER
-  VIEWER
-}
-
-enum JobStatus {
-  PENDING
-  PROCESSING
-  COMPLETED
-  FAILED
-}
-
-enum SnapshotStatus {
-  PENDING
-  VALIDATING
-  MAPPING
-  CALCULATING
-  READY
-  ERROR
-}
+// Enums converted to documentation as SQLite doesn't support them natively in Prisma
+// Roles: OWNER, CFO, HR_ADMIN, HR_USER, VIEWER
+// JobStatus: PENDING, PROCESSING, COMPLETED, FAILED
+// SnapshotStatus: PENDING, VALIDATING, MAPPING, CALCULATING, READY, ERROR
 
 model Tenant {
   id             String      @id @default(uuid())
@@ -41,7 +22,7 @@ model Tenant {
   state          String?
   country        String?
   currency       String      @default("BRL")
-  area_weights   Json?       // JSON with strategic weights per area
+  area_weights   String?       // JSON with strategic weights per area
   created_at     DateTime    @default(now())
   updated_at     DateTime    @updatedAt
   
@@ -62,7 +43,7 @@ model User {
   tenant_id  String
   tenant     Tenant   @relation(fields: [tenant_id], references: [id])
   email      String   @unique
-  role       Role     @default(HR_USER)
+  role       String   @default("HR_USER")
   created_at DateTime @default(now())
 
   audit_events AuditEvent[]
@@ -77,7 +58,7 @@ model PayrollSnapshot {
   period_date DateTime
   source_type String         // e.g. "CSV", "XLSX"
   s3_file_key String
-  status      SnapshotStatus @default(PENDING)
+  status      String @default("PENDING")
   created_at  DateTime       @default(now())
 
   import_jobs      PayrollImportJob[]
@@ -95,10 +76,10 @@ model PayrollImportJob {
   id          String    @id @default(uuid())
   snapshot_id String
   snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
-  status      JobStatus @default(PENDING)
+  status      String @default("PENDING")
   started_at  DateTime?
   finished_at DateTime?
-  error_log   Json?     // error_log_json
+  error_log   String?     // error_log_json
 
   @@map("payroll_import_jobs")
 }
@@ -212,8 +193,8 @@ model MeritCycle {
   name            String
   budget_type     String   // e.g. "FIXED", "PERCENTAGE"
   budget_value    Float
-  constraints     Json?    // teto, piso, etc.
-  area_weights    Json?
+  constraints     String?    // teto, piso, etc.
+  area_weights    String?
   created_at      DateTime @default(now())
 
   recommendations MeritRecommendation[]
@@ -233,7 +214,7 @@ model MeritRecommendation {
   new_total_cash        Float
   cost_monthly          Float
   cost_annual           Float
-  rationale             Json?      // rationale_json
+  rationale             String?      // rationale_json
   created_at            DateTime   @default(now())
 
   @@map("merit_recommendations")
@@ -307,7 +288,7 @@ model CompanyDiagnostic {
   tenant      Tenant   @relation(fields: [tenant_id], references: [id])
   snapshot_id String
   snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
-  metrics     Json
+  metrics     String
   created_at  DateTime @default(now())
 
   @@map("company_diagnostics")
@@ -320,7 +301,7 @@ model AreaDiagnostic {
   snapshot_id String
   snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
   area_name   String
-  metrics     Json
+  metrics     String
   created_at  DateTime @default(now())
 
   @@map("area_diagnostics")
@@ -335,7 +316,7 @@ model AuditEvent {
   entity_type String
   entity_id   String
   action      String
-  metadata    Json?
+  metadata    String?
   created_at  DateTime @default(now())
 
   @@map("audit_events")
