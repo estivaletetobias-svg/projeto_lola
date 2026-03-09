@@ -22,7 +22,6 @@ const merit_cycle_module_1 = require("./merit-cycle/merit-cycle.module");
 const copilot_module_1 = require("./copilot/copilot.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const config_1 = require("@nestjs/config");
-const bullmq_1 = require("@nestjs/bullmq");
 const nestjs_pino_1 = require("nestjs-pino");
 const storage_module_1 = require("./storage/storage.module");
 const salary_engine_module_1 = require("./salary-engine/salary-engine.module");
@@ -34,23 +33,6 @@ exports.AppModule = AppModule = __decorate([
         imports: [
             config_1.ConfigModule.forRoot({ isGlobal: true }),
             nestjs_pino_1.LoggerModule.forRoot(),
-            bullmq_1.BullModule.forRootAsync({
-                inject: [config_1.ConfigService],
-                useFactory: (config) => ({
-                    connection: {
-                        host: config.get('REDIS_HOST', 'localhost'),
-                        port: config.get('REDIS_PORT', 6379),
-                        password: config.get('REDIS_PASSWORD'),
-                        maxRetriesPerRequest: null,
-                        connectTimeout: 2000,
-                        retryStrategy: (times) => {
-                            if (times > 3)
-                                return null;
-                            return Math.min(times * 100, 2000);
-                        }
-                    },
-                }),
-            }),
             auth_module_1.AuthModule,
             tenants_module_1.TenantsModule,
             payroll_module_1.PayrollModule,

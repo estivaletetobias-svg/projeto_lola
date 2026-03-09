@@ -10,7 +10,6 @@ exports.PayrollModule = void 0;
 const common_1 = require("@nestjs/common");
 const payroll_controller_1 = require("./payroll.controller");
 const payroll_service_1 = require("./payroll.service");
-const bullmq_1 = require("@nestjs/bullmq");
 const storage_module_1 = require("../storage/storage.module");
 const import_validation_module_1 = require("../import-validation/import-validation.module");
 let PayrollModule = class PayrollModule {
@@ -21,9 +20,6 @@ exports.PayrollModule = PayrollModule = __decorate([
         imports: [
             storage_module_1.StorageModule,
             import_validation_module_1.ImportValidationModule,
-            bullmq_1.BullModule.registerQueue({
-                name: 'payroll-analysis',
-            }),
         ],
         controllers: [payroll_controller_1.PayrollController],
         providers: [payroll_service_1.PayrollService],

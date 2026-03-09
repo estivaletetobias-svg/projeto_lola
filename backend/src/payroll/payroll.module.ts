@@ -9,9 +9,9 @@ import { ImportValidationModule } from '../import-validation/import-validation.m
   imports: [
     StorageModule,
     ImportValidationModule,
-    BullModule.registerQueue({
-      name: 'payroll-analysis',
-    }),
+    // BullModule.registerQueue({
+    //   name: 'payroll-analysis',
+    // }),
   ],
   controllers: [PayrollController],
   providers: [PayrollService],

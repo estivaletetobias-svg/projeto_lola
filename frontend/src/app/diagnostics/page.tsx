@@ -17,7 +17,7 @@ export default function DiagnosticsPage() {
         const fetchData = async () => {
             try {
                 // 1. Pegar snapshots
-                const snapRes = await fetch('http://localhost:3000/payroll/snapshots');
+                const snapRes = await fetch('http://127.0.0.1:3000/payroll/snapshots');
                 const snapshots = await snapRes.json();
 
                 if (snapshots.length === 0) {
@@ -30,7 +30,7 @@ export default function DiagnosticsPage() {
                 setSnapshot(latest);
 
                 // 2. Pegar análise do Salary Engine
-                const analysisRes = await fetch(`http://localhost:3000/salary-engine/analyze/${latest.id}`);
+                const analysisRes = await fetch(`http://127.0.0.1:3000/salary-engine/analyze/${latest.id}`);
                 const analysisData = await analysisRes.json();
                 setAnalysis(analysisData);
                 setLoading(false);
