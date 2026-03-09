@@ -10,14 +10,14 @@ export default function Sidebar() {
     const [isOpen, setIsOpen] = useState(false);
 
     const menuItems = [
-        { name: 'Dashboard', icon: <Home size={20} />, href: '/' },
-        { name: 'Folha de Pagamento', icon: <FileText size={20} />, href: '/snapshots' },
-        { name: 'Mapeamento (Job Match)', icon: <Briefcase size={20} />, href: '/job-match' },
-        { name: 'Diagnóstico', icon: <BarChart2 size={20} />, href: '/diagnostics' },
-        { name: 'Estrutura Salarial', icon: <Layers size={20} />, href: '/salary-structure' },
-        { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit' },
-        { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark' },
-        { name: 'Projeto (Admin)', icon: <Settings size={20} />, href: '/roadmap' },
+        { name: 'Dashboard', icon: <Home size={20} />, href: '/', status: 'sim' },
+        { name: 'Folha de Pagamento', icon: <FileText size={20} />, href: '/snapshots', status: 'real' },
+        { name: 'Mapeamento (Job Match)', icon: <Briefcase size={20} />, href: '/job-match', status: 'real' },
+        { name: 'Diagnóstico', icon: <BarChart2 size={20} />, href: '/diagnostics', status: 'real' },
+        { name: 'Estrutura Salarial', icon: <Layers size={20} />, href: '/salary-structure', status: 'sim' },
+        { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit', status: 'sim' },
+        { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark', status: 'sim' },
+        { name: 'Projeto (Admin)', icon: <Settings size={20} />, href: '/roadmap', status: 'dev' },
     ];
 
     return (
@@ -42,9 +42,18 @@ export default function Sidebar() {
                             href={item.href}
                             className={`sidebar-item ${pathname === item.href ? 'active' : ''}`}
                             onClick={() => setIsOpen(false)}
+                            style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}
                         >
-                            {item.icon}
-                            <span>{item.name}</span>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                {item.icon}
+                                <span>{item.name}</span>
+                            </div>
+                            {item.status === 'real' && (
+                                <span style={{ fontSize: 9, background: '#10b981', color: 'white', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>REAL</span>
+                            )}
+                            {item.status === 'sim' && (
+                                <span style={{ fontSize: 9, background: '#4b5563', color: '#94a3b8', padding: '2px 6px', borderRadius: 4, fontWeight: 700 }}>SIM</span>
+                            )}
                         </Link>
                     ))}
                 </nav>
