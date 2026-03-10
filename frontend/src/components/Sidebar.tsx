@@ -14,9 +14,9 @@ export default function Sidebar() {
         { name: 'Folha de Pagamento', icon: <FileText size={20} />, href: '/snapshots', status: 'real' },
         { name: 'Mapeamento (Job Match)', icon: <Briefcase size={20} />, href: '/job-match', status: 'real' },
         { name: 'Diagnóstico', icon: <BarChart2 size={20} />, href: '/diagnostics', status: 'real' },
-        { name: 'Estrutura Salarial', icon: <Layers size={20} />, href: '/salary-structure', status: 'sim' },
-        { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit', status: 'sim' },
-        { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark', status: 'sim' },
+        { name: 'Estrutura Salarial', icon: <Layers size={20} />, href: '/salary-structure', status: 'real' },
+        { name: 'Simulador de Mérito', icon: <Zap size={20} />, href: '/merit', status: 'real' },
+        { name: 'Benchmark Explorer', icon: <TrendingUp size={20} />, href: '/benchmark', status: 'real' },
         { name: 'Projeto (Admin)', icon: <Settings size={20} />, href: '/roadmap', status: 'dev' },
     ];
 
