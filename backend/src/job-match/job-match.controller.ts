@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param } from '@nestjs/common';
 import { JobMatchService } from './job-match.service';
 import { JobCatalogService } from '../job-catalog/job-catalog.service';
 
@@ -12,6 +12,16 @@ export class JobMatchController {
     @Get('catalog')
     async getCatalog() {
         return this.jobCatalogService.findAll();
+    }
+
+    @Get('suggest/:snapshotId')
+    async getSuggestions(@Param('snapshotId') snapshotId: string) {
+        return this.jobMatchService.suggestMatches(snapshotId);
+    }
+
+    @Post('auto-approve/:snapshotId')
+    async autoApproveAll(@Param('snapshotId') snapshotId: string) {
+        return this.jobMatchService.autoApproveAll(snapshotId);
     }
 
     @Get(':snapshotId')

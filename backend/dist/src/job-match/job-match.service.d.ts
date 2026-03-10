@@ -45,5 +45,14 @@ export declare class JobMatchService {
         reviewed_by_user_id: string | null;
         reviewed_at: Date | null;
     } | null>;
-    autoMatch(snapshotId: string): Promise<number>;
+    private similarity;
+    suggestMatches(snapshotId: string): Promise<any[]>;
+    autoApproveAll(snapshotId: string): Promise<{
+        approved: number;
+        total: number;
+    }>;
+    autoMatch(snapshotId: string): Promise<{
+        approved: number;
+        total: number;
+    }>;
 }

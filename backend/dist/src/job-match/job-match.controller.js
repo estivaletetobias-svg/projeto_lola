@@ -26,6 +26,12 @@ let JobMatchController = class JobMatchController {
     async getCatalog() {
         return this.jobCatalogService.findAll();
     }
+    async getSuggestions(snapshotId) {
+        return this.jobMatchService.suggestMatches(snapshotId);
+    }
+    async autoApproveAll(snapshotId) {
+        return this.jobMatchService.autoApproveAll(snapshotId);
+    }
     async getMatches(snapshotId) {
         return this.jobMatchService.getMatchesForSnapshot(snapshotId);
     }
@@ -40,6 +46,20 @@ __decorate([
     __metadata("design:paramtypes", []),
     __metadata("design:returntype", Promise)
 ], JobMatchController.prototype, "getCatalog", null);
+__decorate([
+    (0, common_1.Get)('suggest/:snapshotId'),
+    __param(0, (0, common_1.Param)('snapshotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], JobMatchController.prototype, "getSuggestions", null);
+__decorate([
+    (0, common_1.Post)('auto-approve/:snapshotId'),
+    __param(0, (0, common_1.Param)('snapshotId')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], JobMatchController.prototype, "autoApproveAll", null);
 __decorate([
     (0, common_1.Get)(':snapshotId'),
     __param(0, (0, common_1.Param)('snapshotId')),
