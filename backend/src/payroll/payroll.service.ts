@@ -141,8 +141,11 @@ export class PayrollService {
 
             const rowKeys = Object.keys(row);
             const findCol = (terms: string[]) => rowKeys.find(k => {
-                const cleanK = k.trim().toLowerCase();
-                return terms.some(t => cleanK.includes(t.toLowerCase()));
+                const cleanK = k.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return terms.some(t => {
+                    const cleanT = t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return cleanK.includes(cleanT) || cleanT.includes(cleanK);
+                });
             });
 
             const getVal = (terms: string[]) => {
@@ -151,9 +154,21 @@ export class PayrollService {
             };
 
             const rawName = row.nome || row.name || getVal(['nome', 'colaborador', 'funcionário', 'funcionario', 'name', 'pessoal']) || `Colaborador ${i + 1}`;
-            const rawArea = row.area || row.departamento || getVal(['área', 'area', 'unidade', 'depto', 'função', 'funcao', 'cargo', 'title', 'job', 'ocupação', 'ocupacao', 'descrição', 'função', 'func', 'cargho']) || 'Geral';
-            const rawSalary = row.salario || getVal(['salário', 'salario', 'remunera', 'base', 'total', 'proventos']) || 0;
-            const salary = parseFloat(String(rawSalary).replace(/[^\d.,]/g, '').replace(',', '.'));
+            const rawArea = row.area || row.departamento || getVal(['área', 'area', 'unidade', 'depto', 'função', 'funcao', 'cargo', 'title', 'job', 'ocupação', 'ocupacao', 'descrição', 'func', 'cargho', 'setor', 'posição', 'posicao', 'vencimento']) || 'Geral';
+
+            // Parsing robusto para valores brasileiros (ex: 5.000,00 ou 5000.00)
+            let rawSalary = row.salario || getVal(['salário', 'salario', 'remunera', 'base', 'total', 'proventos', 'vencimento', 'bruto', 'rendimento']) || 0;
+            let salaryStr = String(rawSalary).trim();
+
+            // Se tem vírgula e ponto, o ponto costuma ser milhar e vírgula decimal
+            if (salaryStr.includes(',') && salaryStr.includes('.')) {
+                salaryStr = salaryStr.replace(/\./g, '').replace(',', '.');
+            } else if (salaryStr.includes(',')) {
+                // Se só tem vírgula, trocamos por ponto
+                salaryStr = salaryStr.replace(',', '.');
+            }
+
+            const salary = parseFloat(salaryStr.replace(/[^\d.]/g, '')) || 0;
 
             const newEmp = await this.prisma.employee.create({
                 data: {

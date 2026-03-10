@@ -128,17 +128,27 @@ let PayrollService = class PayrollService {
             const uniqueKey = `snap-${snapshot.id}-row-${i}`;
             const rowKeys = Object.keys(row);
             const findCol = (terms) => rowKeys.find(k => {
-                const cleanK = k.trim().toLowerCase();
-                return terms.some(t => cleanK.includes(t.toLowerCase()));
+                const cleanK = k.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                return terms.some(t => {
+                    const cleanT = t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+                    return cleanK.includes(cleanT) || cleanT.includes(cleanK);
+                });
             });
             const getVal = (terms) => {
                 const col = findCol(terms);
                 return col ? row[col] : null;
             };
             const rawName = row.nome || row.name || getVal(['nome', 'colaborador', 'funcionário', 'funcionario', 'name', 'pessoal']) || `Colaborador ${i + 1}`;
-            const rawArea = row.area || row.departamento || getVal(['área', 'area', 'unidade', 'depto', 'função', 'funcao', 'cargo', 'title', 'job', 'ocupação', 'ocupacao', 'descrição', 'função', 'func', 'cargho']) || 'Geral';
-            const rawSalary = row.salario || getVal(['salário', 'salario', 'remunera', 'base', 'total', 'proventos']) || 0;
-            const salary = parseFloat(String(rawSalary).replace(/[^\d.,]/g, '').replace(',', '.'));
+            const rawArea = row.area || row.departamento || getVal(['área', 'area', 'unidade', 'depto', 'função', 'funcao', 'cargo', 'title', 'job', 'ocupação', 'ocupacao', 'descrição', 'func', 'cargho', 'setor', 'posição', 'posicao', 'vencimento']) || 'Geral';
+            let rawSalary = row.salario || getVal(['salário', 'salario', 'remunera', 'base', 'total', 'proventos', 'vencimento', 'bruto', 'rendimento']) || 0;
+            let salaryStr = String(rawSalary).trim();
+            if (salaryStr.includes(',') && salaryStr.includes('.')) {
+                salaryStr = salaryStr.replace(/\./g, '').replace(',', '.');
+            }
+            else if (salaryStr.includes(',')) {
+                salaryStr = salaryStr.replace(',', '.');
+            }
+            const salary = parseFloat(salaryStr.replace(/[^\d.]/g, '')) || 0;
             const newEmp = await this.prisma.employee.create({
                 data: {
                     tenant_id: tenantId,

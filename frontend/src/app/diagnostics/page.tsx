@@ -178,14 +178,35 @@ export default function DiagnosticsPage() {
                                     label={{ value: 'Salário Base', angle: -90, position: 'insideLeft' }}
                                 />
                                 <ZAxis type="number" range={[100, 100]} />
-                                <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+                                <Tooltip
+                                    cursor={{ strokeDasharray: '3 3' }}
+                                    content={({ active, payload }: any) => {
+                                        if (active && payload && payload.length) {
+                                            const data = payload[0].payload;
+                                            // Se for ponto de funcionário
+                                            if (data.name) {
+                                                return (
+                                                    <div className="card" style={{ padding: '8px 12px', background: 'rgba(255,255,255,0.95)', border: '1px solid #e2e8f0', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.1)' }}>
+                                                        <div style={{ fontWeight: 700, fontSize: 13, marginBottom: 4 }}>{data.name}</div>
+                                                        <div style={{ fontSize: 11, color: '#64748b' }}>{data.title}</div>
+                                                        <div style={{ fontSize: 12, marginTop: 4 }}>
+                                                            <span style={{ fontWeight: 600 }}>R$ {data.salary?.toLocaleString()}</span>
+                                                            <span style={{ color: '#64748b', marginLeft: 4 }}>(Grade {data.grade})</span>
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                        }
+                                        return null;
+                                    }}
+                                />
 
                                 {/* A Linha da Reta de Regressão */}
                                 <Scatter
                                     name="Tendência Mercado"
                                     data={curveData}
                                     fill="#4f46e5"
-                                    line={{ stroke: '#4f46e5', strokeWidth: 3 }}
+                                    line={{ stroke: '#4f46e5', strokeWidth: 4 }}
                                     shape={() => null}
                                 />
 
