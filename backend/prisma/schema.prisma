@@ -3,9 +3,10 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
-  url      = "file:./dev.db"
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
+
 
 // Enums converted to documentation as SQLite doesn't support them natively in Prisma
 // Roles: OWNER, CFO, HR_ADMIN, HR_USER, VIEWER
