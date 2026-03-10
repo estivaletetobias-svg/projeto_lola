@@ -9,20 +9,20 @@ export declare class JobMatchService {
         match: {
             job_catalog: {
                 id: string;
+                created_at: Date;
                 family: string;
                 title_std: string;
                 description: string | null;
                 level: string;
                 grade: number;
                 cbo_code: string | null;
-                created_at: Date;
             };
         } & {
             id: string;
             created_at: Date;
-            job_catalog_id: string;
             snapshot_id: string;
             employee_id: string;
+            job_catalog_id: string;
             confidence: number;
             method: string;
             reviewed_by_user_id: string | null;
@@ -37,13 +37,13 @@ export declare class JobMatchService {
     }): Promise<{
         id: string;
         created_at: Date;
-        job_catalog_id: string;
         snapshot_id: string;
         employee_id: string;
+        job_catalog_id: string;
         confidence: number;
         method: string;
         reviewed_by_user_id: string | null;
         reviewed_at: Date | null;
-    }>;
+    } | null>;
     autoMatch(snapshotId: string): Promise<number>;
 }

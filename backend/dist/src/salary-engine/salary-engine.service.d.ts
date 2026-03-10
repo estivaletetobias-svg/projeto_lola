@@ -15,6 +15,8 @@ export declare class SalaryEngineService {
         x: number;
         y: number;
         name: string | null;
+        title: string;
+        salary: number;
     }[]>;
     generateTableEntry(midpoint: number, stepIndex: number, totalSteps: number, rangeSpread: number): number;
 }

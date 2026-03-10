@@ -21,19 +21,25 @@ let SalaryEngineService = SalaryEngineService_1 = class SalaryEngineService {
     }
     calculateRegression(data) {
         const n = data.length;
-        if (n < 2)
+        if (n === 0)
             return { slope: 0, intercept: 0, rSquared: 0 };
-        let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
+        let sumX = 0, sumY = 0;
         for (const point of data) {
             sumX += point.x;
             sumY += point.y;
+        }
+        if (n === 1)
+            return { slope: 0, intercept: sumY / n, rSquared: 1 };
+        let sumXY = 0, sumX2 = 0, sumY2 = 0;
+        for (const point of data) {
             sumXY += point.x * point.y;
             sumX2 += point.x * point.x;
             sumY2 += point.y * point.y;
         }
         const denominator = (n * sumX2 - sumX * sumX);
-        if (denominator === 0)
-            return { slope: 0, intercept: 0, rSquared: 0 };
+        if (denominator === 0) {
+            return { slope: 0, intercept: sumY / n, rSquared: 0 };
+        }
         const slope = (n * sumXY - sumX * sumY) / denominator;
         const intercept = (sumY - slope * sumX) / n;
         const num = (n * sumXY - sumX * sumY) ** 2;
@@ -55,32 +61,14 @@ let SalaryEngineService = SalaryEngineService_1 = class SalaryEngineService {
                 }
             }
         });
-        const levelToGrade = (level) => {
-            const l = level.toLowerCase();
-            if (l.includes('intern') || l.includes('estagi'))
-                return 1;
-            if (l.includes('jr') || l.includes('junior'))
-                return 2;
-            if (l.includes('pl') || l.includes('pleno'))
-                return 3;
-            if (l.includes('sr') || l.includes('senior'))
-                return 4;
-            if (l.includes('spec') || l.includes('especialista'))
-                return 5;
-            if (l.includes('coord'))
-                return 6;
-            if (l.includes('manager') || l.includes('gerente'))
-                return 7;
-            if (l.includes('director') || l.includes('diretor'))
-                return 8;
-            return 3;
-        };
         return compensations
             .filter(c => c.employee.job_matches.length > 0)
             .map(c => ({
-            x: levelToGrade(c.employee.job_matches[0].job_catalog.level),
+            x: c.employee.job_matches[0].job_catalog.grade || 0,
             y: c.base_salary,
-            name: c.employee.full_name
+            name: c.employee.full_name,
+            title: c.employee.job_matches[0].job_catalog.title_std,
+            salary: c.base_salary
         }));
     }
     generateTableEntry(midpoint, stepIndex, totalSteps, rangeSpread) {

@@ -6,13 +6,13 @@ export declare class JobMatchController {
     constructor(jobMatchService: JobMatchService, jobCatalogService: JobCatalogService);
     getCatalog(): Promise<{
         id: string;
+        created_at: Date;
         family: string;
         title_std: string;
         description: string | null;
         level: string;
         grade: number;
         cbo_code: string | null;
-        created_at: Date;
     }[]>;
     getMatches(snapshotId: string): Promise<{
         employeeId: string;
@@ -21,20 +21,20 @@ export declare class JobMatchController {
         match: {
             job_catalog: {
                 id: string;
+                created_at: Date;
                 family: string;
                 title_std: string;
                 description: string | null;
                 level: string;
                 grade: number;
                 cbo_code: string | null;
-                created_at: Date;
             };
         } & {
             id: string;
             created_at: Date;
-            job_catalog_id: string;
             snapshot_id: string;
             employee_id: string;
+            job_catalog_id: string;
             confidence: number;
             method: string;
             reviewed_by_user_id: string | null;
@@ -49,12 +49,12 @@ export declare class JobMatchController {
     }): Promise<{
         id: string;
         created_at: Date;
-        job_catalog_id: string;
         snapshot_id: string;
         employee_id: string;
+        job_catalog_id: string;
         confidence: number;
         method: string;
         reviewed_by_user_id: string | null;
         reviewed_at: Date | null;
-    }>;
+    } | null>;
 }

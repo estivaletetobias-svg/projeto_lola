@@ -5,7 +5,7 @@ import {
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
     LineChart, Line, ScatterChart, Scatter, ZAxis, Cell
 } from 'recharts';
-import { Download, AlertTriangle, TrendingDown, Target, Loader2 } from 'lucide-react';
+import { Download, AlertTriangle, RefreshCw, Loader2 } from 'lucide-react';
 
 export default function DiagnosticsPage() {
     const [loading, setLoading] = useState(true);
@@ -72,13 +72,45 @@ export default function DiagnosticsPage() {
         );
     }
 
-    // Preparar dados para o gráfico de barras (Quartis)
-    const positionData = [
-        { name: 'P25 (Abaixo)', value: 12, color: '#f43f5e' },
-        { name: 'P25-P50 (Alinhado)', value: 54, color: '#10b981' },
-        { name: 'P50-P75 (Agressivo)', value: 28, color: '#4f46e5' },
-        { name: 'P75+ (Acima)', value: 6, color: '#0f172a' },
-    ];
+    // 1. Preparar dados para o gráfico de Dispersão (Scatter + Line)
+    const scatterData = (analysis.mappedEmployees || []).map((emp: any) => ({
+        grade: emp.grade,
+        salary: emp.salary,
+        name: emp.name,
+        title: emp.jobTitle
+    }));
+
+    // Criar a linha de tendência (reta de regressão)
+    const curveData = (analysis.suggestedSalaryStructure || []).map((s: any) => ({
+        grade: parseInt(s.grade.replace('G', '')),
+        salary: s.midpoint // Mudamos para 'salary' para bater com a dataKey do YAxis
+    })).sort((a: any, b: any) => a.grade - b.grade);
+
+    // 2. Calcular distribuição real por Quartis
+    const calculatePositioning = () => {
+        let p25 = 0, p50 = 0, p75 = 0, pAbove = 0;
+
+        (analysis.mappedEmployees || []).forEach((emp: any) => {
+            const midpoint = analysis.suggestedSalaryStructure.find((s: any) => s.grade === `G${emp.grade}`)?.midpoint || 0;
+            if (midpoint === 0) return;
+
+            const gap = (emp.salary / midpoint) - 1;
+
+            if (gap < -0.10) p25++; // Mais de 10% abaixo
+            else if (gap < 0.05) p50++; // Entre -10% e +5% (Alinhado)
+            else if (gap < 0.20) p75++; // Entre 5% e 20% (Agressivo)
+            else pAbove++;
+        });
+
+        return [
+            { name: 'Abaixo (-10%)', value: p25, color: '#f43f5e' },
+            { name: 'Alinhado', value: p50, color: '#10b981' },
+            { name: 'Agressivo (>5%)', value: p75, color: '#4f46e5' },
+            { name: 'Acima (>20%)', value: pAbove, color: '#0f172a' },
+        ];
+    };
+
+    const realPositionData = calculatePositioning();
 
     return (
         <div style={{ paddingBottom: 100 }}>
@@ -87,9 +119,14 @@ export default function DiagnosticsPage() {
                     <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Diagnóstico de Remuneração</h1>
                     <p style={{ color: '#64748b' }}>Snapshot: <strong>{new Date(snapshot.period_date).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</strong></p>
                 </div>
-                <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Download size={18} /> Exportar Relatório
-                </button>
+                <div style={{ display: 'flex', gap: 12 }}>
+                    <button onClick={() => window.location.reload()} className="btn btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <RefreshCw size={18} /> Recarregar Análise
+                    </button>
+                    <button className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <Download size={18} /> Exportar Relatório
+                    </button>
+                </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 32 }}>
@@ -104,44 +141,75 @@ export default function DiagnosticsPage() {
                     <div style={{ fontSize: 16, fontWeight: 700 }}>{analysis.diagnostics.recommendation}</div>
                 </div>
                 <div className="card">
-                    <p style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>Cargos Avaliados</p>
+                    <p style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>Colaboradores</p>
                     <div style={{ fontSize: 24, fontWeight: 700, color: '#4f46e5' }}>{analysis.diagnostics.pointsCount}</div>
                 </div>
                 <div className="card">
-                    <p style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>Média Global Gap</p>
-                    <div style={{ fontSize: 24, fontWeight: 700, color: '#f43f5e' }}>-8.4%</div>
+                    <p style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>Gap Médio Mercado</p>
+                    <div style={{ fontSize: 24, fontWeight: 700, color: (analysis.diagnostics.avgGap || 0) < 0 ? '#f43f5e' : '#10b981' }}>
+                        {analysis.diagnostics.avgGap ? (analysis.diagnostics.avgGap).toFixed(1) : '0.0'}%
+                    </div>
                 </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginBottom: 24 }}>
                 <div className="card">
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 600 }}>Curva de Regressão Lola (Passo 3)</h3>
-                        <div style={{ fontSize: 12, color: '#64748b' }}>Eixo X: Grades (Complexidade) | Eixo Y: Salário Base</div>
+                        <h3 style={{ fontSize: 18, fontWeight: 600 }}>Gráfico de Dispersão e Equilíbrio</h3>
+                        <div style={{ fontSize: 12, color: '#64748b' }}>Pontos: Seus Colaboradores | Linha: Midpoint Mercado</div>
                     </div>
-                    <div style={{ height: 350 }}>
+                    <div style={{ height: 400 }}>
                         <ResponsiveContainer width="100%" height="100%">
-                            <BarChart data={analysis.suggestedSalaryStructure}>
+                            <ScatterChart margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                <XAxis dataKey="grade" axisLine={false} tickLine={false} />
-                                <YAxis axisLine={false} tickLine={false} />
-                                <Tooltip />
-                                <Bar name="Midpoint Sugerido" dataKey="midpoint" fill="#4f46e5" radius={[4, 4, 0, 0]} />
-                            </BarChart>
+                                <XAxis
+                                    type="number"
+                                    dataKey="grade"
+                                    name="Grade"
+                                    unit=""
+                                    domain={['auto', 'auto']}
+                                    label={{ value: 'Grade (Complexidade)', position: 'insideBottom', offset: -10 }}
+                                />
+                                <YAxis
+                                    type="number"
+                                    dataKey="salary"
+                                    name="Salário"
+                                    unit="R$"
+                                    label={{ value: 'Salário Base', angle: -90, position: 'insideLeft' }}
+                                />
+                                <ZAxis type="number" range={[100, 100]} />
+                                <Tooltip cursor={{ strokeDasharray: '3 3' }} />
+
+                                {/* A Linha da Reta de Regressão */}
+                                <Scatter
+                                    name="Tendência Mercado"
+                                    data={curveData}
+                                    fill="#4f46e5"
+                                    line={{ stroke: '#4f46e5', strokeWidth: 3 }}
+                                    shape={() => null}
+                                />
+
+                                {/* Os Pontos Reais */}
+                                <Scatter
+                                    name="Seus Colaboradores"
+                                    data={scatterData}
+                                    fill="#f43f5e"
+                                />
+                            </ScatterChart>
                         </ResponsiveContainer>
                     </div>
                 </div>
 
                 <div className="card">
-                    <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>Tabela Salarial Sugerida (Passo 4)</h3>
-                    <div style={{ height: 350, overflowY: 'auto' }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>Tabela Salarial de Referência</h3>
+                    <div style={{ height: 400, overflowY: 'auto' }}>
                         <table style={{ width: '100%', fontSize: 13, borderCollapse: 'collapse' }}>
                             <thead>
                                 <tr style={{ borderBottom: '1px solid #f1f5f9' }}>
                                     <th style={{ textAlign: 'left', padding: 8 }}>Grade</th>
                                     <th style={{ textAlign: 'right', padding: 8 }}>Midpoint</th>
-                                    <th style={{ textAlign: 'right', padding: 8 }}>A (Min)</th>
-                                    <th style={{ textAlign: 'right', padding: 8 }}>E (Max)</th>
+                                    <th style={{ textAlign: 'right', padding: 8 }}>Min</th>
+                                    <th style={{ textAlign: 'right', padding: 8 }}>Max</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -150,7 +218,7 @@ export default function DiagnosticsPage() {
                                         <td style={{ padding: 8, fontWeight: 600 }}>{row.grade}</td>
                                         <td style={{ padding: 8, textAlign: 'right' }}>R$ {row.midpoint.toLocaleString()}</td>
                                         <td style={{ padding: 8, textAlign: 'right', color: '#64748b' }}>R$ {row.steps[0].value.toLocaleString()}</td>
-                                        <td style={{ padding: 8, textAlign: 'right', color: '#64748b' }}>R$ {row.steps[4].value.toLocaleString()}</td>
+                                        <td style={{ padding: 8, textAlign: 'right', color: '#64748b' }}>R$ {row.steps[row.steps.length - 1].value.toLocaleString()}</td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -160,21 +228,57 @@ export default function DiagnosticsPage() {
             </div>
 
             <div className="card">
-                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>Posicionamento Geral da Folha</h3>
+                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 24 }}>Posicionamento da Folha</h3>
                 <div style={{ height: 300 }}>
                     <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={positionData}>
+                        <BarChart data={realPositionData}>
                             <CartesianGrid strokeDasharray="3 3" vertical={false} />
                             <XAxis dataKey="name" axisLine={false} tickLine={false} />
                             <YAxis axisLine={false} tickLine={false} />
                             <Tooltip />
                             <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                {positionData.map((entry, index) => (
+                                {realPositionData.map((entry, index) => (
                                     <Cell key={`cell-${index}`} fill={entry.color} />
                                 ))}
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                </div>
+            </div>
+
+            <div className="card" style={{ marginTop: 24 }}>
+                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 16 }}>Pessoas Incluídas no Diagnóstico ({analysis.mappedEmployees?.length || 0})</h3>
+                <p style={{ color: '#64748b', fontSize: 14, marginBottom: 24 }}>
+                    Lista de colaboradores que possuem um "De/Para" realizado e estão servindo de base para os cálculos acima.
+                </p>
+                <div style={{ overflowX: 'auto' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                        <thead>
+                            <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
+                                <th style={{ textAlign: 'left', padding: 12 }}>Nome</th>
+                                <th style={{ textAlign: 'left', padding: 12 }}>Cargo Padrão (Grade)</th>
+                                <th style={{ textAlign: 'right', padding: 12 }}>Salário Atual</th>
+                                <th style={{ textAlign: 'right', padding: 12 }}>Gap Mercado</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {analysis.mappedEmployees?.map((emp: any, i: number) => {
+                                const marketP50 = analysis.suggestedSalaryStructure.find((s: any) => s.grade === `G${emp.grade}`)?.midpoint || 0;
+                                const gap = marketP50 > 0 ? ((emp.salary / marketP50) - 1) * 100 : 0;
+
+                                return (
+                                    <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                        <td style={{ padding: 12, fontWeight: 600 }}>{emp.name}</td>
+                                        <td style={{ padding: 12 }}>{emp.jobTitle} (Grade {emp.grade})</td>
+                                        <td style={{ padding: 12, textAlign: 'right' }}>R$ {emp.salary.toLocaleString()}</td>
+                                        <td style={{ padding: 12, textAlign: 'right', color: gap < 0 ? '#f43f5e' : '#10b981', fontWeight: 600 }}>
+                                            {gap > 0 ? '+' : ''}{gap.toFixed(1)}%
+                                        </td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
                 </div>
             </div>
         </div>

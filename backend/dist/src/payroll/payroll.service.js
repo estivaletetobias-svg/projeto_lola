@@ -123,41 +123,48 @@ let PayrollService = class PayrollService {
         const compensationData = [];
         const newEmployees = [];
         const jobCatalog = await this.prisma.jobCatalog.findMany();
-        for (const row of body.data) {
-            const key = String(row.id || row.key || row.matricula || row.Matrícula || row.Code || 'MISSING');
-            let empId = employeeMap.get(key);
-            if (!empId) {
-                const newEmp = await this.prisma.employee.create({
-                    data: {
-                        tenant_id: tenantId,
-                        employee_key: key,
-                        full_name: row.nome || row.name || row['Nome Completo'] || row.Nome || 'N/A',
-                        area: row.area || row.departamento || row['Área/Unidade'] || row.Area || 'Geral',
-                    }
-                });
-                empId = newEmp.id;
-                employeeMap.set(key, empId);
-            }
-            const salary = parseFloat(row.salario || row.base_salary || row['Salário Base'] || row.Salario || row.Remuneração || 0);
+        for (let i = 0; i < body.data.length; i++) {
+            const row = body.data[i];
+            const uniqueKey = `snap-${snapshot.id}-row-${i}`;
+            const rowKeys = Object.keys(row);
+            const findCol = (terms) => rowKeys.find(k => {
+                const cleanK = k.trim().toLowerCase();
+                return terms.some(t => cleanK.includes(t.toLowerCase()));
+            });
+            const getVal = (terms) => {
+                const col = findCol(terms);
+                return col ? row[col] : null;
+            };
+            const rawName = row.nome || row.name || getVal(['nome', 'colaborador', 'funcionário', 'funcionario', 'name', 'pessoal']) || `Colaborador ${i + 1}`;
+            const rawArea = row.area || row.departamento || getVal(['área', 'area', 'unidade', 'depto', 'função', 'funcao', 'cargo', 'title', 'job', 'ocupação', 'ocupacao', 'descrição', 'função', 'func', 'cargho']) || 'Geral';
+            const rawSalary = row.salario || getVal(['salário', 'salario', 'remunera', 'base', 'total', 'proventos']) || 0;
+            const salary = parseFloat(String(rawSalary).replace(/[^\d.,]/g, '').replace(',', '.'));
+            const newEmp = await this.prisma.employee.create({
+                data: {
+                    tenant_id: tenantId,
+                    employee_key: uniqueKey,
+                    full_name: String(rawName),
+                    area: String(rawArea),
+                }
+            });
             compensationData.push({
-                employee_id: empId,
+                employee_id: newEmp.id,
                 snapshot_id: snapshot.id,
                 base_salary: salary,
                 benefits_value: 0,
                 variable_value: 0,
                 total_cash: salary,
             });
-            const title = String(row.cargo || row.job_title || row['Cargo'] || row.Title || '').toLowerCase();
-            const matchedJob = jobCatalog.find(j => title.includes(j.title_std.toLowerCase()) ||
-                (title.includes('eng') && j.title_std.includes('Engineer')));
+            const title = String(rawArea).toLowerCase();
+            const matchedJob = jobCatalog.find(j => title.includes(j.title_std.toLowerCase()));
             if (matchedJob) {
                 await this.prisma.jobMatch.create({
                     data: {
-                        employee_id: empId,
+                        employee_id: newEmp.id,
                         snapshot_id: snapshot.id,
                         job_catalog_id: matchedJob.id,
                         confidence: 0.9,
-                        method: 'AUTO_LOCAL'
+                        method: 'AUTO_IMPORT'
                     }
                 });
             }

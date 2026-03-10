@@ -19,6 +19,7 @@ export declare class SalaryEngineController {
                 rSquared: number;
             };
             pointsCount: number;
+            avgGap: number;
             recommendation: string;
         };
         suggestedSalaryStructure: {
@@ -28,6 +29,12 @@ export declare class SalaryEngineController {
                 stepLabel: string;
                 value: number;
             }[];
+        }[];
+        mappedEmployees: {
+            name: string | null;
+            jobTitle: string;
+            grade: number;
+            salary: number;
         }[];
     }>;
     analyzeSnapshot(snapshotId: string): Promise<{
@@ -39,6 +46,7 @@ export declare class SalaryEngineController {
                 rSquared: number;
             };
             pointsCount: number;
+            avgGap: number;
             recommendation: string;
         };
         suggestedSalaryStructure: {
@@ -49,9 +57,16 @@ export declare class SalaryEngineController {
                 value: number;
             }[];
         }[];
+        mappedEmployees: {
+            name: string | null;
+            jobTitle: string;
+            grade: number;
+            salary: number;
+        }[];
     } | {
         status: string;
         message: string;
     }>;
     private processAnalysis;
+    private calculateAvgGap;
 }

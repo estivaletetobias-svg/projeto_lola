@@ -25,7 +25,7 @@ export class JobMatchService {
         return employees.map(emp => ({
             employeeId: emp.id,
             employeeName: emp.full_name,
-            internalTitle: emp.area, // No MVP usamos area, mas idealmente seria cargo
+            internalTitle: emp.area || 'Geral',
             match: emp.job_matches[0] || null
         }));
     }
@@ -37,6 +37,16 @@ export class JobMatchService {
         const existing = await this.prisma.jobMatch.findFirst({
             where: { employee_id: employeeId, snapshot_id: snapshotId }
         });
+
+        // Se o catalogId for vazio ou nulo, queremos REMOVER o mapeamento (excluir da análise)
+        if (!jobCatalogId || jobCatalogId === '') {
+            if (existing) {
+                return this.prisma.jobMatch.delete({
+                    where: { id: existing.id }
+                });
+            }
+            return null; // Nada para deletar
+        }
 
         if (existing) {
             return this.prisma.jobMatch.update({

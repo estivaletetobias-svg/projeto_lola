@@ -34,7 +34,7 @@ let JobMatchService = class JobMatchService {
         return employees.map(emp => ({
             employeeId: emp.id,
             employeeName: emp.full_name,
-            internalTitle: emp.area,
+            internalTitle: emp.area || 'Geral',
             match: emp.job_matches[0] || null
         }));
     }
@@ -43,6 +43,14 @@ let JobMatchService = class JobMatchService {
         const existing = await this.prisma.jobMatch.findFirst({
             where: { employee_id: employeeId, snapshot_id: snapshotId }
         });
+        if (!jobCatalogId || jobCatalogId === '') {
+            if (existing) {
+                return this.prisma.jobMatch.delete({
+                    where: { id: existing.id }
+                });
+            }
+            return null;
+        }
         if (existing) {
             return this.prisma.jobMatch.update({
                 where: { id: existing.id },

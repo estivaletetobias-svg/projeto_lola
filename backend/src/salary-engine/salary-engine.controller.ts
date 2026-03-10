@@ -19,9 +19,15 @@ export class SalaryEngineController {
             rangeSpread: number
         }
     ) {
-        this.logger.log('Receiving request for salary analysis...');
         const { points, stepsCount, rangeSpread } = body;
-        return this.processAnalysis(points, stepsCount, rangeSpread);
+        const normalizedPoints = (points || []).map(p => ({
+            x: p.x,
+            y: p.y,
+            name: 'Test Employee',
+            title: 'Test Title',
+            salary: p.y
+        }));
+        return this.processAnalysis(normalizedPoints, stepsCount, rangeSpread);
     }
 
     @Get('analyze/:snapshotId')
@@ -40,7 +46,7 @@ export class SalaryEngineController {
         return this.processAnalysis(points, 5, 0.4);
     }
 
-    private processAnalysis(points: { x: number; y: number }[], stepsCount: number, rangeSpread: number) {
+    private processAnalysis(points: { x: number; y: number; name: string | null; title: string; salary: number }[], stepsCount: number, rangeSpread: number) {
         // 1. Passo 3: Cálculo da Regressão (Lógica Carolina)
         const regression = this.salaryEngine.calculateRegression(points);
 
@@ -76,14 +82,30 @@ export class SalaryEngineController {
             diagnostics: {
                 regressionCurve: regression,
                 pointsCount: points.length,
+                avgGap: this.calculateAvgGap(points, regression),
                 recommendation: regression.rSquared > 0.8
                     ? 'Estrutura Financeira Coesa'
                     : regression.rSquared > 0.5
                         ? 'Alinhamento Moderado'
                         : 'Atenção: Dispersão Crítica Detectada'
             },
-            suggestedSalaryStructure: suggestedTable
+            suggestedSalaryStructure: suggestedTable,
+            mappedEmployees: points.map(p => ({
+                name: p.name,
+                jobTitle: p.title,
+                grade: p.x,
+                salary: p.y
+            }))
         };
+    }
+
+    private calculateAvgGap(points: any[], regression: any) {
+        if (points.length === 0) return 0;
+        const totalGap = points.reduce((acc, p) => {
+            const market = regression.slope * p.x + regression.intercept;
+            return acc + (market > 0 ? (p.y / market - 1) : 0);
+        }, 0);
+        return (totalGap / points.length) * 100;
     }
 }
 
