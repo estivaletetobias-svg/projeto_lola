@@ -6,7 +6,9 @@ export declare class JobCatalogService {
         id: string;
         family: string;
         title_std: string;
+        description: string | null;
         level: string;
+        grade: number;
         cbo_code: string | null;
         created_at: Date;
     }[]>;

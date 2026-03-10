@@ -123,14 +123,18 @@ export default function JobMatchPage() {
                                         onChange={(e) => handleApprove(row.employeeId, e.target.value)}
                                         style={{ width: '100%', padding: '8px', borderRadius: 6, border: '1px solid #e2e8f0', background: '#fff' }}
                                     >
-                                        <option value="">-- Selecione um Cargo --</option>
+                                        <option value="">-- Selecione o Cargo Padrão --</option>
                                         {catalog.map(cat => (
                                             <option key={cat.id} value={cat.id}>
-                                                {cat.title_std} (Grade {cat.grade})
+                                                {cat.title_std} (Grade {cat.grade}) - {cat.family}
                                             </option>
                                         ))}
                                     </select>
+                                    <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 4, fontStyle: 'italic' }}>
+                                        {catalog.find(c => c.id === (row.match?.job_catalog_id))?.description || 'Nenhum cargo padrão selecionado.'}
+                                    </div>
                                 </td>
+
                                 <td style={{ padding: '16px 12px', textAlign: 'right' }}>
                                     {row.match ? (
                                         <span style={{ color: '#10b981', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>

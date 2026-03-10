@@ -8,7 +8,9 @@ export declare class JobMatchController {
         id: string;
         family: string;
         title_std: string;
+        description: string | null;
         level: string;
+        grade: number;
         cbo_code: string | null;
         created_at: Date;
     }[]>;
@@ -21,7 +23,9 @@ export declare class JobMatchController {
                 id: string;
                 family: string;
                 title_std: string;
+                description: string | null;
                 level: string;
+                grade: number;
                 cbo_code: string | null;
                 created_at: Date;
             };

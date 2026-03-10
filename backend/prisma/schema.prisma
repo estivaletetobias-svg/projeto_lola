@@ -128,7 +128,9 @@ model JobCatalog {
   id               String   @id @default(uuid())
   family           String
   title_std        String
+  description      String?
   level            String
+  grade            Int      @default(0)
   cbo_code         String?
   created_at       DateTime @default(now())
 
@@ -137,6 +139,7 @@ model JobCatalog {
 
   @@map("job_catalog")
 }
+
 
 model JobMatch {
   id                  String   @id @default(uuid())
