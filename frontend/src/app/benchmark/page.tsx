@@ -1,3 +1,4 @@
+import { safeFetch } from "@/app/api-config";
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
