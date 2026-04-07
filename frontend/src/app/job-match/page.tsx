@@ -179,7 +179,7 @@ export default function JobMatchPage() {
                     <p style={{ fontWeight: 600, color: '#64748b' }}>Sincronizando cargos internos com catálogo global...</p>
                 </div>
             ) : error ? (
-                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: '#1e293b' }}>
+                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: 'white' }}>
                     <AlertTriangle size={64} color="#f59e0b" style={{ margin: '0 auto 24px' }} />
                     <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Ação Necessária</h2>
                     <p style={{ color: '#64748b', fontSize: 16, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>{error}</p>
@@ -355,7 +355,7 @@ export default function JobMatchPage() {
                     </div>
 
                     {groups.length === 0 && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '100px 40px', background: '#1e293b', borderRadius: 32, border: '2px dashed #cbd5e1' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '100px 40px', background: 'white', borderRadius: 32, border: '2px dashed #cbd5e1' }}>
                             <CheckCircle2 size={64} color="#10b981" style={{ margin: '0 auto 24px' }} />
                             <h3 style={{ fontSize: 24, fontWeight: 900, color: '#1e293b' }}>Fluxo de Mapeamento Concluído</h3>
                             <p style={{ color: '#64748b', fontSize: 16, marginTop: 12, maxWidth: 500, margin: '12px auto 32px' }}>A Carolina AI processou todas as equivalências com sucesso. Sua estrutura está pronta para análise.</p>

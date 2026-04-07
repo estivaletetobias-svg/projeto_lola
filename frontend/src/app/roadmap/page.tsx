@@ -224,7 +224,7 @@ export default function RoadmapPage() {
                                 <span>Health Score do Projeto</span>
                                 <span style={{ color: '#10b981', fontWeight: 700 }}>EXCELENTE (A+)</span>
                             </div>
-                            <div style={{ width: '100%', height: 4, background: '#1e293b', borderRadius: 2 }}><div style={{ width: '95%', height: '100%', background: '#10b981', borderRadius: 2 }}></div></div>
+                            <div style={{ width: '100%', height: 4, background: 'white', borderRadius: 2 }}><div style={{ width: '95%', height: '100%', background: '#10b981', borderRadius: 2 }}></div></div>
                         </div>
                         <div style={{ display: 'flex', gap: 12, alignItems: 'center', fontSize: 13, color: '#94a3b8' }}>
                             <Star size={16} color="#f59e0b" />
@@ -279,7 +279,7 @@ export default function RoadmapPage() {
 
                         <div style={{ display: 'grid', gap: 16, marginBottom: 40 }}>
                             {selectedPhase.subPhases.map((sub, i) => (
-                                <div key={i} style={{ padding: 20, background: '#1e293b', borderRadius: '20px', border: '1px solid #334155' }}>
+                                <div key={i} style={{ padding: 20, background: 'white', borderRadius: '20px', border: '1px solid #334155' }}>
                                     <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                                         <span style={{ fontWeight: 800, fontSize: 15, color: '#fff' }}>{sub.title}</span>
                                         <span style={{
@@ -352,7 +352,7 @@ function PhaseCard({ phase, onSelect }: { phase: Phase, onSelect: () => void }) 
                     <h3 style={{ fontSize: 17, fontWeight: 800, color: '#ffffff' }}>{phase.title}</h3>
                     <span style={{ fontSize: 14, fontWeight: 900, color: phase.color }}>{phase.progress}%</span>
                 </div>
-                <div style={{ width: '100%', height: 4, background: '#1e293b', borderRadius: 2 }}>
+                <div style={{ width: '100%', height: 4, background: 'white', borderRadius: 2 }}>
                     <div style={{ width: `${phase.progress}%`, height: '100%', background: phase.color, borderRadius: 2 }}></div>
                 </div>
             </div>

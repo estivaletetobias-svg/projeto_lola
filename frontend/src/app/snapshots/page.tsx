@@ -165,7 +165,7 @@ export default function SnapshotsPage() {
                                         style={{ 
                                             width: '100%', border: '2px dashed #e2e8f0', borderRadius: 24, 
                                             padding: '60px 20px', cursor: 'pointer', transition: 'all 0.2s ease',
-                                            background: '#1e293b'
+                                            background: 'white'
                                         }}
                                         onMouseOver={e => e.currentTarget.style.borderColor = '#4f46e5'}
                                         onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}
@@ -218,7 +218,7 @@ export default function SnapshotsPage() {
                                     )}
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 40 }}>
-                                        <div style={{ background: '#1e293b', padding: 24, borderRadius: 20 }}>
+                                        <div style={{ background: 'white', padding: 24, borderRadius: 20 }}>
                                             <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Mapeamento AI</h4>
                                             <div style={{ display: 'grid', gap: 12 }}>
                                                 {[
@@ -240,7 +240,7 @@ export default function SnapshotsPage() {
                                             </div>
                                         </div>
 
-                                        <div style={{ background: '#1e293b', padding: 24, borderRadius: 20 }}>
+                                        <div style={{ background: 'white', padding: 24, borderRadius: 20 }}>
                                             <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Abordagem de Extração</h4>
                                             <div style={{ padding: 20, background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', textAlign: 'center' }}>
                                                 <Brain size={32} color="#4f46e5" style={{ margin: '0 auto 16px' }} />
@@ -323,7 +323,7 @@ export default function SnapshotsPage() {
                                     </p>
                                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
                                         {['ID / Código', 'Nome Completo', 'Cargo / Role', 'Salário Bruto'].map(tag => (
-                                            <span key={tag} style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, color: '#cbd5e1' }}>{tag}</span>
+                                            <span key={tag} style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, color: '#64748b' }}>{tag}</span>
                                         ))}
                                     </div>
                                 </div>

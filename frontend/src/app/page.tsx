@@ -241,7 +241,7 @@ export default function Dashboard() {
                 <Link key={item.path} href={item.path} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderRadius: 12, textDecoration: 'none', transition: 'all 0.2s' }} className="nav-item">
                   <div style={{ color: '#94a3b8' }}>{item.icon}</div>
                   <span style={{ fontSize: 14, fontWeight: 700, color: '#475569' }}>{item.title}</span>
-                  <ChevronRight size={14} style={{ marginLeft: 'auto', color: '#cbd5e1' }} />
+                  <ChevronRight size={14} style={{ marginLeft: 'auto', color: '#64748b' }} />
                 </Link>
               ))}
             </div>

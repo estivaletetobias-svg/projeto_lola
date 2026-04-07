@@ -174,7 +174,7 @@ export default function BenchmarkExplorerPage() {
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ background: '#1e293b', borderBottom: '1px solid #334155' }}>
+                                    <tr style={{ background: 'white', borderBottom: '1px solid #334155' }}>
                                         <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo / Catalog Title</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nível</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P25</th>
@@ -199,7 +199,7 @@ export default function BenchmarkExplorerPage() {
                                                     background: selected?.id === b.id ? '#4f46e508' : 'white',
                                                     transition: 'all 0.15s ease'
                                                 }}
-                                                whileHover={{ background: '#1e293b' }}
+                                                whileHover={{ background: 'white' }}
                                             >
                                                 <td style={{ padding: '18px 24px' }}>
                                                     <div style={{ fontWeight: 800, fontSize: 14, color: '#1e293b' }}>{b.job_catalog.title_std}</div>
@@ -238,7 +238,7 @@ export default function BenchmarkExplorerPage() {
                         </div>
 
                         {/* Pagination Terminal */}
-                        <div style={{ padding: '20px 24px', background: '#1e293b', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '20px 24px', background: 'white', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
                                 Visão <strong style={{ color: '#1e293b' }}>{((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)}</strong> de {total.toLocaleString()} registros
                             </div>
@@ -291,7 +291,7 @@ export default function BenchmarkExplorerPage() {
                                     {/* Stats Grid */}
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
                                         {chartData.map(item => (
-                                            <div key={item.name} style={{ padding: '16px 12px', borderRadius: 16, background: '#1e293b', border: '1px solid #334155', textAlign: 'center' }}>
+                                            <div key={item.name} style={{ padding: '16px 12px', borderRadius: 16, background: 'white', border: '1px solid #334155', textAlign: 'center' }}>
                                                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', marginBottom: 6, textTransform: 'uppercase' }}>{item.name}</div>
                                                 <div style={{ fontSize: 16, fontWeight: 900, color: item.color }}>R$ {(item.value / 1000).toFixed(1)}k</div>
                                             </div>
@@ -335,7 +335,7 @@ export default function BenchmarkExplorerPage() {
                             ) : (
                                 <motion.div 
                                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    className="card" style={{ padding: 60, textAlign: 'center', background: '#1e293b', border: '1px dashed #cbd5e1' }}
+                                    className="card" style={{ padding: 60, textAlign: 'center', background: 'white', border: '1px dashed #cbd5e1' }}
                                 >
                                     <div style={{ width: 64, height: 64, borderRadius: 32, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
                                         <BookOpen size={28} color="#cbd5e1" />
