@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         }
 
         // --- Persist to Backend ---
-        const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
+        const backendUrl = 'https://projeto-lola-mxos.vercel.app';
         try {
             const payload = {
                 fileName: file.name,
