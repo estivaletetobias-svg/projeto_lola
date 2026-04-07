@@ -96,7 +96,7 @@ export default function SalaryStructurePage() {
                         <Gem size={14} /> Financial Architecture Studio
                     </div>
                   </div>
-                  <h1 style={{ fontSize: 42, fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+                  <h1 style={{ fontSize: 42, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
                     Arquitetura de <br/>
                     <span style={{ color: '#64748b' }}>Grades & Estrutura.</span>
                   </h1>
@@ -114,16 +114,16 @@ export default function SalaryStructurePage() {
                 {flowSteps.map((step) => (
                     <div key={step.id} style={{
                         padding: '20px 24px', borderRadius: 20,
-                        background: step.status === 'ACTIVE' ? '#6366f1' : 'rgba(255,255,255,0.02)',
+                        background: step.status === 'ACTIVE' ? '#6366f1' : 'rgba(0,0,0,0.02)',
                         color: step.status === 'ACTIVE' ? 'white' : '#94a3b8',
-                        border: step.status === 'ACTIVE' ? '1px solid #818cf8' : '1px solid rgba(255,255,255,0.05)',
+                        border: step.status === 'ACTIVE' ? '1px solid #818cf8' : '1px solid rgba(0,0,0,0.05)',
                         display: 'flex', alignItems: 'center', gap: 16,
                         boxShadow: step.status === 'ACTIVE' ? '0 15px 30px rgba(99, 102, 241, 0.25)' : 'none',
                         transition: 'all 0.3s ease'
                     }}>
                         <div style={{
                             width: 36, height: 36, borderRadius: 10,
-                            background: step.status === 'ACTIVE' ? 'rgba(255,255,255,0.2)' : 'rgba(255,255,255,0.05)',
+                            background: step.status === 'ACTIVE' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.05)',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             color: step.status === 'ACTIVE' ? 'white' : '#6366f1'
                         }}>
@@ -131,7 +131,7 @@ export default function SalaryStructurePage() {
                         </div>
                         <div style={{ flex: 1 }}>
                             <div style={{ fontSize: 10, opacity: step.status === 'ACTIVE' ? 0.9 : 0.6, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Step 0{step.id}</div>
-                            <div style={{ fontSize: 14, fontWeight: 900, color: step.status === 'ACTIVE' ? 'white' : '#f1f5f9' }}>{step.title}</div>
+                            <div style={{ fontSize: 14, fontWeight: 900, color: step.status === 'ACTIVE' ? 'white' : '#334155' }}>{step.title}</div>
                         </div>
                         {step.status === 'DONE' && <CheckCircle2 size={18} color="#10b981" />}
                     </div>
@@ -146,7 +146,7 @@ export default function SalaryStructurePage() {
             ) : error ? (
                 <div className="card" style={{ textAlign: 'center', padding: '80px 48px' }}>
                     <AlertCircle size={64} color="#fbbf24" style={{ margin: '0 auto 24px', opacity: 0.8 }} />
-                    <h3 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12, color: '#f8fafc' }}>Dados Insuficientes para Modelagem</h3>
+                    <h3 style={{ fontSize: 24, fontWeight: 900, marginBottom: 12, color: '#1e293b' }}>Dados Insuficientes para Modelagem</h3>
                     <p style={{ color: '#94a3b8', fontSize: 16, maxWidth: 500, margin: '0 auto 32px', lineHeight: 1.6 }}>{error}</p>
                     <a href="/job-match" className="btn btn-primary" style={{ padding: '14px 28px' }}>→ Iniciar Mapeamento de Cargos</a>
                 </div>
@@ -157,11 +157,11 @@ export default function SalaryStructurePage() {
                         <motion.div variants={{ hidden: { opacity: 0, x: -20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 40 }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
                                 <div>
-                                    <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f8fafc', marginBottom: 4 }}>Modelo de Regressão Logística</h3>
+                                    <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b', marginBottom: 4 }}>Modelo de Regressão Logística</h3>
                                     <p style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Equilíbrio Sistêmico da Folha Atual</p>
                                 </div>
                                 <div style={{ textAlign: 'right' }}>
-                                    <div style={{ fontSize: 32, fontWeight: 950, color: '#f8fafc', lineHeight: 1 }}>
+                                    <div style={{ fontSize: 32, fontWeight: 950, color: '#1e293b', lineHeight: 1 }}>
                                         {(regression.rSquared * 100).toFixed(1)}%
                                     </div>
                                     <div style={{
@@ -178,7 +178,7 @@ export default function SalaryStructurePage() {
                             <div style={{ height: 340, marginBottom: 32 }}>
                                 <ResponsiveContainer width="100%" height="100%">
                                     <ComposedChart margin={{ top: 10, right: 10, bottom: 0, left: 0 }}>
-                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                                         <XAxis dataKey="grade" type="number" domain={['auto', 'auto']} axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} />
                                         <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit="R$" />
                                         <Tooltip 
@@ -192,7 +192,7 @@ export default function SalaryStructurePage() {
                                 </ResponsiveContainer>
                             </div>
 
-                            <div style={{ padding: '24px', background: 'rgba(255,255,255,0.02)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.03)', display: 'flex', gap: 20, alignItems: 'center' }}>
+                            <div style={{ padding: '24px', background: 'rgba(0,0,0,0.02)', borderRadius: 20, border: '1px solid rgba(0,0,0,0.03)', display: 'flex', gap: 20, alignItems: 'center' }}>
                                 <div style={{ width: 44, height: 44, borderRadius: 12, background: '#6366f115', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Activity size={24} color="#6366f1" />
                                 </div>
@@ -206,7 +206,7 @@ export default function SalaryStructurePage() {
                         {/* Model Controls */}
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
                             <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32 }}>
-                                <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f1f5f9', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                <h3 style={{ fontSize: 18, fontWeight: 900, color: '#334155', marginBottom: 24, display: 'flex', alignItems: 'center', gap: 10 }}>
                                     <Filter size={18} /> Ajustes de Modelo
                                 </h3>
                                 <div style={{ display: 'grid', gap: 32 }}>
@@ -233,8 +233,8 @@ export default function SalaryStructurePage() {
                                                     key={s}
                                                     onClick={() => setStepsCount(s)}
                                                     style={{
-                                                        padding: '12px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)',
-                                                        background: stepsCount === s ? '#6366f1' : 'rgba(255,255,255,0.02)',
+                                                        padding: '12px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)',
+                                                        background: stepsCount === s ? '#6366f1' : 'rgba(0,0,0,0.02)',
                                                         color: stepsCount === s ? 'white' : '#64748b',
                                                         fontWeight: 800, fontSize: 13, cursor: 'pointer', transition: 'all 0.2s'
                                                     }}
@@ -254,12 +254,12 @@ export default function SalaryStructurePage() {
                                 </div>
                             </motion.div>
 
-                            <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', border: '1px solid rgba(255,255,255,0.03)' }}>
+                            <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)', border: '1px solid rgba(0,0,0,0.03)' }}>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-                                  <div style={{ width: 32, height: 32, background: 'rgba(255,255,255,0.05)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                  <div style={{ width: 32, height: 32, background: 'rgba(0,0,0,0.05)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                     <Sparkles size={16} color="#818cf8" />
                                   </div>
-                                  <h3 style={{ fontSize: 16, fontWeight: 900, color: '#f8fafc' }}>Financial Insight</h3>
+                                  <h3 style={{ fontSize: 16, fontWeight: 900, color: '#1e293b' }}>Financial Insight</h3>
                                 </div>
                                 <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
                                     O gap de competitividade médio detectado é de <strong style={{ color: data.diagnostics.avgGap < 0 ? '#fb7185' : '#34d399' }}>
@@ -272,8 +272,8 @@ export default function SalaryStructurePage() {
 
                     {/* Master Structural Table */}
                     <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                        <div style={{ padding: '32px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f8fafc' }}>Tabela Mestra de Grades e Steps</h3>
+                        <div style={{ padding: '32px 40px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b' }}>Tabela Mestra de Grades e Steps</h3>
                             <div style={{ background: '#6366f115', color: '#818cf8', padding: '6px 12px', borderRadius: 20, fontSize: 11, fontWeight: 900, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                                 <Activity size={14} /> Currency: BRL (R$)
                             </div>
@@ -296,15 +296,15 @@ export default function SalaryStructurePage() {
                                 </thead>
                                 <tbody>
                                     {data.suggestedSalaryStructure?.map((row: any, i: number) => (
-                                        <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }}>
-                                            <td style={{ padding: '20px 40px', fontWeight: 950, color: '#f8fafc', fontSize: 16 }}>{row.grade}</td>
+                                        <tr key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)', transition: 'background 0.2s' }}>
+                                            <td style={{ padding: '20px 40px', fontWeight: 950, color: '#1e293b', fontSize: 16 }}>{row.grade}</td>
                                             {row.steps.map((step: any, j: number) => {
                                                 const isMid = j === Math.floor(stepsCount / 2);
                                                 return (
                                                     <td key={j} style={{
                                                         padding: '20px 40px', fontSize: 15, textAlign: 'right',
                                                         fontWeight: isMid ? 900 : 500,
-                                                        color: isMid ? '#f1f5f9' : '#64748b',
+                                                        color: isMid ? '#334155' : '#64748b',
                                                         background: isMid ? 'rgba(99, 102, 241, 0.03)' : 'transparent',
                                                     }}>
                                                         {step.value?.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}

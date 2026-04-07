@@ -166,7 +166,7 @@ export default function MeritCyclePage() {
                     <p style={{ fontWeight: 600, color: '#64748b' }}>Processando simulação financeira...</p>
                 </div>
             ) : error ? (
-                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: '#f8fafc' }}>
+                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: '#1e293b' }}>
                     <AlertCircle size={64} color="#f59e0b" style={{ margin: '0 auto 24px' }} />
                     <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Diagnóstico Requerido</h2>
                     <p style={{ color: '#64748b', fontSize: 16, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>{error}</p>
@@ -190,12 +190,12 @@ export default function MeritCyclePage() {
                                         type="number"
                                         value={budget}
                                         onChange={(e) => setBudget(Number(e.target.value))}
-                                        style={{ width: '100%', padding: '16px 16px 16px 44px', borderRadius: 16, background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: 20, fontWeight: 800, outline: 'none' }}
+                                        style={{ width: '100%', padding: '16px 16px 16px 44px', borderRadius: 16, background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', fontSize: 20, fontWeight: 800, outline: 'none' }}
                                     />
                                 </div>
                             </div>
 
-                            <div style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 20, padding: 24 }}>
+                            <div style={{ background: 'rgba(0,0,0,0.03)', borderRadius: 20, padding: 24 }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
                                     <span style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600 }}>Custo do Plano</span>
                                     <span style={{ fontSize: 13, fontWeight: 800, color: budgetUsed > 100 ? '#f43f5e' : '#10b981' }}>{budgetUsed.toFixed(1)}%</span>
@@ -232,12 +232,12 @@ export default function MeritCyclePage() {
                                         onClick={() => handleScenarioChange(opt.id)}
                                         style={{ 
                                             textAlign: 'left', padding: '16px', borderRadius: 16, border: '2px solid',
-                                            borderColor: scenario === opt.id ? opt.color : '#f1f5f9',
+                                            borderColor: scenario === opt.id ? opt.color : '#334155',
                                             background: scenario === opt.id ? `${opt.color}05` : 'white',
                                             display: 'flex', alignItems: 'flex-start', gap: 12, cursor: 'pointer', transition: 'all 0.2s'
                                         }}
                                     >
-                                        <div style={{ width: 40, height: 40, borderRadius: 10, background: scenario === opt.id ? opt.color : '#f8fafc', color: scenario === opt.id ? 'white' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                        <div style={{ width: 40, height: 40, borderRadius: 10, background: scenario === opt.id ? opt.color : '#1e293b', color: scenario === opt.id ? 'white' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                             {opt.icon}
                                         </div>
                                         <div>
@@ -250,7 +250,7 @@ export default function MeritCyclePage() {
                         </div>
 
                         {/* AI Insights Card */}
-                        <div className="card" style={{ background: '#f8fafc', border: '1px dashed #cbd5e1', padding: 24 }}>
+                        <div className="card" style={{ background: '#1e293b', border: '1px dashed #cbd5e1', padding: 24 }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
                                 <BrainCircuit size={18} color="#4f46e5" />
                                 <span style={{ fontSize: 12, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase' }}>Carolina AI Insight</span>
@@ -263,12 +263,12 @@ export default function MeritCyclePage() {
 
                     {/* Table Section */}
                     <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '24px 32px', borderBottom: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
                                 <h3 style={{ fontSize: 17, fontWeight: 800, color: '#1e293b' }}>Plano Individualizado</h3>
                                 <p style={{ fontSize: 12, color: '#64748b', margin: 0, fontWeight: 500 }}>{employees.length} colaboradores analisados pelo motor Lola.</p>
                             </div>
-                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: '#f8fafc', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 12px', background: '#1e293b', borderRadius: 8, fontSize: 12, fontWeight: 700, color: '#64748b' }}>
                                 <Filter size={14} /> Filtro: Todos
                             </div>
                         </div>
@@ -276,7 +276,7 @@ export default function MeritCyclePage() {
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                    <tr style={{ background: '#1e293b', borderBottom: '1px solid #334155' }}>
                                         <th style={{ padding: '16px 32px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Colaborador</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Proposta Lola</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase' }}>Diferencial</th>
@@ -295,8 +295,8 @@ export default function MeritCyclePage() {
                                                     key={i}
                                                     initial={{ opacity: 0 }}
                                                     animate={{ opacity: 1 }}
-                                                    style={{ borderBottom: '1px solid #f8fafc' }}
-                                                    whileHover={{ background: '#f8fafc' }}
+                                                    style={{ borderBottom: '1px solid #1e293b' }}
+                                                    whileHover={{ background: '#1e293b' }}
                                                 >
                                                     <td style={{ padding: '20px 32px' }}>
                                                         <div style={{ fontWeight: 800, color: '#1e293b', fontSize: 14 }}>{emp.name}</div>

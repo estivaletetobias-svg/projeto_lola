@@ -66,7 +66,7 @@ export default function DiagnosticsPage() {
                     transition={{ repeat: Infinity, duration: 2, ease: "linear" }}
                     style={{ width: 64, height: 64, borderRadius: 32, border: '3px solid rgba(99, 102, 241, 0.1)', borderTopColor: '#6366f1', marginBottom: 24 }}
                 />
-                <h2 style={{ fontSize: 24, fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.02em' }}>Calculando Deep Analysis...</h2>
+                <h2 style={{ fontSize: 24, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.02em' }}>Calculando Deep Analysis...</h2>
                 <p style={{ marginTop: 8, color: '#64748b', fontWeight: 600 }}>A Carolina AI está processando o equilíbrio entre cargos e mercado.</p>
             </div>
         );
@@ -129,14 +129,14 @@ export default function DiagnosticsPage() {
                         <Gem size={14} /> Executive Strategy Report
                     </div>
                   </div>
-                  <h1 style={{ fontSize: 42, fontWeight: 900, color: '#f8fafc', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
+                  <h1 style={{ fontSize: 42, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1.1 }}>
                     Diagnóstico de <br/>
                     <span style={{ color: '#64748b' }}>Remuneração & Risco.</span>
                   </h1>
                 </div>
                 
                 <div style={{ display: 'flex', gap: 12 }}>
-                    <button onClick={() => window.location.reload()} style={{ padding: '12px 20px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#94a3b8' }}>
+                    <button onClick={() => window.location.reload()} style={{ padding: '12px 20px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)', background: 'rgba(0,0,0,0.02)', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#94a3b8' }}>
                         <RefreshCw size={16} /> Recalcular Engine
                     </button>
                     <button className="btn btn-primary" style={{ padding: '12px 24px', borderRadius: 12, fontWeight: 800, fontSize: 13, boxShadow: '0 10px 20px rgba(79,70,229,0.15)', display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -147,7 +147,7 @@ export default function DiagnosticsPage() {
 
             {/* AI Strategic Assessment */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 40 }}>
-                <motion.div variants={{ hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1 } }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #030712 100%)', padding: '48px', borderRadius: 24, border: '1px solid rgba(255,255,255,0.03)', position: 'relative', overflow: 'hidden' }}>
+                <motion.div variants={{ hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1 } }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #030712 100%)', padding: '48px', borderRadius: 24, border: '1px solid rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'relative', zIndex: 2 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                             <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -155,14 +155,14 @@ export default function DiagnosticsPage() {
                             </div>
                             <span style={{ fontSize: 12, fontWeight: 900, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Carolina AI Analysis</span>
                         </div>
-                        <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 20, maxWidth: '85%', lineHeight: 1.15, color: '#f8fafc' }}>
+                        <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 20, maxWidth: '85%', lineHeight: 1.15, color: '#1e293b' }}>
                             {analysis.diagnostics.recommendation}
                         </h2>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40, marginTop: 48, maxWidth: 600 }}>
                             <div>
                                 <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aderência Interna</div>
-                                <div style={{ fontSize: 32, fontWeight: 950, color: '#f8fafc' }}>{(analysis.diagnostics.regressionCurve.rSquared * 100).toFixed(1)}%</div>
+                                <div style={{ fontSize: 32, fontWeight: 950, color: '#1e293b' }}>{(analysis.diagnostics.regressionCurve.rSquared * 100).toFixed(1)}%</div>
                                 <div style={{ fontSize: 11, color: '#afbcf4', marginTop: 4, fontWeight: 700 }}>Coeficiente de Equilíbrio</div>
                             </div>
                             <div>
@@ -176,7 +176,7 @@ export default function DiagnosticsPage() {
                             </div>
                             <div>
                                 <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Auditado</div>
-                                <div style={{ fontSize: 32, fontWeight: 950, color: '#f1f5f9' }}>{analysis.diagnostics.pointsCount}</div>
+                                <div style={{ fontSize: 32, fontWeight: 950, color: '#334155' }}>{analysis.diagnostics.pointsCount}</div>
                                 <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, fontWeight: 700 }}>Snapshots Ativos</div>
                             </div>
                         </div>
@@ -184,7 +184,7 @@ export default function DiagnosticsPage() {
                 </motion.div>
 
                 <div style={{ display: 'grid', gridAutoRows: '1fr', gap: 24 }}>
-                    <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', gap: 20 }}>
                         <div style={{ width: 64, height: 64, borderRadius: 20, background: '#f43f5e15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <TrendingDown size={32} color="#f43f5e" />
                         </div>
@@ -198,7 +198,7 @@ export default function DiagnosticsPage() {
                             </div>
                         </div>
                     </motion.div>
-                    <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <motion.div variants={{ hidden: { opacity: 0, x: 20 }, show: { opacity: 1, x: 0 } }} className="card" style={{ padding: 32, background: 'rgba(0,0,0,0.02)', border: '1px solid rgba(0,0,0,0.03)', display: 'flex', alignItems: 'center', gap: 20 }}>
                         <div style={{ width: 64, height: 64, borderRadius: 20, background: '#10b98115', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <DollarSign size={32} color="#10b981" />
                         </div>
@@ -214,7 +214,7 @@ export default function DiagnosticsPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 24 }}>
                 <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: 40 }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 40 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f8fafc' }}>Equilíbrio Externo vs Curva de Mercado</h3>
+                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b' }}>Equilíbrio Externo vs Curva de Mercado</h3>
                         <div style={{ display: 'flex', gap: 16, fontSize: 10, fontWeight: 800, color: '#64748b' }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 10, height: 10, borderRadius: 3, background: '#f43f5e' }} /> CARGOS INTERNOS</div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><div style={{ width: 24, height: 3, background: '#6366f1' }} /> PROJEÇÃO MERCADO</div>
@@ -223,7 +223,7 @@ export default function DiagnosticsPage() {
                     <div style={{ height: 420 }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
-                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.05)" />
+                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
                                 <XAxis type="number" dataKey="grade" name="Grade" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} domain={['auto', 'auto']} />
                                 <YAxis type="number" dataKey="salary" name="Salary" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit="R$" />
                                 <Tooltip 
@@ -234,12 +234,12 @@ export default function DiagnosticsPage() {
                                             if (!data.name) return null;
                                             return (
                                                 <div style={{ background: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', padding: '20px', borderRadius: '16px', boxShadow: '0 20px 50px rgba(0,0,0,0.4)' }}>
-                                                    <div style={{ fontWeight: 950, fontSize: 15, marginBottom: 4, color: '#f8fafc' }}>{data.name}</div>
+                                                    <div style={{ fontWeight: 950, fontSize: 15, marginBottom: 4, color: '#1e293b' }}>{data.name}</div>
                                                     <div style={{ fontSize: 12, color: '#64748b', marginBottom: 16 }}>{data.title} (Grade {data.grade})</div>
                                                     <div style={{ display: 'flex', gap: 32 }}>
                                                         <div>
                                                             <div style={{ fontSize: 10, color: '#64748b', fontWeight: 800, marginBottom: 4 }}>SALÁRIO ATUAL</div>
-                                                            <div style={{ fontWeight: 800, fontSize: 16, color: '#f8fafc' }}>R$ {data.salary?.toLocaleString()}</div>
+                                                            <div style={{ fontWeight: 800, fontSize: 16, color: '#1e293b' }}>R$ {data.salary?.toLocaleString()}</div>
                                                         </div>
                                                         <div>
                                                             <div style={{ fontSize: 10, color: '#64748b', fontWeight: 800, marginBottom: 4 }}>DESVIO MERCADO</div>
@@ -265,13 +265,13 @@ export default function DiagnosticsPage() {
 
                 <div style={{ display: 'grid', gridAutoRows: 'auto', gap: 24 }}>
                     <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: 40 }}>
-                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f8fafc', marginBottom: 32 }}>Distribuição de Equilíbrio</h3>
+                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b', marginBottom: 32 }}>Distribuição de Equilíbrio</h3>
                         <div style={{ height: 260 }}>
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={positionData} layout="vertical" margin={{ left: 0, right: 20 }}>
                                     <XAxis type="number" hide />
                                     <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fontSize: 11, fontWeight: 800, fill: '#64748b' }} width={120} />
-                                    <Tooltip cursor={{ fill: 'rgba(255,255,255,0.02)' }} />
+                                    <Tooltip cursor={{ fill: 'rgba(0,0,0,0.02)' }} />
                                     <Bar dataKey="value" radius={[0, 6, 6, 0]} barSize={32}>
                                         {positionData.map((entry, index) => (
                                             <Cell key={`cell-${index}`} fill={entry.color} />
@@ -280,7 +280,7 @@ export default function DiagnosticsPage() {
                                 </BarChart>
                             </ResponsiveContainer>
                         </div>
-                        <div style={{ marginTop: 40, padding: 24, background: 'rgba(255,255,255,0.02)', borderRadius: 20, border: '1px solid rgba(255,255,255,0.03)' }}>
+                        <div style={{ marginTop: 40, padding: 24, background: 'rgba(0,0,0,0.02)', borderRadius: 20, border: '1px solid rgba(0,0,0,0.03)' }}>
                             <div style={{ fontSize: 12, fontWeight: 950, color: '#818cf8', marginBottom: 12, display: 'flex', alignItems: 'center', gap: 8, textTransform: 'uppercase' }}>
                                 <Info size={16} /> Intelligence Highlight
                             </div>
@@ -294,8 +294,8 @@ export default function DiagnosticsPage() {
 
             {/* Comprehensive Data Grid */}
             <motion.div variants={{ hidden: { opacity: 0, y: 20 }, show: { opacity: 1, y: 0 } }} className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                <div style={{ padding: '32px 40px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <h3 style={{ fontSize: 18, fontWeight: 900, color: '#f8fafc' }}>Análise Auditora Individual</h3>
+                <div style={{ padding: '32px 40px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <h3 style={{ fontSize: 18, fontWeight: 900, color: '#1e293b' }}>Análise Auditora Individual</h3>
                     <div style={{ fontSize: 12, fontWeight: 800, color: '#64748b', display: 'flex', gap: 20 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ArrowDownRight size={14} color="#f43f5e" /> Abaixo (-10%)</div>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><Activity size={14} color="#10b981" /> Alinhado (+-10%)</div>
@@ -319,9 +319,9 @@ export default function DiagnosticsPage() {
                                 const status = gap < -10 ? 'below' : (gap > 10 ? 'above' : 'aligned');
 
                                 return (
-                                    <tr key={i} style={{ borderBottom: '1px solid rgba(255,255,255,0.02)', transition: 'background 0.2s' }}>
+                                    <tr key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)', transition: 'background 0.2s' }}>
                                         <td style={{ padding: '20px 40px' }}>
-                                            <div style={{ fontWeight: 800, fontSize: 14, color: '#f8fafc' }}>{emp.name}</div>
+                                            <div style={{ fontWeight: 800, fontSize: 14, color: '#1e293b' }}>{emp.name}</div>
                                             <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{emp.jobTitle} (Grade {emp.grade})</div>
                                         </td>
                                         <td style={{ padding: '20px 40px' }}>
@@ -336,7 +336,7 @@ export default function DiagnosticsPage() {
                                                 {status === 'below' ? 'Déficit Competitivo' : (status === 'above' ? 'Potencial de Retenção' : 'Equilíbrio Total')}
                                             </div>
                                         </td>
-                                        <td style={{ padding: '20px 40px', textAlign: 'right', fontWeight: 800, color: '#f1f5f9', fontSize: 14 }}>
+                                        <td style={{ padding: '20px 40px', textAlign: 'right', fontWeight: 800, color: '#334155', fontSize: 14 }}>
                                             R$ {emp.salary.toLocaleString()}
                                         </td>
                                         <td style={{ padding: '20px 40px', textAlign: 'right' }}>

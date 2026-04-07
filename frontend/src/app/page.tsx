@@ -156,7 +156,7 @@ export default function Dashboard() {
               <div style={{ width: 40, height: 40, borderRadius: 12, background: `${stat.color}10`, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                 {stat.icon}
               </div>
-              <div style={{ fontSize: 11, fontWeight: 800, color: stat.trend.startsWith('+') ? '#10b981' : stat.trend === 'Estável' ? '#64748b' : '#ef4444', background: stat.trend.startsWith('+') ? '#10b98110' : '#f1f5f9', padding: '4px 8px', borderRadius: 6, height: 'fit-content' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: stat.trend.startsWith('+') ? '#10b981' : stat.trend === 'Estável' ? '#64748b' : '#ef4444', background: stat.trend.startsWith('+') ? '#10b98110' : '#334155', padding: '4px 8px', borderRadius: 6, height: 'fit-content' }}>
                 {stat.trend}
               </div>
             </div>
@@ -191,11 +191,11 @@ export default function Dashboard() {
             <div style={{ height: 320 }}>
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={analysis?.diagnostics?.gradeDistribution?.slice(0, 8) || []}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
                   <XAxis dataKey="grade" axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#94a3b8' }} />
                   <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 12, fontWeight: 600, fill: '#94a3b8' }} />
                   <Tooltip 
-                    cursor={{ fill: '#f8fafc' }}
+                    cursor={{ fill: '#1e293b' }}
                     contentStyle={{ borderRadius: 16, border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.08)', padding: 16 }}
                   />
                   <Bar dataKey="salary" fill="#4f46e5" radius={[6, 6, 0, 0]} barSize={32} />

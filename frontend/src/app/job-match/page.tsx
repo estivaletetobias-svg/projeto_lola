@@ -179,7 +179,7 @@ export default function JobMatchPage() {
                     <p style={{ fontWeight: 600, color: '#64748b' }}>Sincronizando cargos internos com catálogo global...</p>
                 </div>
             ) : error ? (
-                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: '#f8fafc' }}>
+                <motion.div variants={{ hidden: { opacity: 0 }, show: { opacity: 1 } }} className="card" style={{ padding: 60, textAlign: 'center', background: '#1e293b' }}>
                     <AlertTriangle size={64} color="#f59e0b" style={{ margin: '0 auto 24px' }} />
                     <h2 style={{ fontSize: 24, fontWeight: 800, marginBottom: 12 }}>Ação Necessária</h2>
                     <p style={{ color: '#64748b', fontSize: 16, marginBottom: 32, maxWidth: 500, margin: '0 auto 32px' }}>{error}</p>
@@ -205,7 +205,7 @@ export default function JobMatchPage() {
                                 <div style={{ marginBottom: 16, color: '#94a3b8' }}>{stat.icon}</div>
                                 <div style={{ fontSize: 12, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>{stat.label}</div>
                                 <div style={{ fontSize: 36, fontWeight: 900, color: '#1e293b' }}>{stat.value}</div>
-                                <div style={{ height: 4, width: '100%', background: '#f1f5f9', borderRadius: 2, marginTop: 20, overflow: 'hidden' }}>
+                                <div style={{ height: 4, width: '100%', background: '#334155', borderRadius: 2, marginTop: 20, overflow: 'hidden' }}>
                                     <motion.div 
                                         initial={{ width: 0 }}
                                         animate={{ width: idx === 1 ? (mappedCount/groups.length * 100) + '%' : '100%' }}
@@ -234,21 +234,21 @@ export default function JobMatchPage() {
                                             background: 'white',
                                             borderRadius: 20,
                                             border: '1px solid',
-                                            borderColor: isExpanded ? '#4f46e530' : group.existingMatch ? '#10b98120' : '#f1f5f9',
+                                            borderColor: isExpanded ? '#4f46e530' : group.existingMatch ? '#10b98120' : '#334155',
                                             boxShadow: isExpanded ? '0 20px 40px rgba(79,70,229,0.06)' : '0 2px 4px rgba(0,0,0,0.02)',
                                             transition: 'all 0.3s ease'
                                         }}
                                     >
                                         <div style={{ padding: '24px 32px', display: 'flex', alignItems: 'center', gap: 24 }}>
                                             {/* Matching Badge */}
-                                            <div style={{ width: 48, height: 48, borderRadius: 14, background: group.existingMatch ? '#10b98110' : '#f8fafc', color: group.existingMatch ? '#10b981' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                                            <div style={{ width: 48, height: 48, borderRadius: 14, background: group.existingMatch ? '#10b98110' : '#1e293b', color: group.existingMatch ? '#10b981' : '#cbd5e1', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                                                 {group.existingMatch ? <Check size={24} strokeWidth={3} /> : <Activity size={24} />}
                                             </div>
 
                                             <div style={{ flex: 1, minWidth: 0 }}>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 4 }}>
                                                     <h3 style={{ fontWeight: 800, fontSize: 17, color: '#1e293b' }}>{group.internalTitle}</h3>
-                                                    <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', background: '#f1f5f9', padding: '2px 10px', borderRadius: 20 }}>
+                                                    <span style={{ fontSize: 10, fontWeight: 800, color: '#64748b', background: '#334155', padding: '2px 10px', borderRadius: 20 }}>
                                                         {group.count} {group.count > 1 ? 'Colaboradores' : 'Colaborador'}
                                                     </span>
                                                 </div>
@@ -283,7 +283,7 @@ export default function JobMatchPage() {
                                                         Redefinir
                                                     </button>
                                                 )}
-                                                <button onClick={() => setExpanded(isExpanded ? null : group.internalTitle)} style={{ padding: '10px', borderRadius: 12, background: isExpanded ? '#f8fafc' : 'white', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
+                                                <button onClick={() => setExpanded(isExpanded ? null : group.internalTitle)} style={{ padding: '10px', borderRadius: 12, background: isExpanded ? '#1e293b' : 'white', border: '1px solid #e2e8f0', cursor: 'pointer' }}>
                                                     {isExpanded ? <ChevronUp size={20} /> : <ChevronDown size={20} />}
                                                 </button>
                                             </div>
@@ -293,10 +293,10 @@ export default function JobMatchPage() {
                                             {isExpanded && (
                                                 <motion.div 
                                                     initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                                                    style={{ borderTop: '1px solid #f8fafc', background: '#fafbff', overflow: 'hidden' }}
+                                                    style={{ borderTop: '1px solid #1e293b', background: '#fafbff', overflow: 'hidden' }}
                                                 >
                                                     <div style={{ padding: '32px 40px', display: 'grid', gridTemplateColumns: 'minmax(350px, 1fr) 1fr', gap: 48 }}>
-                                                        <div style={{ borderRight: '1px solid #f1f5f9', paddingRight: 40 }}>
+                                                        <div style={{ borderRight: '1px solid #334155', paddingRight: 40 }}>
                                                             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24, fontSize: 12, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase' }}>
                                                                 <ListChecks size={16} /> Predições do Motor AI
                                                             </div>
@@ -336,7 +336,7 @@ export default function JobMatchPage() {
                                                             </div>
                                                             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                                                 {filteredCatalog(group.internalTitle).map((job: any) => (
-                                                                    <div key={job.id} onClick={() => handleApprove(group, job.id)} style={{ padding: '12px 16px', borderRadius: 12, border: '1px solid #f1f5f9', background: 'white', cursor: 'pointer', fontSize: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                                    <div key={job.id} onClick={() => handleApprove(group, job.id)} style={{ padding: '12px 16px', borderRadius: 12, border: '1px solid #334155', background: 'white', cursor: 'pointer', fontSize: 13, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                                         <span style={{ fontWeight: 700, color: '#1e293b' }}>{job.title_std}</span>
                                                                         <span style={{ color: '#94a3b8', fontSize: 11, fontWeight: 800 }}>{LEVEL_LABELS[job.level]}</span>
                                                                     </div>
@@ -355,7 +355,7 @@ export default function JobMatchPage() {
                     </div>
 
                     {groups.length === 0 && (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '100px 40px', background: '#f8fafc', borderRadius: 32, border: '2px dashed #cbd5e1' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ textAlign: 'center', padding: '100px 40px', background: '#1e293b', borderRadius: 32, border: '2px dashed #cbd5e1' }}>
                             <CheckCircle2 size={64} color="#10b981" style={{ margin: '0 auto 24px' }} />
                             <h3 style={{ fontSize: 24, fontWeight: 900, color: '#1e293b' }}>Fluxo de Mapeamento Concluído</h3>
                             <p style={{ color: '#64748b', fontSize: 16, marginTop: 12, maxWidth: 500, margin: '12px auto 32px' }}>A Carolina AI processou todas as equivalências com sucesso. Sua estrutura está pronta para análise.</p>

@@ -170,11 +170,11 @@ export default function BenchmarkExplorerPage() {
                     </motion.div>
 
                     {/* Main Table */}
-                    <motion.div variants={itemVars} className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #f1f5f9' }}>
+                    <motion.div variants={itemVars} className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #334155' }}>
                         <div style={{ overflowX: 'auto' }}>
                             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                                 <thead>
-                                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                    <tr style={{ background: '#1e293b', borderBottom: '1px solid #334155' }}>
                                         <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo / Catalog Title</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nível</th>
                                         <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P25</th>
@@ -195,11 +195,11 @@ export default function BenchmarkExplorerPage() {
                                                 exit={{ opacity: 0 }}
                                                 onClick={() => setSelected(b)}
                                                 style={{
-                                                    borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
+                                                    borderBottom: '1px solid #334155', cursor: 'pointer',
                                                     background: selected?.id === b.id ? '#4f46e508' : 'white',
                                                     transition: 'all 0.15s ease'
                                                 }}
-                                                whileHover={{ background: '#f8fafc' }}
+                                                whileHover={{ background: '#1e293b' }}
                                             >
                                                 <td style={{ padding: '18px 24px' }}>
                                                     <div style={{ fontWeight: 800, fontSize: 14, color: '#1e293b' }}>{b.job_catalog.title_std}</div>
@@ -238,7 +238,7 @@ export default function BenchmarkExplorerPage() {
                         </div>
 
                         {/* Pagination Terminal */}
-                        <div style={{ padding: '20px 24px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div style={{ padding: '20px 24px', background: '#1e293b', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
                                 Visão <strong style={{ color: '#1e293b' }}>{((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)}</strong> de {total.toLocaleString()} registros
                             </div>
@@ -291,7 +291,7 @@ export default function BenchmarkExplorerPage() {
                                     {/* Stats Grid */}
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
                                         {chartData.map(item => (
-                                            <div key={item.name} style={{ padding: '16px 12px', borderRadius: 16, background: '#f8fafc', border: '1px solid #f1f5f9', textAlign: 'center' }}>
+                                            <div key={item.name} style={{ padding: '16px 12px', borderRadius: 16, background: '#1e293b', border: '1px solid #334155', textAlign: 'center' }}>
                                                 <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', marginBottom: 6, textTransform: 'uppercase' }}>{item.name}</div>
                                                 <div style={{ fontSize: 16, fontWeight: 900, color: item.color }}>R$ {(item.value / 1000).toFixed(1)}k</div>
                                             </div>
@@ -302,7 +302,7 @@ export default function BenchmarkExplorerPage() {
                                     <div style={{ height: 200, marginBottom: 32 }}>
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={chartData}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#334155" />
                                                 <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
                                                 <YAxis hide />
                                                 <Tooltip 
@@ -335,7 +335,7 @@ export default function BenchmarkExplorerPage() {
                             ) : (
                                 <motion.div 
                                     initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-                                    className="card" style={{ padding: 60, textAlign: 'center', background: '#f8fafc', border: '1px dashed #cbd5e1' }}
+                                    className="card" style={{ padding: 60, textAlign: 'center', background: '#1e293b', border: '1px dashed #cbd5e1' }}
                                 >
                                     <div style={{ width: 64, height: 64, borderRadius: 32, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
                                         <BookOpen size={28} color="#cbd5e1" />

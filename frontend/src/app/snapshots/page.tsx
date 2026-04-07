@@ -134,7 +134,7 @@ export default function SnapshotsPage() {
                             <div style={{ 
                                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                                 width: 32, height: 32, borderRadius: 10,
-                                background: step >= s.id ? '#4f46e5' : '#f1f5f9',
+                                background: step >= s.id ? '#4f46e5' : '#334155',
                                 color: step >= s.id ? 'white' : '#94a3b8',
                                 fontSize: 12, fontWeight: 800,
                                 transition: 'all 0.3s ease'
@@ -165,7 +165,7 @@ export default function SnapshotsPage() {
                                         style={{ 
                                             width: '100%', border: '2px dashed #e2e8f0', borderRadius: 24, 
                                             padding: '60px 20px', cursor: 'pointer', transition: 'all 0.2s ease',
-                                            background: '#f8fafc'
+                                            background: '#1e293b'
                                         }}
                                         onMouseOver={e => e.currentTarget.style.borderColor = '#4f46e5'}
                                         onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}
@@ -208,7 +208,7 @@ export default function SnapshotsPage() {
                                                 </p>
                                             </div>
                                         </div>
-                                        <button onClick={() => setStep(1)} style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, background: '#f1f5f9', border: 'none', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Alterar</button>
+                                        <button onClick={() => setStep(1)} style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, background: '#334155', border: 'none', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Alterar</button>
                                     </div>
 
                                     {errorMsg && (
@@ -218,7 +218,7 @@ export default function SnapshotsPage() {
                                     )}
 
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 40 }}>
-                                        <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
+                                        <div style={{ background: '#1e293b', padding: 24, borderRadius: 20 }}>
                                             <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Mapeamento AI</h4>
                                             <div style={{ display: 'grid', gap: 12 }}>
                                                 {[
@@ -230,7 +230,7 @@ export default function SnapshotsPage() {
                                                     <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'white', borderRadius: 12, border: '1px solid #e2e8f0' }}>
                                                         <span style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>{item.label}</span>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                            <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, color: '#4f46e5' }}>{item.key}</code>
+                                                            <code style={{ fontSize: 12, background: '#334155', padding: '2px 6px', borderRadius: 4, color: '#4f46e5' }}>{item.key}</code>
                                                             <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                                                 <CheckCircle size={10} color="white" />
                                                             </div>
@@ -240,7 +240,7 @@ export default function SnapshotsPage() {
                                             </div>
                                         </div>
 
-                                        <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
+                                        <div style={{ background: '#1e293b', padding: 24, borderRadius: 20 }}>
                                             <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Abordagem de Extração</h4>
                                             <div style={{ padding: 20, background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', textAlign: 'center' }}>
                                                 <Brain size={32} color="#4f46e5" style={{ margin: '0 auto 16px' }} />
@@ -306,7 +306,7 @@ export default function SnapshotsPage() {
                                     onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
                                     onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
                                 >
-                                    <div style={{ width: 48, height: 48, background: '#f1f5f9', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                                    <div style={{ width: 48, height: 48, background: '#334155', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
                                         <Download size={24} color="#4f46e5" />
                                     </div>
                                     <h4 style={{ fontSize: 15, fontWeight: 800, color: '#1e293b', marginBottom: 6 }}>Planilha Modelo</h4>

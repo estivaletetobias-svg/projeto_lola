@@ -92,7 +92,7 @@ export default function OnboardingPage() {
                     </div>
                 </div>
 
-                <div style={{ marginTop: 24, padding: 16, background: '#f1f5f9', borderRadius: 12, display: 'flex', gap: 16 }}>
+                <div style={{ marginTop: 24, padding: 16, background: '#334155', borderRadius: 12, display: 'flex', gap: 16 }}>
                     <Info color="#4f46e5" size={24} />
                     <p style={{ fontSize: 13, color: '#475569' }}>
                         Essas informações são cruciais para o algoritmo de Benchmark. Garantimos a anonimidade dos seus dados individuais conforme a LGPD.
