@@ -39,8 +39,8 @@ export default function JobMatchPage() {
         setLoading(true);
         setError('');
         try {
-            const baseUrl = getBackendUrl();
-            const snapsRes = await safeFetch(`${baseUrl}/payroll/snapshots`);
+            // Usar rotas nativas do frontend diretamenta para estabilidade máxima
+            const snapsRes = await fetch('/api/snapshots');
             const snapshots = await snapsRes.json();
 
             if (!snapshots?.length) {
@@ -53,14 +53,14 @@ export default function JobMatchPage() {
             setSnapshotId(sid);
 
             const [suggestRes, catalogRes] = await Promise.all([
-                safeFetch(`${baseUrl}/job-match/suggest/${sid}`),
-                safeFetch(`${baseUrl}/job-match/catalog`),
+                fetch(`/api/job-match/suggest/${sid}`),
+                fetch('/api/job-match/catalog'),
             ]);
 
-            setGroups(await suggestRes.json());
-            setCatalog(await catalogRes.json());
+            if (suggestRes.ok) setGroups(await suggestRes.json());
+            if (catalogRes.ok) setCatalog(await catalogRes.json());
         } catch (err) {
-            setError('Erro ao conectar ao servidor backend.');
+            setError('Erro ao processar mapeamento AI.');
         } finally {
             setLoading(false);
         }
