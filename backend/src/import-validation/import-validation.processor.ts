@@ -5,6 +5,8 @@ import { PrismaService } from '../prisma/prisma.service';
 import { StorageService } from '../storage/storage.service';
 import { parse } from 'csv-parse/sync';
 import * as ExcelJS from 'exceljs';
+import OpenAI from 'openai';
+const pdfParse = require('pdf-parse');
 
 @Processor('payroll-analysis')
 export class ImportValidationProcessor extends WorkerHost {
@@ -54,13 +56,55 @@ export class ImportValidationProcessor extends WorkerHost {
                 }
                 // Simplistic mapping for MVP
                 data = rows.map(r => ({
-                    employee_key: r[1],
-                    full_name: r[2],
-                    area: r[3],
+                    employee_key: String(r[1] || `tmp-${Date.now()}`),
+                    full_name: String(r[2] || 'Sem Nome'),
+                    area: String(r[3] || 'Geral'),
                     base_salary: parseFloat(r[4] || 0),
                     benefits: parseFloat(r[5] || 0),
                     variable: parseFloat(r[6] || 0),
                 }));
+            } else if (snapshot.source_type === 'PDF' || snapshot.source_type === 'pdf' || key.toLowerCase().endsWith('.pdf')) {
+                this.logger.log(`Extracting data from PDF via OpenAI API...`);
+                // Use pdf-parse to extract raw text
+                const pdfData = await pdfParse(buffer);
+                const textContent = pdfData.text;
+
+                // Call OpenAI to structure it
+                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+                
+                const response = await openai.chat.completions.create({
+                    model: "gpt-4o", // Using GPT-4o for maximum accuracy on tables
+                    response_format: { type: "json_object" },
+                    messages: [
+                        {
+                            role: "system",
+                            content: `You are an elite payroll data extraction engine. You will be given raw text extracted from a PDF payroll slip/spreadsheet.
+                            Extract ALL employee rows. Ensure numbers are properly formatted as floats (e.g., 5000.00 not 5.000,00).
+                            Return a strictly valid JSON object with a single root key 'employees', containing an array of objects.
+                            Each object MUST matching this TS interface exactly:
+                            {
+                                employee_key: string; // Document, ID, CPF, or generate a unique string if none exists
+                                full_name: string; // The full name of the employee
+                                area: string; // Their role, job title, department, or 'Geral'
+                                base_salary: number; // Base salary value
+                                benefits: number; // Sum of benefits or 0
+                                variable: number; // Sum of variable pay or 0
+                            }`
+                        },
+                        {
+                            role: "user",
+                            content: textContent
+                        }
+                    ]
+                });
+
+                const resultText = response.choices[0].message.content;
+                if (!resultText) throw new Error("OpenAI returned empty response");
+                
+                const jsonResult = JSON.parse(resultText);
+                data = jsonResult.employees || [];
+                
+                this.logger.log(`OpenAI extracted ${data.length} employee records from PDF.`);
             } else {
                 const records = parse(buffer.toString(), {
                     columns: true,
