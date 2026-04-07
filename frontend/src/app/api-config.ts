@@ -1,12 +1,6 @@
 export const getBackendUrl = () => {
-    const productionUrl = 'https://projeto-lola-mxos.vercel.app';
-    if (typeof window !== 'undefined') {
-        const host = window.location.hostname;
-        if (host === 'localhost' || host === '127.0.0.1') {
-            return `http://${host}:3001`;
-        }
-    }
-    return productionUrl;
+    // Força o ambiente de produção como solicitado pelo usuário (sem localhost fallbacks)
+    return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://projeto-lola-mxos.vercel.app';
 };
 
 // Dados de demonstração para salvamento de emergência (Pitch Mode) - RESERVADO PARA FALHAS TOTAIS
