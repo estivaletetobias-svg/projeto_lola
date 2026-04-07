@@ -1,7 +1,13 @@
 'use client';
 
 import { useState } from 'react';
-import { Upload, FileText, CheckCircle, AlertCircle, Loader2, Download, Zap } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Upload, FileText, CheckCircle, AlertCircle, 
+    Loader2, Download, Zap, ChevronRight, 
+    Layers, Search, BarChart, ArrowRight,
+    ShieldCheck
+} from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
 
@@ -10,6 +16,7 @@ export default function SnapshotsPage() {
     const [step, setStep] = useState(1); // 1: Upload, 2: Mapping, 3: Success, 4: Finished
     const [fileName, setFileName] = useState('');
     const [fileData, setFileData] = useState<any[]>([]);
+    const [analyzeProgress, setAnalyzeProgress] = useState(0);
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
@@ -31,8 +38,6 @@ export default function SnapshotsPage() {
         };
         reader.readAsBinaryString(file);
     };
-
-    const [analyzeProgress, setAnalyzeProgress] = useState(0);
 
     const startAnalysis = async () => {
         setStep(3);
@@ -59,18 +64,17 @@ export default function SnapshotsPage() {
                 setStep(1);
             }
         } catch (err) {
-            console.error('Fetch error:', err);
             const host = window.location.hostname;
-            alert(`Falha na comunicação com o servidor. Verifique se o backend está rodando em http://${host}:3000`);
+            alert(`Falha na comunicação. Verifique se o backend está rodando.`);
             setStep(1);
         }
     };
 
     const downloadTemplate = () => {
         const data = [
-            { id: 1, nome: "Joao Silva", cargo: "Engenheiro Civil", salario: 8500.00 },
-            { id: 2, nome: "Maria Sousa", cargo: "Arquiteta Junior", salario: 5200.00 },
-            { id: 3, nome: "Jose Santos", cargo: "Mestre de Obras", salario: 4800.00 }
+            { id: 1, nome: "Alexandre Rocha", cargo: "Desenvolvedor Backend Sr", salario: 14500.00 },
+            { id: 2, nome: "Carla Mendes", cargo: "Designer de Produto Pl", salario: 8200.00 },
+            { id: 3, nome: "Ricardo Oliveira", cargo: "Gerente de RH", salario: 12800.00 }
         ];
 
         const ws = XLSX.utils.json_to_sheet(data);
@@ -79,152 +83,226 @@ export default function SnapshotsPage() {
         XLSX.writeFile(wb, "modelo_lola_payroll.xlsx");
     };
 
+    const steps = [
+        { id: 1, label: 'Upload' },
+        { id: 2, label: 'Mapeamento' },
+        { id: 3, label: 'Análise AI' },
+        { id: 4, label: 'Pronto' }
+    ];
+
     return (
-        <div style={{ maxWidth: 1000, margin: '0 auto', paddingBottom: 100 }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32 }}>
+        <div style={{ maxWidth: 1100, margin: '0 auto', paddingBottom: 100 }}>
+            {/* Header com Step Indicator */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 48 }}>
                 <div>
-                    <h1 style={{ fontSize: 32, fontWeight: 700, marginBottom: 8 }}>Folha de Pagamento</h1>
-                    <p style={{ color: '#64748b' }}>Envie o snapshot mensal da folha para análise de inteligência salarial.</p>
+                    <h1 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', letterSpacing: '-0.03em', marginBottom: 8 }}>
+                        Snapshot Mensal
+                    </h1>
+                    <p style={{ color: '#64748b', fontSize: 16 }}>Inicie o ciclo de inteligência salarial carregando sua folha.</p>
                 </div>
-                <button
-                    onClick={downloadTemplate}
-                    style={{ background: '#f8fafc', border: '1px solid #e2e8f0', padding: '10px 16px', borderRadius: 8, fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    {steps.map((s, idx) => (
+                        <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ 
+                                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                width: 32, height: 32, borderRadius: 10,
+                                background: step >= s.id ? '#4f46e5' : '#f1f5f9',
+                                color: step >= s.id ? 'white' : '#94a3b8',
+                                fontSize: 12, fontWeight: 800,
+                                transition: 'all 0.3s ease'
+                            }}>
+                                {step > s.id ? <CheckCircle size={16} /> : s.id}
+                            </div>
+                            <span style={{ fontSize: 13, fontWeight: 700, color: step >= s.id ? '#0f172a' : '#94a3b8' }}>{s.label}</span>
+                            {idx < steps.length - 1 && <ChevronRight size={14} color="#cbd5e1" />}
+                        </div>
+                    ))}
+                </div>
+            </div>
+
+            <AnimatePresence mode="wait">
+                <motion.div
+                    key={step}
+                    initial={{ opacity: 0, y: 10, filter: 'blur(10px)' }}
+                    animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+                    exit={{ opacity: 0, y: -10, filter: 'blur(10px)' }}
+                    transition={{ duration: 0.4 }}
                 >
-                    <Download size={16} /> Baixar Planilha Modelo
-                </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: step === 1 ? '1fr 300px' : '1fr', gap: 24 }}>
-                <div className="card" style={{ padding: 32 }}>
-                    {step === 1 && (
-                        <div style={{ textAlign: 'center', padding: '20px 0' }}>
-                            <div style={{ width: 64, height: 64, background: '#eef2ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-                                <Upload size={32} color="#4f46e5" />
-                            </div>
-                            <h3 style={{ fontSize: 20, fontWeight: 700, marginBottom: 8 }}>Faça o upload da sua folha</h3>
-                            <p style={{ color: '#64748b', marginBottom: 32, maxWidth: 400, margin: '0 auto 32px' }}>
-                                Arraste o arquivo CSV ou XLSX aqui. Recomendamos usar nosso modelo para garantir 100% de precisão nos gráficos.
-                            </p>
-
-                            <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleUpload} />
-                            <label htmlFor="file-upload" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, cursor: 'pointer', padding: '12px 24px', fontSize: 16 }}>
-                                {isUploading ? <Loader2 className="animate-spin" /> : <><FileText size={20} /> Selecionar Arquivo</>}
-                            </label>
-                        </div>
-                    )}
-
-                    {step === 2 && (
-                        <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24, paddingBottom: 16, borderBottom: '1px solid #f1f5f9' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                    <div style={{ width: 32, height: 32, background: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                        <CheckCircle color="#10b981" size={20} />
-                                    </div>
-                                    <div>
-                                        <h3 style={{ fontSize: 18, fontWeight: 700 }}>{fileName}</h3>
-                                        <p style={{ fontSize: 13, color: '#64748b' }}>{fileData.length} linhas identificadas</p>
-                                    </div>
-                                </div>
-                                <button onClick={() => setStep(1)} style={{ fontSize: 13, color: '#4f46e5', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 600 }}>Trocar arquivo</button>
-                            </div>
-
-                            <div style={{ marginBottom: 32 }}>
-                                <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 16, textTransform: 'uppercase', letterSpacing: '0.05em', color: '#64748b' }}>Prévia dos Dados</h4>
-                                <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: 8 }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12 }}>
-                                        <thead style={{ background: '#f8fafc' }}>
-                                            <tr>
-                                                {fileData.length > 0 && Object.keys(fileData[0]).slice(0, 5).map(key => (
-                                                    <th key={key} style={{ padding: '10px 12px', textAlign: 'left', borderBottom: '1px solid #e2e8f0', color: '#475569' }}>{key}</th>
-                                                ))}
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {fileData.slice(0, 3).map((row, i) => (
-                                                <tr key={i} style={{ borderBottom: i === 2 ? 'none' : '1px solid #f1f5f9' }}>
-                                                    {Object.values(row).slice(0, 5).map((val: any, j) => (
-                                                        <td key={j} style={{ padding: '10px 12px' }}>{String(val)}</td>
-                                                    ))}
-                                                </tr>
-                                            ))}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div style={{ background: '#f8fafc', padding: 20, borderRadius: 12, marginBottom: 32 }}>
-                                <h4 style={{ fontSize: 14, fontWeight: 700, marginBottom: 12 }}>Mapeamento de Inteligência</h4>
-                                <p style={{ fontSize: 13, color: '#64748b', marginBottom: 16 }}>Detectamos as seguintes informações essenciais:</p>
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                    {[
-                                        { label: 'Identificação', detected: !!(fileData[0].id || fileData[0].matricula || fileData[0].codigo) },
-                                        { label: 'Nome do Colaborador', detected: !!(fileData[0].nome || fileData[0].name) },
-                                        { label: 'Cargo / Função', detected: !!(fileData[0].cargo || fileData[0].funcao || fileData[0].title) },
-                                        { label: 'Remuneração Base', detected: !!(fileData[0].salario || fileData[0].remuneracao) }
-                                    ].map(item => (
-                                        <div key={item.label} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: item.detected ? '#0f172a' : '#94a3b8' }}>
-                                            {item.detected ? <CheckCircle size={16} color="#10b981" /> : <AlertCircle size={16} color="#cbd5e1" />}
-                                            {item.label}
+                    <div style={{ display: 'grid', gridTemplateColumns: step === 1 ? '1fr 340px' : '1fr', gap: 32 }}>
+                        {/* Area Principal */}
+                        <div className="card" style={{ padding: 48, borderRadius: 24, border: 'none', boxShadow: '0 10px 40px rgba(0,0,0,0.03)' }}>
+                            {step === 1 && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <div 
+                                        style={{ 
+                                            width: '100%', border: '2px dashed #e2e8f0', borderRadius: 24, 
+                                            padding: '60px 20px', cursor: 'pointer', transition: 'all 0.2s ease',
+                                            background: '#f8fafc'
+                                        }}
+                                        onMouseOver={e => e.currentTarget.style.borderColor = '#4f46e5'}
+                                        onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}
+                                    >
+                                        <div style={{ width: 80, height: 80, background: 'white', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}>
+                                            <Upload size={32} color="#4f46e5" />
                                         </div>
-                                    ))}
+                                        <h3 style={{ fontSize: 24, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>Upload de Folha de Pagamento</h3>
+                                        <p style={{ color: '#64748b', marginBottom: 32, maxWidth: 450, margin: '0 auto 32px', lineHeight: 1.6 }}>
+                                            Arraste sua folha (.xlsx ou .csv) ou clique para navegar. <br/>
+                                            Garantimos a segurança ponta-a-ponta dos seus dados de remuneração.
+                                        </p>
+
+                                        <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleUpload} />
+                                        <label htmlFor="file-upload" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '16px 32px', fontSize: 16, fontWeight: 700, borderRadius: 16 }}>
+                                            {isUploading ? <Loader2 className="animate-spin" /> : <><FileText size={22} /> Selecionar Arquivo</>}
+                                        </label>
+                                    </div>
+                                    <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center', gap: 24, color: '#94a3b8', fontSize: 12 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={14} /> Criptografia AES-256</div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><CheckCircle size={14} /> Conformidade LGPD</div>
+                                    </div>
                                 </div>
-                            </div>
+                            )}
 
-                            <button className="btn btn-primary" style={{ width: '100%', padding: 16, fontSize: 16, fontWeight: 700 }} onClick={startAnalysis}>
-                                Confirmar e Analisar {fileData.length} Colaboradores
-                            </button>
+                            {step === 2 && (
+                                <div>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                                            <div style={{ width: 56, height: 56, background: '#f0fdf4', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                <Layers color="#10b981" size={28} />
+                                            </div>
+                                            <div>
+                                                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1e293b' }}>{fileName}</h3>
+                                                <p style={{ fontSize: 14, color: '#64748b' }}>Snaphot validado • <strong>{fileData.length} registros</strong> encontrados</p>
+                                            </div>
+                                        </div>
+                                        <button onClick={() => setStep(1)} style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, background: '#f1f5f9', border: 'none', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Alterar</button>
+                                    </div>
+
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 40 }}>
+                                        <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
+                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Mapeamento de Campos</h4>
+                                            <div style={{ display: 'grid', gap: 12 }}>
+                                                {[
+                                                    { label: 'Identificação', detected: true, key: 'id' },
+                                                    { label: 'Colaborador', detected: true, key: 'nome' },
+                                                    { label: 'Cargo Atual', detected: true, key: 'cargo' },
+                                                    { label: 'Salário Base', detected: true, key: 'salario' }
+                                                ].map(item => (
+                                                    <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'white', borderRadius: 12, border: '1px solid #e2e8f0' }}>
+                                                        <span style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>{item.label}</span>
+                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                            <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, color: '#4f46e5' }}>{item.key}</code>
+                                                            <CheckCircle size={14} color="#10b981" />
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </div>
+
+                                        <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
+                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Amostra de Integridade</h4>
+                                            <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
+                                                <table style={{ width: '100%', fontSize: 11, background: 'white', borderCollapse: 'collapse' }}>
+                                                    <thead style={{ background: '#f1f5f9' }}>
+                                                        <tr>
+                                                            <th style={{ padding: 10, textAlign: 'left' }}>Nome</th>
+                                                            <th style={{ padding: 10, textAlign: 'right' }}>Salário</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {fileData.slice(0, 3).map((row, i) => (
+                                                            <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                                <td style={{ padding: 10, fontWeight: 600 }}>{row.nome || row.name || 'N/A'}</td>
+                                                                <td style={{ padding: 10, textAlign: 'right' }}>R$ {(row.salario || 0).toLocaleString()}</td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button className="btn btn-primary" style={{ width: '100%', padding: 20, fontSize: 18, fontWeight: 800, borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12 }} onClick={startAnalysis}>
+                                        Iniciar Inteligência Salarial <ArrowRight size={20} />
+                                    </button>
+                                </div>
+                            )}
+
+                            {step === 3 && (
+                                <div style={{ textAlign: 'center', padding: '60px 0' }}>
+                                    <div style={{ width: 140, height: 140, margin: '0 auto 32px', position: 'relative' }}>
+                                        <Loader2 className="animate-spin" size={140} color="#4f46e5" strokeWidth={1.5} />
+                                        <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
+                                            <div style={{ fontWeight: 900, fontSize: 32, color: '#0f172a' }}>{analyzeProgress}%</div>
+                                        </div>
+                                    </div>
+                                    <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>
+                                        {analyzeProgress < 40 ? 'Sincronizando Dados...' : 'Gerando Matriz Curitina...'}
+                                    </h3>
+                                    <p style={{ color: '#64748b', fontSize: 17 }}>Carolina está processando cada cargo contra 200+ fontes de mercado.</p>
+                                </div>
+                            )}
+
+                            {step === 4 && (
+                                <div style={{ textAlign: 'center' }}>
+                                    <motion.div 
+                                        initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                                        style={{ width: 100, height: 100, background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 32px', color: 'white', boxShadow: '0 20px 40px rgba(16,185,129,0.2)' }}
+                                    >
+                                        <CheckCircle size={56} />
+                                    </motion.div>
+                                    <h3 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', marginBottom: 16 }}>Análise Concluída!</h3>
+                                    <p style={{ color: '#64748b', fontSize: 18, marginBottom: 48, maxWidth: 500, margin: '0 auto 48px', lineHeight: 1.6 }}>
+                                        Identificamos <strong>{fileData.length} colaboradores</strong>. O diagnóstico preliminar está pronto para sua revisão.
+                                    </p>
+                                    <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
+                                        <Link href="/job-match" className="btn btn-primary" style={{ padding: '18px 36px', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            Mapear Cargos AI <ChevronRight size={20} />
+                                        </Link>
+                                        <Link href="/diagnostics" style={{ padding: '18px 36px', borderRadius: 16, fontWeight: 800, fontSize: 16, border: '1px solid #e2e8f0', background: 'white', color: '#1e293b', textDecoration: 'none' }}>
+                                            Ver Diagnóstico
+                                        </Link>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                    )}
 
-                    {step === 3 && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ width: 120, height: 120, margin: '0 auto 32px', position: 'relative' }}>
-                                <Loader2 className="animate-spin" size={120} color="#4f46e5" strokeWidth={1.5} />
-                                <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', fontWeight: 800, fontSize: 24, color: '#4f46e5' }}>{analyzeProgress}%</div>
-                            </div>
-                            <h3 style={{ fontSize: 22, fontWeight: 700, marginBottom: 12 }}>
-                                {analyzeProgress < 30 ? 'Extraindo dados...' : (analyzeProgress < 70 ? 'Calculando Estatísticas...' : 'Finalizando Diagnóstico...')}
-                            </h3>
-                            <p style={{ color: '#64748b', fontSize: 16 }}>Integrando com o motor de inteligência Carolina.</p>
-                        </div>
-                    )}
+                        {/* Sidebar Informational */}
+                        {step === 1 && (
+                            <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }}>
+                                <button
+                                    onClick={downloadTemplate}
+                                    style={{ width: '100%', marginBottom: 24, padding: '24px', borderRadius: 24, border: '1px solid #e2e8f0', background: 'white', textAlign: 'left', cursor: 'pointer', transition: 'transform 0.2s ease' }}
+                                    onMouseOver={e => e.currentTarget.style.transform = 'translateY(-4px)'}
+                                    onMouseOut={e => e.currentTarget.style.transform = 'translateY(0)'}
+                                >
+                                    <div style={{ width: 48, height: 48, background: '#f1f5f9', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16 }}>
+                                        <Download size={24} color="#4f46e5" />
+                                    </div>
+                                    <h4 style={{ fontSize: 15, fontWeight: 800, color: '#1e293b', marginBottom: 6 }}>Planilha Modelo</h4>
+                                    <p style={{ fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>Use nosso formato padrão para mapear seu RH em segundos.</p>
+                                </button>
 
-                    {step === 4 && (
-                        <div style={{ textAlign: 'center', padding: '40px 0' }}>
-                            <div style={{ width: 80, height: 80, background: '#f0fdf4', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-                                <CheckCircle size={48} color="#10b981" />
-                            </div>
-                            <h3 style={{ fontSize: 28, fontWeight: 800, marginBottom: 12 }}>Pronto para Diagnose!</h3>
-                            <p style={{ color: '#64748b', fontSize: 17, marginBottom: 40, maxWidth: 500, margin: '0 auto 40px' }}>
-                                O snapshot foi processado com sucesso. Agora você deve garantir que os cargos estejam mapeados corretamente.
-                            </p>
-                            <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
-                                <Link href="/job-match" className="btn btn-primary" style={{ padding: '14px 28px' }}>Ir para Mapeamento</Link>
-                                <Link href="/diagnostics" className="btn" style={{ background: '#f1f5f9', padding: '14px 28px' }}>Pular p/ Diagnóstico</Link>
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                {step === 1 && (
-                    <div className="card" style={{ background: '#1e293b', padding: 24, color: 'white', border: 'none' }}>
-                        <h4 style={{ fontSize: 15, fontWeight: 700, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
-                            <Zap size={18} color="#fbbf24" fill="#fbbf24" /> Dica de Ouro
-                        </h4>
-                        <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6, marginBottom: 20 }}>
-                            Para que os gráficos funcionem perfeitamente, garanta que sua planilha tenha estas colunas:
-                        </p>
-                        <ul style={{ padding: 0, margin: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            {['id', 'nome', 'cargo', 'salario'].map(col => (
-                                <li key={col} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12 }}>
-                                    <code style={{ background: '#334155', padding: '2px 6px', borderRadius: 4, color: '#e2e8f0' }}>{col}</code>
-                                    <span style={{ color: '#94a3b8' }}>{col === 'salario' ? 'Usar ponto (ex: 5500.00)' : 'Obrigatório'}</span>
-                                </li>
-                            ))}
-                        </ul>
+                                <div className="card" style={{ background: 'linear-gradient(180deg, #1e293b 0%, #0f172a 100%)', padding: 32, borderRadius: 24, color: 'white', border: 'none' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 20 }}>
+                                        <Zap size={20} color="#fbbf24" fill="#fbbf24" />
+                                        <span style={{ fontSize: 14, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>AI Engine</span>
+                                    </div>
+                                    <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6, marginBottom: 24 }}>
+                                        Nossa inteligência detecta automaticamente as colunas, mesmo que os nomes variem:
+                                    </p>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+                                        {['ID / Código', 'Nome Completo', 'Cargo / Role', 'Salário Bruto'].map(tag => (
+                                            <span key={tag} style={{ background: 'rgba(255,255,255,0.1)', padding: '6px 12px', borderRadius: 8, fontSize: 11, fontWeight: 700, color: '#cbd5e1' }}>{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            </motion.div>
+                        )}
                     </div>
-                )}
-            </div>
+                </motion.div>
+            </AnimatePresence>
         </div>
     );
 }

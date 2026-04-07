@@ -1,8 +1,16 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Search, TrendingUp, BarChart3, Filter, ChevronDown, Star, ArrowUpRight, ArrowDownRight } from 'lucide-react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+    Search, TrendingUp, BarChart3, Filter, ChevronDown, Star, 
+    ArrowUpRight, ArrowDownRight, Globe, Layers, Activity,
+    ChevronRight, Zap, Target, BookOpen, Info, Loader2
+} from 'lucide-react';
+import { 
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+    ResponsiveContainer, Cell, AreaChart, Area 
+} from 'recharts';
 
 interface Benchmark {
     id: string;
@@ -57,7 +65,7 @@ export default function BenchmarkExplorerPage() {
     const [total, setTotal] = useState(0);
     const [page, setPage] = useState(1);
     const [selected, setSelected] = useState<Benchmark | null>(null);
-    const pageSize = 20;
+    const pageSize = 15;
 
     const fetchData = useCallback(async () => {
         setLoading(true);
@@ -88,210 +96,267 @@ export default function BenchmarkExplorerPage() {
     }, [fetchData]);
 
     const chartData = selected ? [
-        { name: 'P25 (1º Quartil)', value: selected.p25, fill: '#94a3b8' },
-        { name: 'P50 (Mediana)', value: selected.p50, fill: '#4f46e5' },
-        { name: 'P75 (3º Quartil)', value: selected.p75, fill: '#10b981' },
+        { name: 'P25', value: selected.p25, color: '#94a3b8', label: '1º Quartil' },
+        { name: 'P50', value: selected.p50, color: '#4f46e5', label: 'Mediana' },
+        { name: 'P75', value: selected.p75, color: '#10b981', label: '3º Quartil' },
     ] : [];
 
-    return (
-        <div style={{ maxWidth: 1300, paddingBottom: 80 }}>
-            {/* Header */}
-            <div style={{ marginBottom: 32 }}>
-                <h1 style={{ fontSize: 32, fontWeight: 800, marginBottom: 8 }}>Benchmark Explorer</h1>
-                <p style={{ color: '#64748b', fontSize: 16 }}>
-                    Pesquisa de mercado de <strong>{total.toLocaleString()}</strong> registros salariais — TI/Software 2025
-                </p>
-            </div>
+    const containerVars = {
+        hidden: { opacity: 0 },
+        show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+    };
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 380px', gap: 24 }}>
-                {/* Lista de Benchmarks */}
+    const itemVars = {
+        hidden: { opacity: 0, y: 20 },
+        show: { opacity: 1, y: 0 }
+    };
+
+    return (
+        <motion.div 
+            initial="hidden" animate="show" variants={containerVars}
+            style={{ maxWidth: 1400, paddingBottom: 100 }}
+        >
+            {/* Header Terminal */}
+            <motion.div variants={itemVars} style={{ marginBottom: 40 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 8, background: '#4f46e520', color: '#4f46e5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Globe size={18} />
+                    </div>
+                    <span style={{ fontSize: 12, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Real-time Market Indices</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end' }}>
+                    <div>
+                        <h1 style={{ fontSize: 40, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1 }}>Benchmark Explorer</h1>
+                        <p style={{ color: '#64748b', fontSize: 16, marginTop: 12 }}>
+                            Acesso a <strong style={{ color: '#1e293b' }}>{total.toLocaleString()} benchmarks</strong> atualizados para TI & Tech.
+                        </p>
+                    </div>
+                </div>
+            </motion.div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 400px', gap: 32 }}>
+                {/* List & Filters */}
                 <div>
-                    {/* Filtros */}
-                    <div style={{ display: 'flex', gap: 12, marginBottom: 20 }}>
+                    {/* Filter Bar */}
+                    <motion.div variants={itemVars} style={{ display: 'flex', gap: 16, marginBottom: 24 }}>
                         <div style={{ flex: 1, position: 'relative' }}>
-                            <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
+                            <Search size={18} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8' }} />
                             <input
                                 type="text"
-                                placeholder="Buscar cargo... (ex: Analista, Engenheiro, Gerente)"
+                                placeholder="Filtrar por cargo, stack ou tecnologia..."
                                 value={search}
                                 onChange={(e) => { setSearch(e.target.value); setPage(1); }}
-                                style={{ width: '100%', padding: '12px 12px 12px 40px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 14, outline: 'none' }}
+                                style={{ width: '100%', padding: '16px 16px 16px 48px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 600, outline: 'none', background: 'white', transition: 'all 0.2s ease', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.02)' }}
+                                onFocus={e => { e.currentTarget.style.borderColor = '#4f46e5'; e.currentTarget.style.boxShadow = '0 10px 15px -3px rgba(79,70,229,0.1)'; }}
+                                onBlur={e => { e.currentTarget.style.borderColor = '#e2e8f0'; e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0,0,0,0.02)'; }}
                             />
                         </div>
-                        <select
-                            value={levelFilter}
-                            onChange={(e) => { setLevelFilter(e.target.value); setPage(1); }}
-                            style={{ padding: '12px 16px', borderRadius: 10, border: '1px solid #e2e8f0', fontSize: 14, background: 'white', cursor: 'pointer' }}
-                        >
-                            <option value="ALL">Todos os Níveis</option>
-                            {Object.entries(LEVEL_LABELS).map(([k, v]) => (
-                                <option key={k} value={k}>{v}</option>
-                            ))}
-                        </select>
-                    </div>
+                        <div style={{ position: 'relative' }}>
+                            <Filter size={16} style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: '#64748b' }} />
+                            <select
+                                value={levelFilter}
+                                onChange={(e) => { setLevelFilter(e.target.value); setPage(1); }}
+                                style={{ padding: '16px 40px 16px 40px', borderRadius: 16, border: '1px solid #e2e8f0', fontSize: 14, fontWeight: 700, color: '#1e293b', background: 'white', cursor: 'pointer', appearance: 'none', minWidth: 180 }}
+                            >
+                                <option value="ALL">Nível: Todos</option>
+                                {Object.entries(LEVEL_LABELS).map(([k, v]) => (
+                                    <option key={k} value={k}>{v}</option>
+                                ))}
+                            </select>
+                            <ChevronDown size={14} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', color: '#94a3b8', pointerEvents: 'none' }} />
+                        </div>
+                    </motion.div>
 
-                    {/* Tabela */}
-                    <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: '#f8fafc', borderBottom: '1px solid #e2e8f0' }}>
-                                    <th style={{ padding: '14px 20px', textAlign: 'left', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'center', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nível</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P25</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P50 ★</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P75</th>
-                                    <th style={{ padding: '14px 16px', textAlign: 'right', fontSize: 12, fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.05em' }}>N</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {loading ? (
-                                    <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Carregando dados...</td></tr>
-                                ) : benchmarks.length === 0 ? (
-                                    <tr><td colSpan={6} style={{ padding: 40, textAlign: 'center', color: '#94a3b8' }}>Nenhum resultado encontrado.</td></tr>
-                                ) : (
-                                    benchmarks.map((b) => (
-                                        <tr
-                                            key={b.id}
-                                            onClick={() => setSelected(b)}
-                                            style={{
-                                                borderBottom: '1px solid #f1f5f9',
-                                                cursor: 'pointer',
-                                                background: selected?.id === b.id ? '#eef2ff' : 'white',
-                                                transition: 'background 0.15s'
-                                            }}
-                                        >
-                                            <td style={{ padding: '14px 20px', fontWeight: 600, fontSize: 14 }}>
-                                                {b.job_catalog.title_std}
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'center' }}>
-                                                <span style={{
-                                                    fontSize: 11, fontWeight: 700,
-                                                    background: LEVEL_COLORS[b.job_catalog.level] + '20',
-                                                    color: LEVEL_COLORS[b.job_catalog.level],
-                                                    padding: '3px 8px', borderRadius: 6
-                                                }}>
-                                                    {LEVEL_LABELS[b.job_catalog.level] || b.job_catalog.level}
-                                                </span>
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: '#64748b', fontSize: 13 }}>
-                                                R$ {b.p25.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', fontWeight: 800, color: '#4f46e5', fontSize: 14 }}>
-                                                R$ {b.p50.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: '#64748b', fontSize: 13 }}>
-                                                R$ {b.p75.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
-                                            </td>
-                                            <td style={{ padding: '14px 16px', textAlign: 'right', color: '#94a3b8', fontSize: 12 }}>
-                                                {b.n}
-                                            </td>
-                                        </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
+                    {/* Main Table */}
+                    <motion.div variants={itemVars} className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #f1f5f9' }}>
+                        <div style={{ overflowX: 'auto' }}>
+                            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                                <thead>
+                                    <tr style={{ background: '#f8fafc', borderBottom: '1px solid #f1f5f9' }}>
+                                        <th style={{ padding: '16px 24px', textAlign: 'left', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Cargo / Catalog Title</th>
+                                        <th style={{ padding: '16px 16px', textAlign: 'center', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nível</th>
+                                        <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P25</th>
+                                        <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P50 / Médio</th>
+                                        <th style={{ padding: '16px 16px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>P75</th>
+                                        <th style={{ padding: '16px 24px', textAlign: 'right', fontSize: 11, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amostras</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <AnimatePresence mode="popLayout">
+                                        {loading ? (
+                                            <tr><td colSpan={6} style={{ padding: 60, textAlign: 'center' }}><Loader2 size={32} className="animate-spin" color="#4f46e5" style={{ margin: '0 auto' }} /></td></tr>
+                                        ) : benchmarks.map((b) => (
+                                            <motion.tr
+                                                key={b.id}
+                                                initial={{ opacity: 0 }}
+                                                animate={{ opacity: 1 }}
+                                                exit={{ opacity: 0 }}
+                                                onClick={() => setSelected(b)}
+                                                style={{
+                                                    borderBottom: '1px solid #f1f5f9', cursor: 'pointer',
+                                                    background: selected?.id === b.id ? '#4f46e508' : 'white',
+                                                    transition: 'all 0.15s ease'
+                                                }}
+                                                whileHover={{ background: '#f8fafc' }}
+                                            >
+                                                <td style={{ padding: '18px 24px' }}>
+                                                    <div style={{ fontWeight: 800, fontSize: 14, color: '#1e293b' }}>{b.job_catalog.title_std}</div>
+                                                    <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>{b.job_catalog.family || 'Geral'} · Grade {b.job_catalog.grade}</div>
+                                                </td>
+                                                <td style={{ padding: '18px 16px', textAlign: 'center' }}>
+                                                    <span style={{ 
+                                                        fontSize: 10, fontWeight: 800, textTransform: 'uppercase',
+                                                        background: LEVEL_COLORS[b.job_catalog.level] + '15',
+                                                        color: LEVEL_COLORS[b.job_catalog.level],
+                                                        padding: '4px 10px', borderRadius: 20
+                                                    }}>
+                                                        {LEVEL_LABELS[b.job_catalog.level] || b.job_catalog.level}
+                                                    </span>
+                                                </td>
+                                                <td style={{ padding: '18px 16px', textAlign: 'right', color: '#64748b', fontSize: 13, fontWeight: 600 }}>
+                                                    R$ {b.p25.toLocaleString('pt-BR')}
+                                                </td>
+                                                <td style={{ padding: '18px 16px', textAlign: 'right', fontWeight: 900, color: '#4f46e5', fontSize: 15 }}>
+                                                    R$ {b.p50.toLocaleString('pt-BR')}
+                                                </td>
+                                                <td style={{ padding: '18px 16px', textAlign: 'right', color: '#64748b', fontSize: 13, fontWeight: 600 }}>
+                                                    R$ {b.p75.toLocaleString('pt-BR')}
+                                                </td>
+                                                <td style={{ padding: '18px 24px', textAlign: 'right' }}>
+                                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 6 }}>
+                                                        <span style={{ fontSize: 12, fontWeight: 800, color: '#1e293b' }}>{b.n}</span>
+                                                        <Activity size={12} color="#cbd5e1" />
+                                                    </div>
+                                                </td>
+                                            </motion.tr>
+                                        ))}
+                                    </AnimatePresence>
+                                </tbody>
+                            </table>
+                        </div>
 
-                        {/* Paginação */}
-                        {total > pageSize && (
-                            <div style={{ padding: '16px 20px', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                <span style={{ fontSize: 13, color: '#64748b' }}>
-                                    Mostrando {((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)} de {total}
-                                </span>
-                                <div style={{ display: 'flex', gap: 8 }}>
-                                    <button
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                        style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, opacity: page === 1 ? 0.4 : 1 }}
-                                    >
-                                        ← Anterior
-                                    </button>
-                                    <button
-                                        onClick={() => setPage(p => p + 1)}
-                                        disabled={page * pageSize >= total}
-                                        style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, opacity: page * pageSize >= total ? 0.4 : 1 }}
-                                    >
-                                        Próxima →
-                                    </button>
-                                </div>
+                        {/* Pagination Terminal */}
+                        <div style={{ padding: '20px 24px', background: '#f8fafc', borderTop: '1px solid #f1f5f9', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
+                                Visão <strong style={{ color: '#1e293b' }}>{((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)}</strong> de {total.toLocaleString()} registros
                             </div>
-                        )}
-                    </div>
-                </div>
-
-                {/* Painel Lateral - Detalhes */}
-                <div>
-                    {selected ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 20, position: 'sticky', top: 24 }}>
-                            <div className="card">
-                                <div style={{ marginBottom: 20 }}>
-                                    <div style={{ fontSize: 11, fontWeight: 700, color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 6 }}>
-                                        {LEVEL_LABELS[selected.job_catalog.level] || selected.job_catalog.level}
-                                    </div>
-                                    <h2 style={{ fontSize: 20, fontWeight: 800, marginBottom: 4 }}>{selected.job_catalog.title_std}</h2>
-                                    <div style={{ fontSize: 12, color: '#94a3b8' }}>
-                                        Grade {selected.job_catalog.grade} · {selected.n} amostras · {new Date(selected.as_of_date).getFullYear()}
-                                    </div>
-                                </div>
-
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 24 }}>
-                                    {[
-                                        { label: 'P25', value: selected.p25, color: '#94a3b8', desc: '1º Quartil' },
-                                        { label: 'P50', value: selected.p50, color: '#4f46e5', desc: 'Mediana' },
-                                        { label: 'P75', value: selected.p75, color: '#10b981', desc: '3º Quartil' },
-                                    ].map(item => (
-                                        <div key={item.label} style={{ textAlign: 'center', padding: '12px 8px', borderRadius: 10, background: item.color + '12', border: `1px solid ${item.color}30` }}>
-                                            <div style={{ fontSize: 10, fontWeight: 700, color: item.color, marginBottom: 4 }}>{item.label}</div>
-                                            <div style={{ fontSize: 15, fontWeight: 800, color: item.color }}>
-                                                R$ {(item.value / 1000).toFixed(1)}k
-                                            </div>
-                                            <div style={{ fontSize: 10, color: '#94a3b8' }}>{item.desc}</div>
-                                        </div>
-                                    ))}
-                                </div>
-
-                                <div style={{ height: 200 }}>
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 5 }}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                            <XAxis dataKey="name" tick={{ fontSize: 10 }} />
-                                            <YAxis tick={{ fontSize: 10 }} />
-                                            <Tooltip formatter={(v: any) => `R$ ${Number(v).toLocaleString()}`} />
-                                            <Bar dataKey="value" radius={[6, 6, 0, 0]}>
-                                                {chartData.map((entry, index) => (
-                                                    <rect key={index} fill={entry.fill} />
-                                                ))}
-                                            </Bar>
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </div>
-
-                            <div className="card" style={{ background: '#0f172a', color: 'white', border: 'none' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-                                    <TrendingUp size={18} color="#4f46e5" />
-                                    <h3 style={{ fontSize: 16, fontWeight: 700 }}>Amplitude Salarial</h3>
-                                </div>
-                                <div style={{ fontSize: 24, fontWeight: 800, color: '#4f46e5', marginBottom: 4 }}>
-                                    {(((selected.p75 - selected.p25) / selected.p25) * 100).toFixed(0)}%
-                                </div>
-                                <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.5 }}>
-                                    Variação entre o 1º e 3º quartil. Amplitudes acima de 40% indicam mercado muito disperso para este cargo.
-                                </p>
+                            <div style={{ display: 'flex', gap: 10 }}>
+                                <button
+                                    onClick={() => setPage(p => Math.max(1, p - 1))}
+                                    disabled={page === 1}
+                                    style={{ padding: '10px 18px', borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, opacity: page === 1 ? 0.4 : 1 }}
+                                >
+                                    Anterior
+                                </button>
+                                <button
+                                    onClick={() => setPage(p => p + 1)}
+                                    disabled={page * pageSize >= total}
+                                    style={{ padding: '10px 18px', borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, opacity: page * pageSize >= total ? 0.4 : 1 }}
+                                >
+                                    Próxima
+                                </button>
                             </div>
                         </div>
-                    ) : (
-                        <div className="card" style={{ textAlign: 'center', padding: '60px 32px' }}>
-                            <BarChart3 size={48} color="#e2e8f0" style={{ margin: '0 auto 16px' }} />
-                            <h3 style={{ fontSize: 18, fontWeight: 700, color: '#94a3b8', marginBottom: 8 }}>
-                                Selecione um Cargo
-                            </h3>
-                            <p style={{ fontSize: 14, color: '#cbd5e1' }}>
-                                Clique em qualquer linha da tabela para ver os detalhes e o gráfico de distribuição salarial.
+                    </motion.div>
+                </div>
+
+                {/* Detail Analysis Panel */}
+                <div style={{ position: 'relative' }}>
+                    <div style={{ position: 'sticky', top: 24 }}>
+                        <AnimatePresence mode="wait">
+                            {selected ? (
+                                <motion.div 
+                                    key={selected.id}
+                                    initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 20 }}
+                                    className="card" style={{ padding: 32, border: '1px solid #4f46e530', background: 'white', boxShadow: '0 20px 40px -10px rgba(79,70,229,0.1)' }}
+                                >
+                                    <div style={{ marginBottom: 32 }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
+                                            <span style={{ fontSize: 11, fontWeight: 900, background: '#4f46e510', color: '#4f46e5', padding: '4px 12px', borderRadius: 20, textTransform: 'uppercase' }}>
+                                                {LEVEL_LABELS[selected.job_catalog.level] || selected.job_catalog.level}
+                                            </span>
+                                            <div style={{ display: 'flex', gap: 4 }}>
+                                                {[1,2,3,4,5].map(s => <Star key={s} size={12} fill={s <= 4 ? "#f59e0b" : "none"} color="#f59e0b" />)}
+                                            </div>
+                                        </div>
+                                        <h2 style={{ fontSize: 24, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.02em', marginBottom: 8 }}>{selected.job_catalog.title_std}</h2>
+                                        <div style={{ fontSize: 13, color: '#94a3b8', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Layers size={14} /> Grade {selected.job_catalog.grade}</span>
+                                            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><Target size={14} /> {selected.n} Amostras</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Stats Grid */}
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12, marginBottom: 32 }}>
+                                        {chartData.map(item => (
+                                            <div key={item.name} style={{ padding: '16px 12px', borderRadius: 16, background: '#f8fafc', border: '1px solid #f1f5f9', textAlign: 'center' }}>
+                                                <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', marginBottom: 6, textTransform: 'uppercase' }}>{item.name}</div>
+                                                <div style={{ fontSize: 16, fontWeight: 900, color: item.color }}>R$ {(item.value / 1000).toFixed(1)}k</div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Distribution Chart */}
+                                    <div style={{ height: 200, marginBottom: 32 }}>
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={chartData}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 700, fill: '#94a3b8' }} />
+                                                <YAxis hide />
+                                                <Tooltip 
+                                                    cursor={{ fill: 'rgba(79, 70, 229, 0.05)' }} 
+                                                    contentStyle={{ borderRadius: 12, border: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.1)', fontSize: 12, fontWeight: 800 }}
+                                                />
+                                                <Bar dataKey="value" barSize={40} radius={[6, 6, 0, 0]}>
+                                                    {chartData.map((entry, index) => (
+                                                        <Cell key={index} fill={entry.color} />
+                                                    ))}
+                                                </Bar>
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    </div>
+
+                                    {/* Market Heatmap Insight */}
+                                    <div style={{ padding: 20, borderRadius: 20, background: '#0f172a', color: 'white' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+                                            <Zap size={18} color="#4f46e5" />
+                                            <span style={{ fontSize: 12, fontWeight: 800, color: '#4f46e5', textTransform: 'uppercase' }}>Carolina AI Analysis</span>
+                                        </div>
+                                        <div style={{ fontSize: 24, fontWeight: 900, marginBottom: 4 }}>
+                                            {(((selected.p75 - selected.p25) / selected.p25) * 100).toFixed(0)}% <span style={{ fontSize: 12, color: '#94a3b8', fontWeight: 600 }}>Amplitude</span>
+                                        </div>
+                                        <p style={{ fontSize: 13, color: '#94a3b8', lineHeight: 1.6, margin: 0 }}>
+                                            Cargo com alta dispersão de mercado. Recomendamos focar no <strong style={{ color: 'white' }}>P50</strong> para nivelamento e <strong style={{ color: '#10b981' }}>P75</strong> apenas para talentos 'Key-Player'.
+                                        </p>
+                                    </div>
+                                </motion.div>
+                            ) : (
+                                <motion.div 
+                                    initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+                                    className="card" style={{ padding: 60, textAlign: 'center', background: '#f8fafc', border: '1px dashed #cbd5e1' }}
+                                >
+                                    <div style={{ width: 64, height: 64, borderRadius: 32, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>
+                                        <BookOpen size={28} color="#cbd5e1" />
+                                    </div>
+                                    <h3 style={{ fontSize: 18, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>Seleção Requerida</h3>
+                                    <p style={{ fontSize: 14, color: '#94a3b8', lineHeight: 1.6 }}>Selecione um índice de mercado da tabela ao lado para visualizar a análise detalhada de quartis.</p>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Bottom Utility Card */}
+                        <div className="card" style={{ marginTop: 24, padding: 24, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', color: 'white', border: 'none' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                                <Info size={18} color="rgba(255,255,255,0.8)" />
+                                <span style={{ fontSize: 12, fontWeight: 900, textTransform: 'uppercase' }}>Data Methodology</span>
+                            </div>
+                            <p style={{ fontSize: 13, lineHeight: 1.6, opacity: 0.9, margin: 0 }}>
+                                Amostras coletadas via API e consolidadas mensalmente. Última atualização: <strong style={{ color: 'white' }}>Março 2025</strong>.
                             </p>
                         </div>
-                    )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 }

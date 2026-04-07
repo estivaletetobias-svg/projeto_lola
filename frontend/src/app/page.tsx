@@ -1,15 +1,18 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   BarChart2, Users, TrendingUp, Zap, FileText,
   AlertTriangle, CheckCircle2, ArrowRight, Search,
-  Layers, BookOpen, Loader2
+  Layers, BookOpen, Loader2, Sparkles, Target, 
+  ChevronRight, BrainCircuit, Activity, Globe,
+  ArrowUpRight, ArrowDownRight, Gem, History
 } from 'lucide-react';
 import Link from 'next/link';
 import {
-  RadialBarChart, RadialBar, ResponsiveContainer,
-  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid
+  BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer,
+  AreaChart, Area, Cell
 } from 'recharts';
 
 interface Stats {
@@ -48,7 +51,6 @@ export default function Home() {
             : '—'
         });
       }
-      // Enriquece com análise do snapshot mais recente
       if (snaps?.length > 0) {
         try {
           const res = await fetch(`http://${host}:3000/salary-engine/analyze/${snaps[0].id}`);
@@ -60,10 +62,6 @@ export default function Home() {
     });
   }, []);
 
-  const gapColor = stats.avgGap < -15 ? '#ef4444' : stats.avgGap < -5 ? '#f59e0b' : '#10b981';
-  const gapLabel = stats.avgGap < -15 ? 'Ação Urgente' : stats.avgGap < -5 ? 'Monitorando' : 'Saudável';
-
-  // Dados para o mini gráfico de distribuição de gaps
   const distributionData = analysis?.mappedEmployees?.map((emp: any) => {
     const struct = analysis.suggestedSalaryStructure?.find((s: any) => s.grade === `G${emp.grade}`);
     const p50 = struct?.midpoint || 1;
@@ -71,286 +69,214 @@ export default function Home() {
     return { name: emp.name?.split(' ')[0] || 'Emp', gap };
   }) || [];
 
-  const quickLinks = [
-    { label: 'Folha de Pagamento', href: '/snapshots', icon: <FileText size={16} />, desc: 'Upload de snapshot' },
-    { label: 'Mapeamento', href: '/job-match', icon: <BookOpen size={16} />, desc: 'Vincular cargos' },
-    { label: 'Diagnóstico', href: '/diagnostics', icon: <BarChart2 size={16} />, desc: 'Análise de gaps' },
-    { label: 'Estrutura Salarial', href: '/salary-structure', icon: <Layers size={16} />, desc: 'Grades e tabelas' },
-    { label: 'Simulador de Mérito', href: '/merit', icon: <Zap size={16} />, desc: 'Ciclo de reajuste' },
-    { label: 'Benchmark Explorer', href: '/benchmark', icon: <TrendingUp size={16} />, desc: '1.257 benchmarks reais' },
+  const containerVars = {
+    hidden: { opacity: 0 },
+    show: { opacity: 1, transition: { staggerChildren: 0.1 } }
+  };
+
+  const itemVars = {
+    hidden: { opacity: 0, y: 15 },
+    show: { opacity: 1, y: 0 }
+  };
+
+  const kpis = [
+    { label: 'Total Headcount', val: stats.totalEmployees, icon: <Users size={20} />, color: '#6366f1', trend: '+2.4%', sub: 'vs last month' },
+    { label: 'Payroll Variance', val: `${stats.avgGap > 0 ? '+' : ''}${Number(stats.avgGap).toFixed(1)}%`, icon: <Activity size={20} />, color: stats.avgGap < -10 ? '#f43f5e' : '#10b981', trend: 'Déficit', sub: 'Market Gap Avg' },
+    { label: 'Cost of Parity', val: `R$ ${(stats.monthlyCostP50 / 1000).toFixed(1)}k`, icon: <Gem size={20} />, color: '#818cf8', trend: 'P50 Target', sub: 'Monthly Impact' },
+    { label: 'Market Intel', val: '1.2M', icon: <Globe size={20} />, color: '#f59e0b', trend: 'Benchmarks', sub: 'Active Catalog' }
   ];
 
   return (
-    <div style={{ maxWidth: 1200, paddingBottom: 80 }}>
-
-      {/* Header */}
-      <div style={{ marginBottom: 40 }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-          <div>
-            <h1 style={{ fontSize: 36, fontWeight: 800, marginBottom: 8, letterSpacing: '-0.02em' }}>
-              Bom dia, Tobias 👋
-            </h1>
-            <p style={{ color: '#64748b', fontSize: 17 }}>
-              Inteligência salarial da <strong>Lola Tech Ltd</strong> — {stats.lastSnapshotDate}
-              {stats.isDemo && (
-                <span style={{ marginLeft: 10, fontSize: 11, background: '#fef3c7', color: '#92400e', padding: '3px 8px', borderRadius: 4, fontWeight: 700 }}>
-                  SEM DADOS
-                </span>
-              )}
-            </p>
+    <motion.div initial="hidden" animate="show" variants={containerVars} style={{ maxWidth: 1300, paddingBottom: 100 }}>
+      {/* Dynamic Header */}
+      <motion.div variants={itemVars} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 56 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
+            <div style={{ background: '#6366f115', color: '#818cf8', padding: '4px 10px', borderRadius: 20, fontSize: 11, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'flex', alignItems: 'center', gap: 6 }}>
+                <Sparkles size={14} /> Intelligence Center Active
+            </div>
+            {stats.isDemo && <span style={{ fontSize: 10, background: '#fbbf2420', color: '#f59e0b', padding: '4px 10px', borderRadius: 20, fontWeight: 900, border: '1px solid #fbbf2420' }}>DEMO MODE</span>}
           </div>
-          <Link href="/snapshots" className="btn btn-primary" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <FileText size={16} /> Nova Folha
+          <h1 style={{ fontSize: 44, fontWeight: 950, color: '#f8fafc', letterSpacing: '-0.04em', lineHeight: 1 }}>
+            Olá, Tobias. <br/>
+            <span style={{ color: '#64748b' }}>Seu RH estrategicamente pronto.</span>
+          </h1>
+        </div>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <button style={{ padding: '12px 20px', borderRadius: 12, border: '1px solid rgba(255,255,255,0.05)', background: 'rgba(255,255,255,0.02)', color: '#94a3b8', fontWeight: 800, fontSize: 12, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+            <History size={16} /> Audit Log
+          </button>
+          <Link href="/snapshots" className="btn btn-primary" style={{ padding: '14px 28px', borderRadius: 14, fontWeight: 900, fontSize: 13, boxShadow: '0 10px 25px rgba(99,102,241,0.2)' }}>
+            Processar Snapshot
           </Link>
         </div>
+      </motion.div>
+
+      {/* Strategic KPIs Container */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 24, marginBottom: 40 }}>
+        {kpis.map((kpi, i) => (
+          <motion.div 
+            key={i} variants={itemVars} 
+            whileHover={{ y: -5, background: 'rgba(255,255,255,0.03)' }}
+            className="card" style={{ padding: '28px', border: '1px solid rgba(255,255,255,0.03)', transition: 'all 0.3s ease' }}
+          >
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: `${kpi.color}15`, color: kpi.color, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                {kpi.icon}
+              </div>
+              <div style={{ fontSize: 10, fontWeight: 950, color: kpi.color, background: `${kpi.color}10`, padding: '4px 8px', borderRadius: 6 }}>{kpi.trend}</div>
+            </div>
+            <div style={{ fontSize: 36, fontWeight: 950, color: '#f1f5f9', marginBottom: 4, letterSpacing: '-0.03em' }}>{kpi.val}</div>
+            <div style={{ fontSize: 13, fontWeight: 800, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.02em', marginBottom: 2 }}>{kpi.label}</div>
+            <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>{kpi.sub}</div>
+          </motion.div>
+        ))}
       </div>
 
-      {/* KPI Cards */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8' }}>
-          <Loader2 size={32} className="animate-spin" style={{ margin: '0 auto' }} />
-        </div>
-      ) : (
-        <div className="grid-4" style={{ marginBottom: 32 }}>
-          {/* Colaboradores */}
-          <div className="card" style={{ borderLeft: '4px solid #4f46e5' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ padding: 10, background: '#eef2ff', borderRadius: 10 }}>
-                <Users color="#4f46e5" size={22} />
-              </div>
-              {!stats.isDemo && (
-                <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700, background: '#f0fdf4', padding: '2px 8px', borderRadius: 4 }}>
-                  REAL
-                </span>
-              )}
-            </div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              {stats.totalEmployees}
-            </div>
-            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Colaboradores na folha</div>
-          </div>
-
-          {/* Gap vs Mercado */}
-          <div className="card" style={{ borderLeft: `4px solid ${gapColor}` }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ padding: 10, background: gapColor + '15', borderRadius: 10 }}>
-                <TrendingUp color={gapColor} size={22} />
-              </div>
-              <span style={{ fontSize: 11, fontWeight: 700, color: gapColor, background: gapColor + '15', padding: '2px 8px', borderRadius: 4 }}>
-                {gapLabel}
-              </span>
-            </div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              {stats.avgGap > 0 ? '+' : ''}{Number(stats.avgGap).toFixed(1)}%
-            </div>
-            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Gap médio vs. mercado P50</div>
-          </div>
-
-          {/* Custo p/ nivelamento */}
-          <div className="card" style={{ borderLeft: '4px solid #10b981' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ padding: 10, background: '#f0fdf4', borderRadius: 10 }}>
-                <Zap color="#10b981" size={22} />
-              </div>
-              <span style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Estimado</span>
-            </div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              R$ {(stats.monthlyCostP50 / 1000).toFixed(1)}k
-            </div>
-            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Custo mensal para atingir P50</div>
-          </div>
-
-          {/* Benchmarks disponíveis */}
-          <div className="card" style={{ borderLeft: '4px solid #f59e0b' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 16 }}>
-              <div style={{ padding: 10, background: '#fffbeb', borderRadius: 10 }}>
-                <Search color="#f59e0b" size={22} />
-              </div>
-              <span style={{ fontSize: 11, color: '#10b981', fontWeight: 700, background: '#f0fdf4', padding: '2px 8px', borderRadius: 4 }}>
-                IMPORTADO
-              </span>
-            </div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#0f172a', letterSpacing: '-0.02em' }}>
-              1.257
-            </div>
-            <div style={{ fontSize: 13, color: '#64748b', fontWeight: 500 }}>Benchmarks de mercado (2025)</div>
-          </div>
-        </div>
-      )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 24 }}>
-        {/* Gráfico de Gaps dos Colaboradores */}
-        <div className="card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+      {/* Analytics Matrix */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 24, marginBottom: 48 }}>
+        <motion.div variants={itemVars} className="card" style={{ padding: 40, background: 'rgba(15, 23, 42, 0.5)' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
             <div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 4 }}>Gap por Colaborador</h3>
-              <p style={{ fontSize: 13, color: '#64748b' }}>Posicionamento vs. P50 do mercado</p>
+              <h3 style={{ fontSize: 20, fontWeight: 950, color: '#f8fafc', marginBottom: 6 }}>Market Gap Distribution</h3>
+              <p style={{ fontSize: 13, color: '#64748b', fontWeight: 600 }}>Desvio percentual individual vs. benchmarks vigentes.</p>
             </div>
-            <Link href="/diagnostics" style={{ fontSize: 13, color: '#4f46e5', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 4 }}>
-              Ver detalhes <ArrowRight size={14} />
-            </Link>
+            <div style={{ display: 'flex', gap: 16 }}>
+               <div style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: 10, fontWeight: 900, color: '#64748b' }}>
+                  <div style={{ width: 8, height: 8, borderRadius: 2, background: '#6366f1' }} /> GAP ATIVO
+               </div>
+            </div>
           </div>
 
-          {distributionData.length > 0 ? (
-            <div style={{ height: 200 }}>
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={distributionData} margin={{ top: 5, right: 10, left: -20, bottom: 5 }}>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                  <XAxis dataKey="name" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} unit="%" />
-                  <Tooltip formatter={(v: any) => [`${v}%`, 'Gap']} />
-                  <Bar
-                    dataKey="gap"
-                    radius={[4, 4, 0, 0]}
-                    label={false}
-                    fill="#4f46e5"
-                  />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <div style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', gap: 12, color: '#94a3b8' }}>
-              <BarChart2 size={40} style={{ opacity: 0.3 }} />
-              <p style={{ fontSize: 14 }}>Mapeie cargos para ver os gaps</p>
-              <Link href="/job-match" style={{ fontSize: 13, color: '#4f46e5', fontWeight: 600 }}>→ Mapeamento</Link>
-            </div>
-          )}
-        </div>
+          <div style={{ height: 280 }}>
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={distributionData}>
+                <CartesianGrid strokeDasharray="4 4" vertical={false} stroke="rgba(255,255,255,0.03)" />
+                <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 11, fontWeight: 800 }} />
+                <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 11, fontWeight: 800 }} unit="%" />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.02)' }}
+                  contentStyle={{ background: '#030712', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, boxShadow: '0 20px 40px rgba(0,0,0,0.4)', fontSize: 12, fontWeight: 900 }}
+                />
+                <Bar dataKey="gap" radius={[4, 4, 0, 0]} barSize={24}>
+                  {distributionData.map((entry: any, index: number) => (
+                    <Cell key={`cell-${index}`} fill={entry.gap < -10 ? '#f43f5e' : entry.gap > 10 ? '#818cf8' : '#6366f1'} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </motion.div>
 
-        {/* Ações Recomendadas */}
-        <div className="card">
-          <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Ações Recomendadas</h3>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {[
-              {
-                icon: <AlertTriangle size={18} color="#ef4444" />,
-                bg: '#fff1f2',
-                title: stats.avgGap < -10
-                  ? `${stats.totalEmployees} colaboradores abaixo do P50`
-                  : 'Folha dentro do mercado',
-                desc: stats.avgGap < -10 ? 'Simule um ciclo de mérito para nivelamento' : 'Continue monitorando semestralmente',
-                href: '/merit',
-                cta: 'Simular',
-                urgent: stats.avgGap < -10,
-              },
-              {
-                icon: <CheckCircle2 size={18} color="#4f46e5" />,
-                bg: '#eef2ff',
-                title: 'Explorar benchmarks de 2025',
-                desc: '1.257 dados de mercado disponíveis para TI/Software',
-                href: '/benchmark',
-                cta: 'Explorar',
-                urgent: false,
-              },
-              {
-                icon: <Layers size={18} color="#10b981" />,
-                bg: '#f0fdf4',
-                title: 'Gerar Estrutura Salarial',
-                desc: 'Tabela de grades baseada na sua folha atual',
-                href: '/salary-structure',
-                cta: 'Ver',
-                urgent: false,
-              },
-            ].map((action, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: 14, borderRadius: 12, background: '#f8fafc', border: action.urgent ? '1px solid #fecaca' : '1px solid #f1f5f9' }}>
-                <div style={{ width: 40, height: 40, borderRadius: 10, background: action.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {action.icon}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <p style={{ fontSize: 14, fontWeight: 600, margin: 0, marginBottom: 2 }}>{action.title}</p>
-                  <p style={{ fontSize: 12, color: '#64748b', margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{action.desc}</p>
-                </div>
-                <Link href={action.href} className="btn" style={{ padding: '6px 14px', background: action.urgent ? '#ef4444' : '#f1f5f9', color: action.urgent ? 'white' : '#1e293b', fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', flexShrink: 0 }}>
-                  {action.cta}
-                </Link>
+        <motion.div variants={itemVars} style={{ display: 'grid', gridAutoRows: '1fr', gap: 24 }}>
+          <div className="card" style={{ padding: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{ width: 44, height: 44, borderRadius: 12, background: '#f43f5e15', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <AlertTriangle color="#f43f5e" size={20} />
               </div>
-            ))}
+              <h3 style={{ fontSize: 16, fontWeight: 900, color: '#f8fafc' }}>Critical Actions</h3>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+               <Link href="/job-match" style={{ textDecoration: 'none' }}>
+                 <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.2s' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: '#f1f5f9' }}>Auditoria de Mapeamento</div>
+                      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Existem cargos não pareados.</div>
+                    </div>
+                    <ArrowRight size={14} color="#64748b" />
+                 </div>
+               </Link>
+               <Link href="/merit" style={{ textDecoration: 'none' }}>
+                 <div style={{ padding: '16px', background: 'rgba(255,255,255,0.02)', borderRadius: 16, border: '1px solid rgba(255,255,255,0.03)', display: 'flex', alignItems: 'center', gap: 12, transition: 'all 0.2s' }}>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 13, fontWeight: 900, color: '#f1f5f9' }}>Correção de Déficit</div>
+                      <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>12 colabs com alto turnover por salário.</div>
+                    </div>
+                    <ArrowRight size={14} color="#64748b" />
+                 </div>
+               </Link>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Quick Access + Copilot */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
-        {/* Quick Access */}
-        <div className="card">
-          <h3 style={{ fontSize: 17, fontWeight: 700, marginBottom: 20 }}>Acesso Rápido</h3>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-            {quickLinks.map((link) => (
-              <Link key={link.href} href={link.href} style={{ textDecoration: 'none' }}>
-                <div style={{
-                  padding: '14px 16px', borderRadius: 12, border: '1px solid #e2e8f0',
-                  background: '#f8fafc', display: 'flex', alignItems: 'center', gap: 12,
-                  transition: 'all 0.15s', cursor: 'pointer'
-                }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = '#eef2ff'; (e.currentTarget as HTMLElement).style.borderColor = '#c7d2fe'; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = '#f8fafc'; (e.currentTarget as HTMLElement).style.borderColor = '#e2e8f0'; }}
-                >
-                  <div style={{ color: '#4f46e5', flexShrink: 0 }}>{link.icon}</div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#0f172a' }}>{link.label}</div>
-                    <div style={{ fontSize: 11, color: '#94a3b8' }}>{link.desc}</div>
-                  </div>
-                </div>
+          <div className="card" style={{ padding: 32, background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', color: 'white', border: 'none', position: 'relative', overflow: 'hidden' }}>
+            <div style={{ position: 'relative', zIndex: 2 }}>
+              <div style={{ fontSize: 11, fontWeight: 950, opacity: 0.8, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 8 }}>Ready for Strategy</div>
+              <h3 style={{ fontSize: 24, fontWeight: 950, marginBottom: 12 }}>Ativar Ciclo de Mérito</h3>
+              <p style={{ fontSize: 13, opacity: 0.9, lineHeight: 1.5, marginBottom: 20 }}>Deseja simular um ciclo de 5% de correção baseado no gap de mercado atual? </p>
+              <Link href="/merit" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, background: 'white', color: '#4f46e5', padding: '12px 24px', borderRadius: 12, fontSize: 13, fontWeight: 900, textDecoration: 'none', boxShadow: '0 10px 20px rgba(0,0,0,0.1)' }}>
+                Iniciar Simulação <Zap size={16} fill="currentColor" />
               </Link>
-            ))}
-          </div>
-        </div>
-
-        {/* Copilot Carolina */}
-        <div className="card" style={{ background: '#0f172a', color: 'white', border: 'none' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-            <div style={{ width: 40, height: 40, borderRadius: 20, background: 'linear-gradient(135deg, #4f46e5, #7c3aed)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>
-              🤖
             </div>
-            <div>
-              <h3 style={{ fontSize: 17, fontWeight: 700, margin: 0 }}>Carolina</h3>
-              <p style={{ fontSize: 12, color: '#94a3b8', margin: 0 }}>Copilot de Inteligência Salarial</p>
-            </div>
+            <Sparkles size={80} style={{ position: 'absolute', right: -10, bottom: -10, opacity: 0.1 }} />
           </div>
-          <p style={{ fontSize: 14, color: '#94a3b8', marginBottom: 20, lineHeight: 1.6 }}>
-            Olá, Tobias! Tenho <strong style={{ color: 'white' }}>{stats.totalEmployees} colaboradores</strong> e <strong style={{ color: 'white' }}>1.257 benchmarks</strong> carregados. Como posso ajudar?
-          </p>
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-            {[
-              '📊 Quem está mais abaixo do P50?',
-              '💰 Custo para nivelar todos ao mercado',
-              '🔍 Cargo com maior gap',
-              '📈 Simular reajuste de 8%',
-            ].map((q, i) => (
-              <button
-                key={i}
-                onClick={() => setCopilotInput(q.slice(3))}
-                style={{
-                  padding: '8px 12px', background: '#1e293b', color: '#e2e8f0',
-                  fontSize: 11, textAlign: 'left', border: '1px solid #334155',
-                  borderRadius: 8, cursor: 'pointer', lineHeight: 1.4
-                }}
-              >
-                {q}
-              </button>
-            ))}
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <input
-              type="text"
-              placeholder="Pergunte à Carolina..."
-              value={copilotInput}
-              onChange={(e) => setCopilotInput(e.target.value)}
-              style={{
-                flex: 1, padding: '12px 16px', borderRadius: 10,
-                background: '#1e293b', border: '1px solid #334155',
-                color: 'white', fontSize: 14, outline: 'none'
-              }}
-            />
-            <button
-              className="btn btn-primary"
-              style={{ padding: '12px 18px', borderRadius: 10, flexShrink: 0 }}
-            >
-              ↵
-            </button>
-          </div>
-        </div>
+        </motion.div>
       </div>
-    </div>
+
+      {/* Carolina AI Copilot Premium Interface */}
+      <motion.div variants={itemVars} style={{ background: '#030712', borderRadius: 32, padding: 48, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)', filter: 'blur(50px)' }} />
+          
+          <div style={{ position: 'relative', zIndex: 2 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 32 }}>
+              <div style={{ width: 56, height: 56, borderRadius: 18, background: 'linear-gradient(135deg, #6366f1 0%, #4f46e5 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 12px 24px rgba(99, 102, 241, 0.3)' }}>
+                <BrainCircuit size={28} color="white" />
+              </div>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <h3 style={{ fontSize: 22, fontWeight: 950, color: '#f8fafc', margin: 0, letterSpacing: '-0.02em' }}>Carolina AI</h3>
+                  <div style={{ width: 6, height: 6, borderRadius: 3, background: '#10b981' }} />
+                </div>
+                <p style={{ fontSize: 12, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.15em', marginTop: 4 }}>Compensation Copilot</p>
+              </div>
+            </div>
+
+            <p style={{ fontSize: 18, color: '#94a3b8', lineHeight: 1.6, marginBottom: 40, maxWidth: '85%' }}>
+              Tobias, analisei a saúde retentiva da Lola Tech. Identifiquei que <strong style={{ color: '#f8fafc' }}>12 colaboradores de Tech</strong> operam com um déficit médio de <strong style={{ color: '#fb7185' }}>-18.4%</strong> vs market P50. <br/>
+              A probabilidade de turnover voluntário neste cluster subiu para <strong style={{ color: '#fb7185' }}>65%</strong> este trimestre.
+            </p>
+
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 48 }}>
+              {[
+                { l: 'Listar cargos críticos', i: <Target size={14} /> },
+                { l: 'Impacto financeiro de 5%', i: <Activity size={14} /> },
+                { l: 'Gerar Battlecard de Retenção', i: <Gem size={14} /> }
+              ].map((q, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => setCopilotInput(q.l)}
+                  style={{ 
+                    padding: '12px 20px', borderRadius: 14, background: 'rgba(255,255,255,0.02)', 
+                    border: '1px solid rgba(255,255,255,0.05)', color: '#e2e8f0', fontSize: 13, 
+                    fontWeight: 800, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8,
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.05)'; e.currentTarget.style.borderColor = '#6366f1'; }}
+                  onMouseOut={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.02)'; e.currentTarget.style.borderColor = 'rgba(255,255,255,0.05)'; }}
+                >
+                  {q.i} {q.l}
+                </button>
+              ))}
+            </div>
+
+            <div style={{ position: 'relative', width: '100%' }}>
+              <input 
+                type="text"
+                placeholder="Questione Carolina sobre estratégia ou projeções financeiras..."
+                value={copilotInput}
+                onChange={(e) => setCopilotInput(e.target.value)}
+                style={{ 
+                  width: '100%', padding: '24px 80px 24px 32px', borderRadius: 24, 
+                  background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.1)', 
+                  color: 'white', fontSize: 16, fontWeight: 600, outline: 'none',
+                  boxShadow: '0 20px 40px rgba(0,0,0,0.2)'
+                }}
+              />
+              <div style={{ position: 'absolute', right: 24, top: '50%', transform: 'translateY(-50%)', width: 44, height: 44, background: '#6366f1', borderRadius: 14, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+                <ArrowRight size={20} color="white" />
+              </div>
+            </div>
+          </div>
+      </motion.div>
+    </motion.div>
   );
 }

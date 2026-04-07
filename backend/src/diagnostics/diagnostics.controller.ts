@@ -7,9 +7,8 @@ export class DiagnosticsController {
 
     @Get('dashboard-stats')
     async getStats() {
-        // Em um cenário real usaríamos o tenantId do usuário logado
-        // Para o teste, vamos usar um ID fixo ou o primeiro tenant encontrado
-        const tenantId = 'dummy-tenant-id';
+        // Alinhado com o tenantId do seed.ts para a demonstração
+        const tenantId = 'demo-tenant-id';
         return this.diagnosticsService.getDashboardStats(tenantId);
     }
 }
