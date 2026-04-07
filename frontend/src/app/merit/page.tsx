@@ -38,7 +38,7 @@ export default function MeritCyclePage() {
         setError('');
         try {
             const baseUrl = getBackendUrl();
-            const snapsRes = await fetch(`${baseUrl}/payroll/snapshots?tenantId=default`);
+            const snapsRes = await safeFetch(`${baseUrl}/payroll/snapshots?tenantId=default`);
             const snaps = await snapsRes.json();
             if (!snaps || snaps.length === 0) {
                 setError('Nenhuma folha importada. Faça o upload na aba Folha de Pagamento.');
@@ -49,7 +49,7 @@ export default function MeritCyclePage() {
             const snapshotId = snaps[0].id;
             setSnapshotId(snapshotId);
 
-            const analysisRes = await fetch(`${baseUrl}/salary-engine/analyze/${snapshotId}`);
+            const analysisRes = await safeFetch(`${baseUrl}/salary-engine/analyze/${snapshotId}`);
             const analysis = await analysisRes.json();
 
             if (analysis.status !== 'success' || !analysis.mappedEmployees?.length) {

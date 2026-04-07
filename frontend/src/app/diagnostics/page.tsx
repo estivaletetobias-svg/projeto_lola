@@ -26,7 +26,7 @@ export default function DiagnosticsPage() {
         const fetchData = async () => {
             try {
                 const baseUrl = getBackendUrl();
-                const snapRes = await fetch(`${baseUrl}/payroll/snapshots`);
+                const snapRes = await safeFetch(`${baseUrl}/payroll/snapshots`);
                 const snapshots = await snapRes.json();
 
                 if (snapshots.length === 0) {
@@ -38,7 +38,7 @@ export default function DiagnosticsPage() {
                 const latest = snapshots[0];
                 setSnapshot(latest);
 
-                const analysisRes = await fetch(`${baseUrl}/salary-engine/analyze/${latest.id}`);
+                const analysisRes = await safeFetch(`${baseUrl}/salary-engine/analyze/${latest.id}`);
                 const analysisData = await analysisRes.json();
 
                 if (analysisData.status === 'error') {

@@ -74,7 +74,7 @@ export default function SnapshotsPage() {
             formData.append('file', fileObj);
             formData.append('tenantId', 'default');
 
-            const response = await fetch('/api/upload-payroll', {
+            const response = await safeFetch('/api/upload-payroll', {
                 method: 'POST',
                 body: formData,
             });

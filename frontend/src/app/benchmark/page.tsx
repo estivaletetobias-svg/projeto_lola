@@ -79,7 +79,7 @@ export default function BenchmarkExplorerPage() {
                 ...(levelFilter !== 'ALL' && { level: levelFilter }),
             });
             const baseUrl = getBackendUrl();
-            const res = await fetch(`${baseUrl}/market-benchmark?${params}`);
+            const res = await safeFetch(`${baseUrl}/market-benchmark?${params}`);
             if (res.ok) {
                 const json: ApiResponse = await res.json();
                 setBenchmarks(json.data || []);

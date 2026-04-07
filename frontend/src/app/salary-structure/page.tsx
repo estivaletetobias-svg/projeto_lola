@@ -30,7 +30,7 @@ export default function SalaryStructurePage() {
 
             let sid = snapId || snapshotId;
             if (!sid) {
-                const snapsRes = await fetch(`${baseUrl}/payroll/snapshots?tenantId=default`);
+                const snapsRes = await safeFetch(`${baseUrl}/payroll/snapshots?tenantId=default`);
                 const snaps = await snapsRes.json();
                 if (!snaps || snaps.length === 0) {
                     setIsDemo(true);
@@ -42,7 +42,7 @@ export default function SalaryStructurePage() {
                 setSnapshotId(sid);
             }
 
-            const res = await fetch(`${baseUrl}/salary-engine/analyze/${sid}`);
+            const res = await safeFetch(`${baseUrl}/salary-engine/analyze/${sid}`);
             const result = await res.json();
 
             if (result.status === 'success') {

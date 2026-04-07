@@ -40,8 +40,8 @@ export default function Dashboard() {
     try {
       const baseUrl = getBackendUrl();
       const [dashStats, snaps] = await Promise.all([
-        fetch(`${baseUrl}/diagnostics/dashboard-stats`).then(r => r.json()).catch(() => null),
-        fetch(`${baseUrl}/payroll/snapshots?tenantId=default`).then(r => r.json()).catch(() => []),
+        safeFetch(`${baseUrl}/diagnostics/dashboard-stats`).then(r => r.json()).catch(() => null),
+        safeFetch(`${baseUrl}/payroll/snapshots?tenantId=default`).then(r => r.json()).catch(() => []),
       ]);
 
       if (dashStats && !dashStats.error) {
@@ -57,7 +57,7 @@ export default function Dashboard() {
         const sid = snaps[0].id;
         setSnapshotId(sid);
         try {
-          const res = await fetch(`${baseUrl}/salary-engine/analyze/${sid}`);
+          const res = await safeFetch(`${baseUrl}/salary-engine/analyze/${sid}`);
           const result = await res.json();
           if (result.status === 'success') setAnalysis(result);
         } catch (_) { }

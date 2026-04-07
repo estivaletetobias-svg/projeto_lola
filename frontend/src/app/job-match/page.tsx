@@ -39,7 +39,7 @@ export default function JobMatchPage() {
         setError('');
         try {
             const baseUrl = getBackendUrl();
-            const snapsRes = await fetch(`${baseUrl}/payroll/snapshots`);
+            const snapsRes = await safeFetch(`${baseUrl}/payroll/snapshots`);
             const snapshots = await snapsRes.json();
 
             if (!snapshots?.length) {
@@ -52,8 +52,8 @@ export default function JobMatchPage() {
             setSnapshotId(sid);
 
             const [suggestRes, catalogRes] = await Promise.all([
-                fetch(`${baseUrl}/job-match/suggest/${sid}`),
-                fetch(`${baseUrl}/job-match/catalog`),
+                safeFetch(`${baseUrl}/job-match/suggest/${sid}`),
+                safeFetch(`${baseUrl}/job-match/catalog`),
             ]);
 
             setGroups(await suggestRes.json());
@@ -72,7 +72,7 @@ export default function JobMatchPage() {
         try {
             const baseUrl = getBackendUrl();
             for (const empId of group.employeeIds) {
-                await fetch(`${baseUrl}/job-match/approve`, {
+                await safeFetch(`${baseUrl}/job-match/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -101,7 +101,7 @@ export default function JobMatchPage() {
         try {
             const baseUrl = getBackendUrl();
             for (const empId of group.employeeIds) {
-                await fetch(`${baseUrl}/job-match/approve`, {
+                await safeFetch(`${baseUrl}/job-match/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -121,7 +121,7 @@ export default function JobMatchPage() {
         setAutoApproving(true);
         try {
             const baseUrl = getBackendUrl();
-            await fetch(`${baseUrl}/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
+            await safeFetch(`${baseUrl}/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
             await fetchData();
         } finally {
             setAutoApproving(false);
