@@ -5,7 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, TrendingUp, BarChart3, Filter, ChevronDown, Star, 
     ArrowUpRight, ArrowDownRight, Globe, Layers, Activity,
-    Users, ShieldCheck, Download, RefreshCw, AlertCircle, Loader2, Sparkles, LayoutGrid, ListChecks
+    Users, ShieldCheck, Download, RefreshCw, AlertCircle, Loader2, Sparkles, LayoutGrid, ListChecks,
+    Target, Zap, BookOpen, Info, ChevronRight
 } from 'lucide-react';
 import { getBackendUrl } from '../api-config';
 import { 
