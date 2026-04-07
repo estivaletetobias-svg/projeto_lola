@@ -1,0 +1,327 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+
+// Enums converted to documentation as SQLite doesn't support them natively in Prisma
+// Roles: OWNER, CFO, HR_ADMIN, HR_USER, VIEWER
+// JobStatus: PENDING, PROCESSING, COMPLETED, FAILED
+// SnapshotStatus: PENDING, VALIDATING, MAPPING, CALCULATING, READY, ERROR
+
+model Tenant {
+  id             String      @id @default(uuid())
+  name           String
+  cnpj           String?
+  cnae           String?
+  company_size   String?     // bucket: 0-50, 51-200, etc.
+  city           String?
+  state          String?
+  country        String?
+  currency       String      @default("BRL")
+  area_weights   String?       // JSON with strategic weights per area
+  created_at     DateTime    @default(now())
+  updated_at     DateTime    @updatedAt
+  
+  users            User[]
+  snapshots        PayrollSnapshot[]
+  employees        Employee[]
+  merit_cycles     MeritCycle[]
+  diagnostics      CompanyDiagnostic[]
+  area_diagnostics AreaDiagnostic[]
+  audit_events     AuditEvent[]
+  salary_structures SalaryStructure[]
+
+  @@map("tenants")
+}
+
+model User {
+  id         String   @id @default(uuid())
+  tenant_id  String
+  tenant     Tenant   @relation(fields: [tenant_id], references: [id])
+  email      String   @unique
+  role       String   @default("HR_USER")
+  created_at DateTime @default(now())
+
+  audit_events AuditEvent[]
+
+  @@map("users")
+}
+
+model PayrollSnapshot {
+  id          String         @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant         @relation(fields: [tenant_id], references: [id])
+  period_date DateTime
+  source_type String         // e.g. "CSV", "XLSX"
+  s3_file_key String
+  status      String @default("PENDING")
+  created_at  DateTime       @default(now())
+
+  import_jobs      PayrollImportJob[]
+  compensation     Compensation[]
+  job_matches      JobMatch[]
+  diagnostics      CompanyDiagnostic[]
+  area_diagnostics AreaDiagnostic[]
+  merit_cycles     MeritCycle[]
+  salary_structures SalaryStructure[]
+
+  @@map("payroll_snapshots")
+}
+
+model PayrollImportJob {
+  id          String    @id @default(uuid())
+  snapshot_id String
+  snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  status      String @default("PENDING")
+  started_at  DateTime?
+  finished_at DateTime?
+  error_log   String?     // error_log_json
+
+  @@map("payroll_import_jobs")
+}
+
+model Employee {
+  id             String    @id @default(uuid())
+  tenant_id      String
+  tenant         Tenant    @relation(fields: [tenant_id], references: [id])
+  employee_key   String    // identifying code internal to tenant
+  full_name      String?   // masked maybe
+  area           String
+  location_city  String?
+  location_state String?
+  status         String?   // ACTIVE, TERMINATED
+  hired_at       DateTime?
+  terminated_at  DateTime?
+  created_at     DateTime  @default(now())
+
+  compensation         Compensation[]
+  job_matches          JobMatch[]
+  merit_recommendations MeritRecommendation[]
+
+  @@unique([tenant_id, employee_key])
+  @@map("employees")
+}
+
+model Compensation {
+  id             String   @id @default(uuid())
+  employee_id    String
+  employee       Employee @relation(fields: [employee_id], references: [id])
+  snapshot_id    String
+  snapshot       PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  base_salary    Float
+  benefits_value Float    @default(0)
+  variable_value Float    @default(0)
+  overtime_value Float    @default(0)
+  total_cash     Float
+  currency       String   @default("BRL")
+  created_at     DateTime @default(now())
+
+  @@map("compensation")
+}
+
+model JobCatalog {
+  id               String   @id @default(uuid())
+  family           String
+  title_std        String
+  description      String?
+  level            String
+  grade            Int      @default(0)
+  cbo_code         String?
+  created_at       DateTime @default(now())
+
+  job_matches      JobMatch[]
+  market_benchmarks MarketBenchmark[]
+
+  @@map("job_catalog")
+}
+
+
+model JobMatch {
+  id                  String   @id @default(uuid())
+  employee_id         String
+  employee            Employee @relation(fields: [employee_id], references: [id])
+  snapshot_id         String
+  snapshot            PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  job_catalog_id      String
+  job_catalog         JobCatalog @relation(fields: [job_catalog_id], references: [id])
+  confidence          Float
+  method              String   // e.g. "REGEX", "FUZZY", "AI"
+  reviewed_by_user_id String?
+  reviewed_at         DateTime?
+  created_at          DateTime @default(now())
+
+  @@map("job_matches")
+}
+
+model MarketBenchmark {
+  id                  String     @id @default(uuid())
+  job_catalog_id      String
+  job_catalog         JobCatalog @relation(fields: [job_catalog_id], references: [id])
+  cnae                String?
+  company_size_bucket String?
+  city                String?
+  state               String?
+  country             String?
+  p25                 Float
+  p50                 Float
+  p75                 Float
+  n                   Int
+  as_of_date          DateTime
+  source_tag          String?
+  created_at          DateTime   @default(now())
+
+  @@map("market_benchmarks")
+}
+
+model MacroIndex {
+  id          String   @id @default(uuid())
+  index_name  String
+  period_date DateTime
+  value       Float
+  created_at  DateTime @default(now())
+
+  @@map("macro_index")
+}
+
+model MeritCycle {
+  id              String   @id @default(uuid())
+  tenant_id       String
+  tenant          Tenant   @relation(fields: [tenant_id], references: [id])
+  snapshot_id     String
+  snapshot        PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  name            String
+  budget_type     String   // e.g. "FIXED", "PERCENTAGE"
+  budget_value    Float
+  constraints     String?    // teto, piso, etc.
+  area_weights    String?
+  created_at      DateTime @default(now())
+
+  recommendations MeritRecommendation[]
+
+  @@map("merit_cycles")
+}
+
+model MeritRecommendation {
+  id                    String     @id @default(uuid())
+  merit_cycle_id        String
+  merit_cycle           MeritCycle @relation(fields: [merit_cycle_id], references: [id])
+  employee_id           String
+  employee              Employee   @relation(fields: [employee_id], references: [id])
+  action_type           String     // Merit, Promotion, Adjustment
+  suggested_raise_value Float
+  suggested_raise_percent Float
+  new_total_cash        Float
+  cost_monthly          Float
+  cost_annual           Float
+  rationale             String?      // rationale_json
+  created_at            DateTime   @default(now())
+
+  @@map("merit_recommendations")
+}
+
+
+model SalaryStructure {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  snapshot_id String
+  snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  name        String
+  type        String   @default("CLT") // CLT, PJ
+  is_active   Boolean  @default(false)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  grades      SalaryGrade[]
+  steps       SalaryStep[]
+  entries     SalaryTableEntry[]
+
+  @@map("salary_structures")
+}
+
+model SalaryGrade {
+  id             String   @id @default(uuid())
+  structure_id   String
+  structure      SalaryStructure @relation(fields: [structure_id], references: [id])
+  grade_label    String   // e.g., "G1", "Grade 1"
+  midpoint       Float
+  range_spread   Float    // percentage (e.g., 0.4 for 40%)
+  created_at     DateTime @default(now())
+
+  entries        SalaryTableEntry[]
+
+  @@map("salary_grades")
+}
+
+model SalaryStep {
+  id                String   @id @default(uuid())
+  structure_id      String
+  structure         SalaryStructure @relation(fields: [structure_id], references: [id])
+  step_label        String   // e.g., "A", "B", "1"
+  percent_increment Float    // percentage from midpoint or previous step
+  created_at        DateTime @default(now())
+
+  entries           SalaryTableEntry[]
+
+  @@map("salary_steps")
+}
+
+model SalaryTableEntry {
+  id             String   @id @default(uuid())
+  structure_id   String
+  structure      SalaryStructure @relation(fields: [structure_id], references: [id])
+  grade_id       String
+  grade          SalaryGrade @relation(fields: [grade_id], references: [id])
+  step_id        String
+  step           SalaryStep @relation(fields: [step_id], references: [id])
+  value          Float
+  created_at     DateTime @default(now())
+
+  @@unique([structure_id, grade_id, step_id])
+  @@map("salary_table_entries")
+}
+
+model CompanyDiagnostic {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  snapshot_id String
+  snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  metrics     String
+  created_at  DateTime @default(now())
+
+  @@map("company_diagnostics")
+}
+
+model AreaDiagnostic {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  snapshot_id String
+  snapshot    PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
+  area_name   String
+  metrics     String
+  created_at  DateTime @default(now())
+
+  @@map("area_diagnostics")
+}
+
+model AuditEvent {
+  id          String   @id @default(uuid())
+  tenant_id   String
+  tenant      Tenant   @relation(fields: [tenant_id], references: [id])
+  user_id     String?
+  user        User?    @relation(fields: [user_id], references: [id])
+  entity_type String
+  entity_id   String
+  action      String
+  metadata    String?
+  created_at  DateTime @default(now())
+
+  @@map("audit_events")
+}
