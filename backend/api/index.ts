@@ -5,9 +5,9 @@ let app: any;
 export default async function handler(req: any, res: any) {
   try {
     if (!app) {
-      // Dynamic imports to catch module resolution crashes
-      const { NestFactory } = await import('@nestjs/core');
-      const { AppModule } = await import('../src/app.module');
+      // Import PRECOMPILED code from dist/ to retain exactly the decorators created by 'nest build'
+      const { NestFactory } = require('@nestjs/core');
+      const { AppModule } = require('../dist/src/app.module');
       
       app = await NestFactory.create(AppModule);
       
