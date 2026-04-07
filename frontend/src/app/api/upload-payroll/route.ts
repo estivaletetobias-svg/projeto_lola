@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import * as XLSX from 'xlsx';
+// @ts-ignore
 import pdf from 'pdf-parse-fork';
 
 export const runtime = 'nodejs';
