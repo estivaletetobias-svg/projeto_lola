@@ -10,9 +10,11 @@ import {
     Download, AlertTriangle, RefreshCw, Loader2, 
     TrendingDown, Users, Target, DollarSign, 
     ChevronRight, Sparkles, ShieldAlert, Activity,
+    Cpu, AlertCircle, Filter, LayoutGrid, ListChecks,
     Zap, Gem, ArrowUpRight, ArrowDownRight, Info
 } from 'lucide-react';
 import Link from 'next/link';
+import { getBackendUrl } from '../api-config';
 
 export default function DiagnosticsPage() {
     const [loading, setLoading] = useState(true);
@@ -23,8 +25,8 @@ export default function DiagnosticsPage() {
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const host = window.location.hostname;
-                const snapRes = await fetch(`http://${host}:3001/payroll/snapshots`);
+                const baseUrl = getBackendUrl();
+                const snapRes = await fetch(`${baseUrl}/payroll/snapshots`);
                 const snapshots = await snapRes.json();
 
                 if (snapshots.length === 0) {
@@ -36,7 +38,7 @@ export default function DiagnosticsPage() {
                 const latest = snapshots[0];
                 setSnapshot(latest);
 
-                const analysisRes = await fetch(`http://${host}:3001/salary-engine/analyze/${latest.id}`);
+                const analysisRes = await fetch(`${baseUrl}/salary-engine/analyze/${latest.id}`);
                 const analysisData = await analysisRes.json();
 
                 if (analysisData.status === 'error') {

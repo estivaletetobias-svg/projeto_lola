@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Search, TrendingUp, BarChart3, Filter, ChevronDown, Star, 
     ArrowUpRight, ArrowDownRight, Globe, Layers, Activity,
-    ChevronRight, Zap, Target, BookOpen, Info, Loader2
+    Users, ShieldCheck, Download, RefreshCw, AlertCircle, Loader2, Sparkles, LayoutGrid, ListChecks
 } from 'lucide-react';
+import { getBackendUrl } from '../api-config';
 import { 
     BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
     ResponsiveContainer, Cell, AreaChart, Area 
@@ -70,14 +71,14 @@ export default function BenchmarkExplorerPage() {
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
-            const host = window.location.hostname;
             const params = new URLSearchParams({
                 page: String(page),
                 pageSize: String(pageSize),
                 ...(search && { search }),
                 ...(levelFilter !== 'ALL' && { level: levelFilter }),
             });
-            const res = await fetch(`http://${host}:3001/market-benchmark?${params}`);
+            const baseUrl = getBackendUrl();
+            const res = await fetch(`${baseUrl}/market-benchmark?${params}`);
             if (res.ok) {
                 const json: ApiResponse = await res.json();
                 setBenchmarks(json.data || []);

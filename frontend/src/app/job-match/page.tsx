@@ -9,6 +9,7 @@ import {
     Target, BrainCircuit, LayoutGrid, ListChecks
 } from 'lucide-react';
 import Link from 'next/link';
+import { getBackendUrl } from '../api-config';
 
 const LEVEL_LABELS: Record<string, string> = {
     ANY: 'Indiferente', JUNIOR: 'Júnior', PLENO: 'Pleno',
@@ -37,8 +38,8 @@ export default function JobMatchPage() {
         setLoading(true);
         setError('');
         try {
-            const host = window.location.hostname;
-            const snapsRes = await fetch(`http://${host}:3001/payroll/snapshots`);
+            const baseUrl = getBackendUrl();
+            const snapsRes = await fetch(`${baseUrl}/payroll/snapshots`);
             const snapshots = await snapsRes.json();
 
             if (!snapshots?.length) {
@@ -51,8 +52,8 @@ export default function JobMatchPage() {
             setSnapshotId(sid);
 
             const [suggestRes, catalogRes] = await Promise.all([
-                fetch(`http://${host}:3001/job-match/suggest/${sid}`),
-                fetch(`http://${host}:3001/job-match/catalog`),
+                fetch(`${baseUrl}/job-match/suggest/${sid}`),
+                fetch(`${baseUrl}/job-match/catalog`),
             ]);
 
             setGroups(await suggestRes.json());
@@ -69,9 +70,9 @@ export default function JobMatchPage() {
     const handleApprove = async (group: any, jobCatalogId: string) => {
         setSaving(group.internalTitle);
         try {
-            const host = window.location.hostname;
+            const baseUrl = getBackendUrl();
             for (const empId of group.employeeIds) {
-                await fetch(`http://${host}:3001/job-match/approve`, {
+                await fetch(`${baseUrl}/job-match/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -98,9 +99,9 @@ export default function JobMatchPage() {
     const handleRemove = async (group: any) => {
         setSaving(group.internalTitle);
         try {
-            const host = window.location.hostname;
+            const baseUrl = getBackendUrl();
             for (const empId of group.employeeIds) {
-                await fetch(`http://${host}:3001/job-match/approve`, {
+                await fetch(`${baseUrl}/job-match/approve`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -119,8 +120,8 @@ export default function JobMatchPage() {
     const handleAutoApproveAll = async () => {
         setAutoApproving(true);
         try {
-            const host = window.location.hostname;
-            await fetch(`http://${host}:3001/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
+            const baseUrl = getBackendUrl();
+            await fetch(`${baseUrl}/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
             await fetchData();
         } finally {
             setAutoApproving(false);

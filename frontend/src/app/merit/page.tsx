@@ -5,8 +5,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Target, Zap, Shield, Download, AlertCircle, Loader2, RefreshCw, 
     ArrowRight, ChevronRight, TrendingUp, Wallet, CheckCircle2,
-    Sparkles, BrainCircuit, Filter
+    Sparkles, BrainCircuit, Filter, History, LayoutGrid, ListChecks
 } from 'lucide-react';
+import { getBackendUrl } from '../api-config';
 import Link from 'next/link';
 import * as XLSX from 'xlsx';
 
@@ -26,6 +27,7 @@ export default function MeritCyclePage() {
     const [error, setError] = useState('');
     const [employees, setEmployees] = useState<Employee[]>([]);
     const [adjustments, setAdjustments] = useState<Record<number, number>>({});
+    const [snapshotId, setSnapshotId] = useState<string | null>(null);
 
     useEffect(() => {
         loadEmployees();
@@ -35,8 +37,8 @@ export default function MeritCyclePage() {
         setLoading(true);
         setError('');
         try {
-            const host = window.location.hostname;
-            const snapsRes = await fetch(`http://${host}:3001/payroll/snapshots?tenantId=default`);
+            const baseUrl = getBackendUrl();
+            const snapsRes = await fetch(`${baseUrl}/payroll/snapshots?tenantId=default`);
             const snaps = await snapsRes.json();
             if (!snaps || snaps.length === 0) {
                 setError('Nenhuma folha importada. Faça o upload na aba Folha de Pagamento.');
@@ -45,7 +47,9 @@ export default function MeritCyclePage() {
             }
 
             const snapshotId = snaps[0].id;
-            const analysisRes = await fetch(`http://${host}:3001/salary-engine/analyze/${snapshotId}`);
+            setSnapshotId(snapshotId);
+
+            const analysisRes = await fetch(`${baseUrl}/salary-engine/analyze/${snapshotId}`);
             const analysis = await analysisRes.json();
 
             if (analysis.status !== 'success' || !analysis.mappedEmployees?.length) {
