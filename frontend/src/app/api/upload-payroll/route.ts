@@ -92,7 +92,7 @@ export async function POST(request: NextRequest) {
         }
 
         // --- Persist to Backend ---
-        const backendUrl = 'https://projeto-lola-mxos.vercel.app';
+        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:3001';
         try {
             const payload = {
                 fileName: file.name,
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
                     status: 'success',
                     count: employees.length,
                     snapshotId: result.snapshotId,
-                    employees: employees.slice(0, 3),
+                    employees: employees,
                 });
             }
         } catch (backendErr) {
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             status: 'success',
             count: employees.length,
-            employees: employees.slice(0, 3)
+            employees: employees,
         });
 
     } catch (error: any) {

@@ -85,6 +85,12 @@ export default function SnapshotsPage() {
             if (response.ok) {
                 const result = await response.json();
                 setRecordCount(result.count || 0);
+                
+                // Salvar dados extraidos reais no Cache do Navegador para a apresentação rodar 100% autônoma
+                if (result.employees && typeof window !== 'undefined') {
+                    localStorage.setItem('@lola-live-employees', JSON.stringify(result.employees));
+                }
+
                 setAnalyzeProgress(100);
                 setTimeout(() => setStep(4), 800);
             } else {
