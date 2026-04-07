@@ -1,10 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
-import officeParser from 'officeparser';
-import fileType from 'file-type';
-
-// Forcing bundle inclusion
-const _forceBundle = fileType;
+import * as XLSX from 'xlsx';
+import pdf from 'pdf-parse-fork';
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
@@ -14,7 +11,7 @@ const openai = new OpenAI({
 });
 
 const AI_SYSTEM_PROMPT = `You are an elite payroll data extraction engine. 
-You will receive raw text from a payroll document (PDF, Excel, or CSV).
+You will receive raw text from a payroll document.
 Extract ALL employee rows. Ignore headers, empty rows, totals, and decorative lines.
 Ensure salary numbers are floats (e.g., 5000.00 not "5.000,00").
 Return a strictly valid JSON object with a single root key 'employees' containing an array.
@@ -40,20 +37,36 @@ export async function POST(request: NextRequest) {
 
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
+        const fileName = file.name.toLowerCase();
         
-        // --- Use officeParser as the universal engine ---
         let textContent = '';
-        try {
-            textContent = await (officeParser as any).parseOffice(buffer);
-            // Safety cap for tokens
-            textContent = textContent.substring(0, 50000);
-        } catch (parseError: any) {
-            console.error('Parser error:', parseError);
-            return NextResponse.json({ error: `Could not read file: ${parseError.message}` }, { status: 422 });
+
+        if (fileName.endsWith('.pdf')) {
+            try {
+                // pdf-parse-fork handles Node environment correctly
+                const data = await pdf(buffer);
+                textContent = data.text;
+            } catch (err: any) {
+                console.error('PDF Parse error:', err);
+                return NextResponse.json({ error: `Could not read PDF: ${err.message}` }, { status: 422 });
+            }
+        } 
+        else if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls') || fileName.endsWith('.csv')) {
+            try {
+                const workbook = XLSX.read(buffer, { type: 'buffer' });
+                const firstSheetName = workbook.SheetNames[0];
+                const worksheet = workbook.Sheets[firstSheetName];
+                textContent = XLSX.utils.sheet_to_csv(worksheet);
+            } catch (err: any) {
+                console.error('Excel Parse error:', err);
+                return NextResponse.json({ error: `Could not read spreadsheet: ${err.message}` }, { status: 422 });
+            }
+        } else {
+            return NextResponse.json({ error: 'Unsupported file type. Please upload PDF, XLSX, or CSV.' }, { status: 400 });
         }
 
-        if (!textContent || textContent.trim().length < 10) {
-            return NextResponse.json({ error: 'The file appears to be empty or unreadable.' }, { status: 422 });
+        if (!textContent || textContent.trim().length < 5) {
+            return NextResponse.json({ error: 'File appears to be empty or unreadable.' }, { status: 422 });
         }
 
         // --- Call OpenAI ---
@@ -62,7 +75,7 @@ export async function POST(request: NextRequest) {
             response_format: { type: 'json_object' },
             messages: [
                 { role: 'system', content: AI_SYSTEM_PROMPT },
-                { role: 'user', content: textContent }
+                { role: 'user', content: textContent.substring(0, 60000) }
             ],
             temperature: 0,
         });
@@ -74,10 +87,10 @@ export async function POST(request: NextRequest) {
         const employees: any[] = jsonResult.employees || [];
 
         if (employees.length === 0) {
-            return NextResponse.json({ error: 'AI could not extract any employee data. Please ensure the file contains payroll records.' }, { status: 422 });
+            return NextResponse.json({ error: 'AI could not find employees in this file.' }, { status: 422 });
         }
 
-        // --- Proxy to Backend if available ---
+        // --- Persist to Backend ---
         const backendUrl = process.env.BACKEND_URL || 'http://localhost:3001';
         try {
             const payload = {
@@ -96,8 +109,7 @@ export async function POST(request: NextRequest) {
             const backendRes = await fetch(`${backendUrl}/payroll/upload-local`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
-                body: JSON.stringify(payload),
-                signal: AbortSignal.timeout(15000),
+                body: JSON.stringify(payload)
             });
 
             if (backendRes.ok) {
@@ -110,14 +122,13 @@ export async function POST(request: NextRequest) {
                 });
             }
         } catch (backendErr) {
-            console.warn('Backend proxy failed, returning raw extracted data:', backendErr);
+            console.warn('Backend unavailable, returning extracted data only.');
         }
 
         return NextResponse.json({
             status: 'success',
             count: employees.length,
-            employees: employees.slice(0, 3),
-            note: 'Processed by AI. Connect backend for full persistence.',
+            employees: employees.slice(0, 3)
         });
 
     } catch (error: any) {
