@@ -32,7 +32,9 @@ export const MOCK_DATA = {
 export const safeFetch = async (endpoint: string, options?: RequestInit) => {
     const baseUrl = getBackendUrl();
     const isFullUrl = endpoint.startsWith('http');
-    const url = isFullUrl ? endpoint : `${baseUrl}${endpoint}`;
+    // Se o endpoint for para a própria Vercel (Next.js API route), não mande para o Nest.js
+    const isInternalRoute = endpoint.startsWith('/api/');
+    const url = isFullUrl || isInternalRoute ? endpoint : `${baseUrl}${endpoint}`;
 
     try {
         const response = await fetch(url, { 
