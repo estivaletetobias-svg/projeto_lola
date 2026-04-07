@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import officeParser from 'officeparser';
+import fileType from 'file-type';
+
+// Forcing bundle inclusion
+const _forceBundle = fileType;
 
 export const runtime = 'nodejs';
 export const maxDuration = 60;
