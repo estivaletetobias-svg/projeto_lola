@@ -23,18 +23,11 @@ export const MOCK_DATA = {
     }
 };
 
-// Função mágica de Fetch com Backup Automático
+// MODO PITCH ATIVADO: Não tenta falar com o servidor para ser Instantâneo
 export const safeFetch = async (endpoint: string, options?: RequestInit) => {
-    const url = `${getBackendUrl()}${endpoint}`;
-    try {
-        const response = await fetch(url, { ...options, signal: AbortSignal.timeout(3000) });
-        if (!response.ok) throw new Error('Offline');
-        return await response.json();
-    } catch (e) {
-        console.warn('Backend indisponível. Ativando Dados de Demonstração (Pitch Mode)...');
-        // Retorna dados fakes dependendo do que foi pedido
-        if (endpoint.includes('stats')) return MOCK_DATA.stats;
-        if (endpoint.includes('diagnostics')) return MOCK_DATA.diagnostics;
-        return [];
-    }
+    console.warn('PITCHE MODE ACTIVE: Usando inteligência local.');
+    if (endpoint.includes('stats')) return MOCK_DATA.stats;
+    if (endpoint.includes('diagnostics')) return MOCK_DATA.diagnostics;
+    if (endpoint.includes('snapshots')) return [{ id: '1', fileName: 'Folha_Abril_Premium.pdf', createdAt: new Date() }];
+    return [];
 };
