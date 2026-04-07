@@ -41,6 +41,9 @@ var __importStar = (this && this.__importStar) || (function () {
 var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 var ImportValidationProcessor_1;
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ImportValidationProcessor = void 0;
@@ -48,8 +51,9 @@ const bullmq_1 = require("@nestjs/bullmq");
 const common_1 = require("@nestjs/common");
 const prisma_service_1 = require("../prisma/prisma.service");
 const storage_service_1 = require("../storage/storage.service");
-const sync_1 = require("csv-parse/sync");
 const ExcelJS = __importStar(require("exceljs"));
+const openai_1 = __importDefault(require("openai"));
+const pdfParse = require('pdf-parse');
 let ImportValidationProcessor = ImportValidationProcessor_1 = class ImportValidationProcessor extends bullmq_1.WorkerHost {
     prisma;
     storage;
@@ -76,35 +80,62 @@ let ImportValidationProcessor = ImportValidationProcessor_1 = class ImportValida
             const key = snapshot.s3_file_key;
             const fileBody = await this.storage.getFile(key);
             const buffer = await this.streamToBuffer(fileBody);
-            let data = [];
-            if (snapshot.source_type === 'XLSX') {
+            let textContent = '';
+            if (snapshot.source_type === 'XLSX' || key.toLowerCase().endsWith('.xlsx')) {
+                this.logger.log(`Parsing XLSX to text...`);
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(buffer);
                 const worksheet = workbook.getWorksheet(1);
                 const rows = [];
                 if (worksheet) {
                     worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-                        if (rowNumber === 1)
-                            return;
                         rows.push(row.values);
                     });
                 }
-                data = rows.map(r => ({
-                    employee_key: r[1],
-                    full_name: r[2],
-                    area: r[3],
-                    base_salary: parseFloat(r[4] || 0),
-                    benefits: parseFloat(r[5] || 0),
-                    variable: parseFloat(r[6] || 0),
-                }));
+                textContent = JSON.stringify(rows).substring(0, 50000);
+            }
+            else if (snapshot.source_type === 'PDF' || snapshot.source_type === 'pdf' || key.toLowerCase().endsWith('.pdf')) {
+                this.logger.log(`Parsing PDF to text...`);
+                const pdfData = await pdfParse(buffer);
+                textContent = pdfData.text;
             }
             else {
-                const records = (0, sync_1.parse)(buffer.toString(), {
-                    columns: true,
-                    skip_empty_lines: true,
-                });
-                data = records;
+                this.logger.log(`Assuming CSV/TXT format...`);
+                textContent = buffer.toString().substring(0, 50000);
             }
+            this.logger.log(`Extracting data via OpenAI API for zero-touch parsing...`);
+            const openai = new openai_1.default({ apiKey: process.env.OPENAI_API_KEY });
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are an elite payroll data extraction engine. You will be given raw text extracted from a payroll slip, CSV, or spreadsheet.
+                        Extract ALL employee rows. Ignore completely empty lines or purely decorative headers. Ensure numbers are properly formatted as floats (e.g., 5000.00 not 5.000,00).
+                        Return a strictly valid JSON object with a single root key 'employees', containing an array of objects.
+                        Each object MUST matching this TS interface exactly:
+                        {
+                            employee_key: string; // Document, ID, CPF, or generate a unique string if none exists
+                            full_name: string; // The full name of the employee
+                            area: string; // Their role, job title, department, or 'Geral'
+                            base_salary: number; // Base salary value
+                            benefits: number; // Sum of benefits or 0
+                            variable: number; // Sum of variable pay or 0
+                        }`
+                    },
+                    {
+                        role: "user",
+                        content: textContent
+                    }
+                ]
+            });
+            const resultText = response.choices[0].message.content;
+            if (!resultText)
+                throw new Error("OpenAI returned empty response");
+            const jsonResult = JSON.parse(resultText);
+            const data = jsonResult.employees || [];
+            this.logger.log(`OpenAI extracted ${data.length} records dynamically.`);
             const errors = [];
             for (const row of data) {
                 try {

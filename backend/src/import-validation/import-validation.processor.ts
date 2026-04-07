@@ -42,76 +42,65 @@ export class ImportValidationProcessor extends WorkerHost {
             const fileBody = await this.storage.getFile(key);
             const buffer = await this.streamToBuffer(fileBody);
 
-            let data: any[] = [];
-            if (snapshot.source_type === 'XLSX') {
+            let textContent = '';
+
+            if (snapshot.source_type === 'XLSX' || key.toLowerCase().endsWith('.xlsx')) {
+                this.logger.log(`Parsing XLSX to text...`);
                 const workbook = new ExcelJS.Workbook();
                 await workbook.xlsx.load(buffer as any);
                 const worksheet = workbook.getWorksheet(1);
                 const rows: any[] = [];
                 if (worksheet) {
                     worksheet.eachRow({ includeEmpty: false }, (row, rowNumber) => {
-                        if (rowNumber === 1) return; // Header
                         rows.push(row.values);
                     });
                 }
-                // Simplistic mapping for MVP
-                data = rows.map(r => ({
-                    employee_key: String(r[1] || `tmp-${Date.now()}`),
-                    full_name: String(r[2] || 'Sem Nome'),
-                    area: String(r[3] || 'Geral'),
-                    base_salary: parseFloat(r[4] || 0),
-                    benefits: parseFloat(r[5] || 0),
-                    variable: parseFloat(r[6] || 0),
-                }));
+                textContent = JSON.stringify(rows).substring(0, 50000); // Prevent token overflow for huge files
             } else if (snapshot.source_type === 'PDF' || snapshot.source_type === 'pdf' || key.toLowerCase().endsWith('.pdf')) {
-                this.logger.log(`Extracting data from PDF via OpenAI API...`);
-                // Use pdf-parse to extract raw text
+                this.logger.log(`Parsing PDF to text...`);
                 const pdfData = await pdfParse(buffer);
-                const textContent = pdfData.text;
-
-                // Call OpenAI to structure it
-                const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-                
-                const response = await openai.chat.completions.create({
-                    model: "gpt-4o", // Using GPT-4o for maximum accuracy on tables
-                    response_format: { type: "json_object" },
-                    messages: [
-                        {
-                            role: "system",
-                            content: `You are an elite payroll data extraction engine. You will be given raw text extracted from a PDF payroll slip/spreadsheet.
-                            Extract ALL employee rows. Ensure numbers are properly formatted as floats (e.g., 5000.00 not 5.000,00).
-                            Return a strictly valid JSON object with a single root key 'employees', containing an array of objects.
-                            Each object MUST matching this TS interface exactly:
-                            {
-                                employee_key: string; // Document, ID, CPF, or generate a unique string if none exists
-                                full_name: string; // The full name of the employee
-                                area: string; // Their role, job title, department, or 'Geral'
-                                base_salary: number; // Base salary value
-                                benefits: number; // Sum of benefits or 0
-                                variable: number; // Sum of variable pay or 0
-                            }`
-                        },
-                        {
-                            role: "user",
-                            content: textContent
-                        }
-                    ]
-                });
-
-                const resultText = response.choices[0].message.content;
-                if (!resultText) throw new Error("OpenAI returned empty response");
-                
-                const jsonResult = JSON.parse(resultText);
-                data = jsonResult.employees || [];
-                
-                this.logger.log(`OpenAI extracted ${data.length} employee records from PDF.`);
+                textContent = pdfData.text;
             } else {
-                const records = parse(buffer.toString(), {
-                    columns: true,
-                    skip_empty_lines: true,
-                });
-                data = records;
+                this.logger.log(`Assuming CSV/TXT format...`);
+                textContent = buffer.toString().substring(0, 50000);
             }
+
+            this.logger.log(`Extracting data via OpenAI API for zero-touch parsing...`);
+            const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+            
+            const response = await openai.chat.completions.create({
+                model: "gpt-4o",
+                response_format: { type: "json_object" },
+                messages: [
+                    {
+                        role: "system",
+                        content: `You are an elite payroll data extraction engine. You will be given raw text extracted from a payroll slip, CSV, or spreadsheet.
+                        Extract ALL employee rows. Ignore completely empty lines or purely decorative headers. Ensure numbers are properly formatted as floats (e.g., 5000.00 not 5.000,00).
+                        Return a strictly valid JSON object with a single root key 'employees', containing an array of objects.
+                        Each object MUST matching this TS interface exactly:
+                        {
+                            employee_key: string; // Document, ID, CPF, or generate a unique string if none exists
+                            full_name: string; // The full name of the employee
+                            area: string; // Their role, job title, department, or 'Geral'
+                            base_salary: number; // Base salary value
+                            benefits: number; // Sum of benefits or 0
+                            variable: number; // Sum of variable pay or 0
+                        }`
+                    },
+                    {
+                        role: "user",
+                        content: textContent
+                    }
+                ]
+            });
+
+            const resultText = response.choices[0].message.content;
+            if (!resultText) throw new Error("OpenAI returned empty response");
+            
+            const jsonResult = JSON.parse(resultText);
+            const data = jsonResult.employees || [];
+            
+            this.logger.log(`OpenAI extracted ${data.length} records dynamically.`);
 
             // 1. Validate and Persist
             const errors: Record<string, any>[] = []; // Changed type to Record<string, any>[]

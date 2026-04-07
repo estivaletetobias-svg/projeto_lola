@@ -15,8 +15,8 @@ async function bootstrap() {
     });
     app.use((0, express_1.json)({ limit: '50mb' }));
     app.use((0, express_1.urlencoded)({ limit: '50mb', extended: true }));
-    await app.listen(process.env.PORT ?? 3000);
-    console.log(`--- BACKEND Lola ON (v2): Port ${process.env.PORT ?? 3000} ---`);
+    await app.listen(process.env.PORT ?? 3001);
+    console.log(`--- BACKEND Lola ON (v2): Port ${process.env.PORT ?? 3001} ---`);
 }
 bootstrap();
 //# sourceMappingURL=main.js.map

@@ -12,7 +12,7 @@ export declare class MarketBenchmarkController {
             };
         } & {
             id: string;
-            job_catalog_id: string;
+            created_at: Date;
             cnae: string | null;
             company_size_bucket: string | null;
             city: string | null;
@@ -24,7 +24,7 @@ export declare class MarketBenchmarkController {
             n: number;
             as_of_date: Date;
             source_tag: string | null;
-            created_at: Date;
+            job_catalog_id: string;
         })[];
         total: number;
         page: number;

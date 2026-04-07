@@ -8,46 +8,17 @@ async function main() {
     await prisma.jobMatch.deleteMany({});
     await prisma.jobCatalog.deleteMany({});
     const constructionJobs = [
-        {
-            family: 'Obras', title_std: 'Servente', level: 'Junior', grade: 2, cbo_code: '717020',
-            description: 'Executa tarefas manuais simples, auxilia pedreiros e eletricistas no canteiro de obras.'
-        },
-        {
-            family: 'Obras', title_std: 'Pedreiro de Alvenaria', level: 'Pleno', grade: 5, cbo_code: '715210',
-            description: 'Executa serviços de fundação, alvenaria de vedação e estrutural segundo projetos.'
-        },
-        {
-            family: 'Obras', title_std: 'Azulejista / Revestidor', level: 'Pleno', grade: 6, cbo_code: '715210',
-            description: 'Especialista em acabamentos finos, colocação de cerâmicas, porcelanatos e pedras.'
-        },
-        {
-            family: 'Obras', title_std: 'Mestre de Obras', level: 'Senior', grade: 12, cbo_code: '710205',
-            description: 'Responsável direto pela execução física da obra, coordenação de equipes e cumprimento de cronogramas.'
-        },
-        {
-            family: 'Engenharia', title_std: 'Engenheiro Civil Junior', level: 'Junior', grade: 14, cbo_code: '214205',
-            description: 'Acompanha a execução técnica, faz medições e garante o cumprimento das normas de segurança.'
-        },
-        {
-            family: 'Engenharia', title_std: 'Engenheiro Civil Pleno', level: 'Pleno', grade: 18, cbo_code: '214205',
-            description: 'Gestor técnico de obra, responsável por custos, prazos e compatibilização de projetos.'
-        },
-        {
-            family: 'Engenharia', title_std: 'Engenheiro de Segurança', level: 'Pleno', grade: 16, cbo_code: '214915',
-            description: 'Garante o cumprimento das NRs, treinamento de equipes e prevenção de acidentes de trabalho.'
-        },
-        {
-            family: 'Suprimentos', title_std: 'Analista de Suprimentos', level: 'Pleno', grade: 10, cbo_code: '354205',
-            description: 'Gestão de compras de insumos para construção, cotações e negociações com fornecedores de grande porte.'
-        },
-        {
-            family: 'Financeiro', title_std: 'Assistente Administrativo de Obras', level: 'Junior', grade: 6, cbo_code: '411010',
-            description: 'Focado em rotinas de canteiro: RH local, controle de ponto e documentação de integração.'
-        },
-        {
-            family: 'Gestão', title_std: 'Gerente de Planejamento', level: 'Senior', grade: 24, cbo_code: '142105',
-            description: 'Gestão estratégica de múltiplos canteiros, controle orçamentário e interfaces executivas.'
-        }
+        { family: 'Obras', title_std: 'Servente', level: 'Junior', grade: 2, cbo_code: '717020', description: 'Executa tarefas manuais simples.' },
+        { family: 'Obras', title_std: 'Pedreiro', level: 'Pleno', grade: 6, cbo_code: '715210', description: 'Executa serviços de fundação e alvenaria.' },
+        { family: 'Engenharia', title_std: 'Engenheiro Civil', level: 'Pleno', grade: 18, cbo_code: '214205', description: 'Gestor técnico de obra.' },
+        { family: 'Engenharia', title_std: 'Mestre de Obras', level: 'Senior', grade: 12, cbo_code: '710205', description: 'Coordenação de equipes.' },
+        { family: 'Tecnologia', title_std: 'Software Engineer', level: 'Junior', grade: 12, cbo_code: '212405', description: 'Desenvolvimento de sistemas escaláveis e APIs.' },
+        { family: 'Tecnologia', title_std: 'Software Engineer', level: 'Pleno', grade: 18, cbo_code: '212405', description: 'Arquitetura de software e mentoria técnica.' },
+        { family: 'Tecnologia', title_std: 'Software Engineer', level: 'Senior', grade: 24, cbo_code: '212405', description: 'Liderança técnica de squads e decisões de infraestrutura.' },
+        { family: 'Produto', title_std: 'Product Manager', level: 'Pleno', grade: 20, cbo_code: '142105', description: 'Gestão de roadmap e descoberta de produto.' },
+        { family: 'Tecnologia', title_std: 'Data Scientist', level: 'Senior', grade: 26, cbo_code: '211105', description: 'Modelagem preditiva e inteligência de dados.' },
+        { family: 'Executivo', title_std: 'CTO', level: 'Executive', grade: 45, cbo_code: '121010', description: 'Visão tecnológica estratégica e gestão de engenharia.' },
+        { family: 'Vendas', title_std: 'Account Executive', level: 'Senior', grade: 22, cbo_code: '354120', description: 'Negociações B2B de alto valor.' }
     ];
     for (const job of constructionJobs) {
         await prisma.jobCatalog.create({ data: job });

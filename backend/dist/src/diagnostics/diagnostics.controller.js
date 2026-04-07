@@ -18,7 +18,7 @@ let DiagnosticsController = class DiagnosticsController {
         this.diagnosticsService = diagnosticsService;
     }
     async getStats() {
-        const tenantId = 'dummy-tenant-id';
+        const tenantId = 'demo-tenant-id';
         return this.diagnosticsService.getDashboardStats(tenantId);
     }
 };
