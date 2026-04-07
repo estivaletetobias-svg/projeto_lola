@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
         // --- Use officeParser as the universal engine ---
         let textContent = '';
         try {
-            textContent = await officeParser.parseOfficeAsync(buffer);
+            textContent = await (officeParser as any).parseOffice(buffer);
             // Safety cap for tokens
             textContent = textContent.substring(0, 50000);
         } catch (parseError: any) {
