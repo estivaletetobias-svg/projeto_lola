@@ -3,10 +3,10 @@ import { prisma } from '@/lib/prisma';
 
 export async function GET(
     request: Request,
-    { params }: { params: { snapshotId: string } }
+    { params }: { params: Promise<{ snapshotId: string }> }
 ) {
     try {
-        const { snapshotId } = params;
+        const { snapshotId } = await params;
 
         // Fetch all employees for this snapshot
         const employees = await prisma.employee.findMany({
