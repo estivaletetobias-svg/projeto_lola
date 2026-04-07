@@ -121,7 +121,7 @@ export default function Sidebar() {
                             TE
                         </div>
                         <div style={{ flex: 1, minWidth: 0 }}>
-                            <div style={{ fontSize: 13, fontWeight: 800, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Tobias Estivalete</div>
+                            <div style={{ fontSize: 13, fontWeight: 800, color: '#f8fafc', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>Carolina Farah</div>
                             <div style={{ fontSize: 11, color: '#64748b', fontWeight: 600 }}>Lola Tech Ltd</div>
                         </div>
                         <button style={{ background: 'none', border: 'none', color: '#4b5563', cursor: 'pointer', padding: 4 }}>

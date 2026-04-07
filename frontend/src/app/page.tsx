@@ -98,7 +98,7 @@ export default function Home() {
             {stats.isDemo && <span style={{ fontSize: 10, background: '#fbbf2420', color: '#f59e0b', padding: '4px 10px', borderRadius: 20, fontWeight: 900, border: '1px solid #fbbf2420' }}>DEMO MODE</span>}
           </div>
           <h1 style={{ fontSize: 44, fontWeight: 950, color: '#f8fafc', letterSpacing: '-0.04em', lineHeight: 1 }}>
-            Olá, Tobias. <br/>
+            Olá, Carolina. <br/>
             <span style={{ color: '#64748b' }}>Seu RH estrategicamente pronto.</span>
           </h1>
         </div>
@@ -135,7 +135,7 @@ export default function Home() {
 
       {/* Analytics Matrix */}
       <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 1fr', gap: 24, marginBottom: 48 }}>
-        <motion.div variants={itemVars} className="card" style={{ padding: 40, background: 'rgba(15, 23, 42, 0.5)' }}>
+        <motion.div variants={itemVars} className="card" style={{ padding: 40, background: 'rgba(22, 32, 50, 0.5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 40 }}>
             <div>
               <h3 style={{ fontSize: 20, fontWeight: 950, color: '#f8fafc', marginBottom: 6 }}>Market Gap Distribution</h3>
@@ -156,7 +156,7 @@ export default function Home() {
                 <YAxis axisLine={false} tickLine={false} tick={{ fill: '#475569', fontSize: 11, fontWeight: 800 }} unit="%" />
                 <Tooltip 
                   cursor={{ fill: 'rgba(255,255,255,0.02)' }}
-                  contentStyle={{ background: '#030712', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, boxShadow: '0 20px 40px rgba(0,0,0,0.4)', fontSize: 12, fontWeight: 900 }}
+                  contentStyle={{ background: '#0f1c2e', border: '1px solid rgba(255,255,255,0.1)', borderRadius: 14, boxShadow: '0 20px 40px rgba(0,0,0,0.4)', fontSize: 12, fontWeight: 900 }}
                 />
                 <Bar dataKey="gap" radius={[4, 4, 0, 0]} barSize={24}>
                   {distributionData.map((entry: any, index: number) => (
@@ -213,7 +213,7 @@ export default function Home() {
       </div>
 
       {/* Carolina AI Copilot Premium Interface */}
-      <motion.div variants={itemVars} style={{ background: '#030712', borderRadius: 32, padding: 48, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
+      <motion.div variants={itemVars} style={{ background: '#0f1c2e', borderRadius: 32, padding: 48, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: '-10%', right: '-10%', width: 400, height: 400, background: 'radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%)', filter: 'blur(50px)' }} />
           
           <div style={{ position: 'relative', zIndex: 2 }}>
@@ -231,7 +231,7 @@ export default function Home() {
             </div>
 
             <p style={{ fontSize: 18, color: '#94a3b8', lineHeight: 1.6, marginBottom: 40, maxWidth: '85%' }}>
-              Tobias, analisei a saúde retentiva da Lola Tech. Identifiquei que <strong style={{ color: '#f8fafc' }}>12 colaboradores de Tech</strong> operam com um déficit médio de <strong style={{ color: '#fb7185' }}>-18.4%</strong> vs market P50. <br/>
+              Carolina, analisei a saúde retentiva da Lola Tech. Identifiquei que <strong style={{ color: '#f8fafc' }}>12 colaboradores de Tech</strong> operam com um déficit médio de <strong style={{ color: '#fb7185' }}>-18.4%</strong> vs market P50. <br/>
               A probabilidade de turnover voluntário neste cluster subiu para <strong style={{ color: '#fb7185' }}>65%</strong> este trimestre.
             </p>
 
