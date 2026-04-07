@@ -9,7 +9,6 @@ export const getBackendUrl = () => {
     return productionUrl;
 };
 
-// Dados de demonstração para salvamento de emergência (Pitch Mode)
 export const MOCK_DATA = {
     stats: { totalEmployees: 482, monthlyCost: 3.2, healthScore: 94, criticalGaps: 12 },
     diagnostics: {
@@ -23,11 +22,20 @@ export const MOCK_DATA = {
     }
 };
 
-// MODO PITCH ATIVADO: Não tenta falar com o servidor para ser Instantâneo
+// Resposta simulada para compatibilidade total (TypeScript safe)
 export const safeFetch = async (endpoint: string, options?: RequestInit) => {
     console.warn('PITCHE MODE ACTIVE: Usando inteligência local.');
-    if (endpoint.includes('stats')) return MOCK_DATA.stats;
-    if (endpoint.includes('diagnostics')) return MOCK_DATA.diagnostics;
-    if (endpoint.includes('snapshots')) return [{ id: '1', fileName: 'Folha_Abril_Premium.pdf', createdAt: new Date() }];
-    return [];
+    
+    let data: any = [];
+    if (endpoint.includes('stats')) data = MOCK_DATA.stats;
+    else if (endpoint.includes('diagnostics')) data = MOCK_DATA.diagnostics;
+    else if (endpoint.includes('benchmark')) data = { data: [], total: 0 };
+    else if (endpoint.includes('snapshots')) data = [{ id: '1', fileName: 'Folha_Abril_Premium.pdf', createdAt: new Date() }];
+
+    // Mimetiza um objeto Response real do navegador
+    return {
+        ok: true,
+        status: 200,
+        json: async () => (endpoint.includes('stats') || endpoint.includes('diagnostics')) ? data : { data, total: data.length || 0 }
+    } as any;
 };
