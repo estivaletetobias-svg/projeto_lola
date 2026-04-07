@@ -9,6 +9,7 @@ export const getBackendUrl = () => {
     return productionUrl;
 };
 
+// Dados de demonstração para salvamento de emergência (Pitch Mode) - RESERVADO PARA FALHAS TOTAIS
 export const MOCK_DATA = {
     stats: { totalEmployees: 482, monthlyCost: 3.2, healthScore: 94, criticalGaps: 12 },
     diagnostics: {
@@ -27,19 +28,35 @@ export const MOCK_DATA = {
     ]
 };
 
+// Função de Fetch Real Confiável
 export const safeFetch = async (endpoint: string, options?: RequestInit) => {
-    console.warn('PITCHE MODE ACTIVE: Usando inteligência local.');
-    
-    let data: any = [];
-    if (endpoint.includes('stats')) data = MOCK_DATA.stats;
-    else if (endpoint.includes('diagnostics')) data = MOCK_DATA.diagnostics;
-    else if (endpoint.includes('job-match') || endpoint.includes('mapping')) data = MOCK_DATA.mapping;
-    else if (endpoint.includes('snapshots')) data = [{ id: '1', fileName: 'Folha_Abril_Premium.pdf', createdAt: new Date() }];
-    else if (endpoint.includes('benchmark')) data = { data: [], total: 0 };
+    const baseUrl = getBackendUrl();
+    const isFullUrl = endpoint.startsWith('http');
+    const url = isFullUrl ? endpoint : `${baseUrl}${endpoint}`;
 
-    return {
-        ok: true,
-        status: 200,
-        json: async () => (endpoint.includes('stats') || endpoint.includes('diagnostics') || endpoint.includes('mapping')) ? data : { data, total: data.length || 0 }
-    } as any;
+    try {
+        const response = await fetch(url, { 
+            ...options, 
+            // Signal removed for compatibility, let it timeout naturally or use standard fetch
+        });
+
+        if (response.ok) return response;
+
+        // Se falhar (ex: 404), mas for um GET de estatísticas, podemos tentar salvar o pitch
+        if (options?.method === 'GET' || !options?.method) {
+            console.warn(`Backend falhou (${response.status}) em ${url}. Ativando modo de segurança.`);
+            if (endpoint.includes('stats')) return { ok: true, json: async () => MOCK_DATA.stats } as any;
+            if (endpoint.includes('diagnostics')) return { ok: true, json: async () => MOCK_DATA.diagnostics } as any;
+            if (endpoint.includes('job-match')) return { ok: true, json: async () => MOCK_DATA.mapping } as any;
+        }
+
+        return response; // Deixa o erro real passar para a UI se não for caso de backup
+    } catch (err) {
+        console.error('Fetch error:', err);
+        // Fallback apenas para GET se a rede cair
+        if (options?.method === 'GET' || !options?.method) {
+             if (endpoint.includes('stats')) return { ok: true, json: async () => MOCK_DATA.stats } as any;
+        }
+        throw err;
+    }
 };
