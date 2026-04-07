@@ -1,17 +1,19 @@
 export const getBackendUrl = () => {
+    // Endereço oficial que você criou na Vercel
+    const productionUrl = 'https://projeto-lola-mxos.vercel.app';
+    
     // Se estivermos no navegador
     if (typeof window !== 'undefined') {
         const host = window.location.hostname;
         
-        // Se for localhost, usa a porta 3001 padrão
+        // Se for localhost (seu PC), usa a porta 3001
         if (host === 'localhost' || host === '127.0.0.1') {
             return `http://${host}:3001`;
         }
         
-        // CONEXÃO OFICIAL: Aponta para o Back-End que você acabou de subir
-        return process.env.NEXT_PUBLIC_API_URL || 'https://projeto-lola-mxos.vercel.app';
+        // Em qualquer outro lugar (Vercel), usa o motor oficial
+        return productionUrl;
     }
     
-    // Fallback para SSR
-    return process.env.BACKEND_URL || 'https://projeto-lola-mxos.vercel.app';
+    return productionUrl;
 };
