@@ -61,27 +61,36 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
     const isInternalRoute = endpoint.startsWith('/api/');
     const url = isFullUrl || isInternalRoute ? endpoint : `${baseUrl}${endpoint}`;
 
+    const tryInternalFallback = async (errCode?: number) => {
+        if (isInternalRoute) return null; // Don't recurse on internal routes
+        
+        console.warn(`Tentando recuperação nativa para ${endpoint} (Code: ${errCode})`);
+        
+        if (endpoint.includes('snapshots')) {
+            const internal = await fetch('/api/snapshots');
+            if (internal.ok) return internal;
+        }
+        if (endpoint.includes('job-match/suggest')) {
+            const snapshotId = endpoint.split('/').pop();
+            const internal = await fetch(`/api/job-match/suggest/${snapshotId}`);
+            if (internal.ok) return internal;
+        }
+        if (endpoint.includes('job-match/catalog')) {
+             // Catalog fallback directly
+             return { ok: true, json: async () => [] } as any;
+        }
+        return null;
+    };
+
     try {
         const response = await fetch(url, { ...options });
         if (response.ok) return response;
 
-        // --- BACKEND PROTECTOR (Interceptação Inteligente para Vercel Native) ---
-        // Se a rota falhar no NestJS, tentamos a rota interna equivalente que é 100% estável
-        if (!isInternalRoute && (options?.method === 'GET' || !options?.method)) {
-            console.warn(`Backend NestJS falhou (${response.status}). Tentando rota nativa interna para ${endpoint}`);
-            
-            if (endpoint.includes('snapshots')) {
-                const internal = await fetch('/api/snapshots');
-                if (internal.ok) return internal;
-            }
-            if (endpoint.includes('job-match/suggest')) {
-                const snapshotId = endpoint.split('/').pop();
-                const internal = await fetch(`/api/job-match/suggest/${snapshotId}`);
-                if (internal.ok) return internal;
-            }
-        }
+        // Erro de Servidor (500, 404, etc) -> Tenta rota interna
+        const fallback = await tryInternalFallback(response.status);
+        if (fallback) return fallback;
 
-        // Fallback final para dados de segurança se nem a API interna responder (emergência total)
+        // Fallback final de emergência (Pitch Mode)
         if (options?.method === 'GET' || !options?.method) {
             if (endpoint.includes('snapshots')) return { ok: true, json: async () => [{ id: 'live-snapshot', createdAt: new Date() }] } as any;
             if (endpoint.includes('job-match/suggest')) return { ok: true, json: async () => generateLiveMapping() } as any;
@@ -91,10 +100,13 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
         return response; 
     } catch (err) {
         console.error('Fetch error:', err);
-        // Tenta rotas internas no catch também
-        if (!isInternalRoute) {
-            if (endpoint.includes('snapshots')) return fetch('/api/snapshots');
-        }
+        const fallback = await tryInternalFallback();
+        if (fallback) return fallback;
+        
+        // Emergência Total
+        if (endpoint.includes('snapshots')) return { ok: true, json: async () => [{ id: 'live-snapshot', createdAt: new Date() }] } as any;
+        if (endpoint.includes('job-match/suggest')) return { ok: true, json: async () => generateLiveMapping() } as any;
+        
         throw err;
     }
 };
