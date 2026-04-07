@@ -8,11 +8,10 @@ export const getBackendUrl = () => {
             return `http://${host}:3001`;
         }
         
-        // Se estiver na Vercel, tenta usar uma variável de ambiente pública
-        // ou assume que o backend está no mesmo domínio/subdomínio configurado
-        return process.env.NEXT_PUBLIC_API_URL || 'https://projeto-lola-backend.vercel.app'; // Placeholder ou URL real se soubermos
+        // CONEXÃO OFICIAL: Aponta para o Back-End que você acabou de subir
+        return process.env.NEXT_PUBLIC_API_URL || 'https://projeto-lola-mxos.vercel.app';
     }
     
     // Fallback para SSR
-    return process.env.BACKEND_URL || 'http://localhost:3001';
+    return process.env.BACKEND_URL || 'https://projeto-lola-mxos.vercel.app';
 };
