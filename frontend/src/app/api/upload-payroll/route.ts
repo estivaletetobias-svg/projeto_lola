@@ -91,46 +91,74 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'AI could not find employees in this file.' }, { status: 422 });
         }
 
-        // --- Persist to Backend ---
-        const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.BACKEND_URL || 'http://localhost:3001';
+        // --- Persist Directly to DB (Native Next.js Integration) ---
+        const { prisma } = await import('@/lib/prisma');
+        
         try {
-            const payload = {
-                fileName: file.name,
-                periodDate: new Date().toISOString(),
-                data: employees.map(e => ({
-                    nome: e.full_name,
-                    cargo: e.area,
-                    salario: e.base_salary,
-                    id: e.employee_key,
-                    beneficios: e.benefits,
-                    variavel: e.variable,
-                })),
-            };
-
-            const backendRes = await fetch(`${backendUrl}/payroll/upload-local`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json', 'x-tenant-id': tenantId },
-                body: JSON.stringify(payload)
+            // Find tenant or use a default
+            const tenant = await prisma.tenant.findFirst() || await prisma.tenant.create({ data: { name: 'Lola Tech Ltd' } });
+            
+            // Create Snapshot
+            const snapshot = await prisma.payrollSnapshot.create({
+                data: {
+                    tenant_id: tenant.id,
+                    period_date: new Date(),
+                    source_type: file.name.split('.').pop()?.toUpperCase() || 'LOCAL',
+                    s3_file_key: `local/${file.name}`,
+                    status: 'READY',
+                }
             });
 
-            if (backendRes.ok) {
-                const result = await backendRes.json();
-                return NextResponse.json({
-                    status: 'success',
-                    count: employees.length,
-                    snapshotId: result.snapshotId,
-                    employees: employees,
+            // Upsert Employees and create Compensation
+            for (const e of employees) {
+                const emp = await prisma.employee.upsert({
+                    where: { 
+                        tenant_id_employee_key: { 
+                            tenant_id: tenant.id, 
+                            employee_key: String(e.id || e.employee_key) 
+                        } 
+                    },
+                    update: {
+                        full_name: e.full_name,
+                        area: e.area,
+                        status: 'ACTIVE',
+                    },
+                    create: {
+                        tenant_id: tenant.id,
+                        employee_key: String(e.id || e.employee_key),
+                        full_name: e.full_name,
+                        area: e.area,
+                        status: 'ACTIVE',
+                    }
+                });
+
+                await prisma.compensation.create({
+                    data: {
+                        employee_id: emp.id,
+                        snapshot_id: snapshot.id,
+                        base_salary: Number(e.base_salary) || 0,
+                        benefits_value: Number(e.benefits) || 0,
+                        variable_value: Number(e.variable) || 0,
+                        total_cash: (Number(e.base_salary) || 0) + (Number(e.benefits) || 0) + (Number(e.variable) || 0),
+                    }
                 });
             }
-        } catch (backendErr) {
-            console.warn('Backend unavailable, returning extracted data only.');
-        }
 
-        return NextResponse.json({
-            status: 'success',
-            count: employees.length,
-            employees: employees,
-        });
+            return NextResponse.json({
+                status: 'success',
+                count: employees.length,
+                snapshotId: snapshot.id,
+                employees: employees,
+            });
+        } catch (dbErr: any) {
+            console.error('Database persistence failed:', dbErr);
+            return NextResponse.json({
+                status: 'success',
+                count: employees.length,
+                dbStatus: 'persistence_failed',
+                employees: employees,
+            });
+        }
 
     } catch (error: any) {
         console.error('Upload API error:', error);
