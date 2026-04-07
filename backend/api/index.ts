@@ -1,5 +1,3 @@
-import { NestFactory } from '@nestjs/core';
-import { AppModule } from '../src/app.module';
 import { json, urlencoded } from 'express';
 
 let app: any;
@@ -7,6 +5,10 @@ let app: any;
 export default async function handler(req: any, res: any) {
   try {
     if (!app) {
+      // Dynamic imports to catch module resolution crashes
+      const { NestFactory } = await import('@nestjs/core');
+      const { AppModule } = await import('../src/app.module');
+      
       app = await NestFactory.create(AppModule);
       
       app.enableCors({
@@ -26,7 +28,7 @@ export default async function handler(req: any, res: any) {
   } catch (err: any) {
     console.error('🔴 VERCEL NESTJS BOOTSTRAP CRASH:', err);
     return res.status(500).json({ 
-      error: 'CRITICAL_BOOTSTRAP_FAILURE', 
+      error: 'CRITICAL_DYNAMIC_IMPORT_FAILURE', 
       message: err.message, 
       stack: err.stack 
     });
