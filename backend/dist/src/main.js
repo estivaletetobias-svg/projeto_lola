@@ -9,14 +9,13 @@ async function bootstrap() {
         origin: true,
         methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
         credentials: true,
-        preflightContinue: false,
-        optionsSuccessStatus: 204,
-        allowedHeaders: 'Content-Type, Accept, Authorization',
     });
     app.use((0, express_1.json)({ limit: '50mb' }));
     app.use((0, express_1.urlencoded)({ limit: '50mb', extended: true }));
     await app.listen(process.env.PORT ?? 3001);
-    console.log(`--- BACKEND Lola ON (v2): Port ${process.env.PORT ?? 3001} ---`);
 }
+exports.default = async (req, res) => {
+    await bootstrap();
+};
 bootstrap();
 //# sourceMappingURL=main.js.map
