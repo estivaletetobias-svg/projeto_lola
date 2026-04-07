@@ -1,5 +1,5 @@
-import { safeFetch } from "@/app/api-config";
 'use client';
+import { safeFetch } from "@/app/api-config";
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
