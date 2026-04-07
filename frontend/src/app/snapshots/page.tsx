@@ -1,72 +1,100 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
     Upload, FileText, CheckCircle, AlertCircle, 
     Loader2, Download, Zap, ChevronRight, 
     Layers, Search, BarChart, ArrowRight,
-    ShieldCheck
+    ShieldCheck, Brain, File
 } from 'lucide-react';
 import * as XLSX from 'xlsx';
 import Link from 'next/link';
 
 export default function SnapshotsPage() {
     const [isUploading, setIsUploading] = useState(false);
-    const [step, setStep] = useState(1); // 1: Upload, 2: Mapping, 3: Success, 4: Finished
+    const [step, setStep] = useState(1); // 1: Upload, 2: Confirm, 3: Processing, 4: Done
     const [fileName, setFileName] = useState('');
-    const [fileData, setFileData] = useState<any[]>([]);
+    const [fileObj, setFileObj] = useState<File | null>(null);
+    const [recordCount, setRecordCount] = useState(0);
     const [analyzeProgress, setAnalyzeProgress] = useState(0);
+    const [errorMsg, setErrorMsg] = useState('');
+    const inputRef = useRef<HTMLInputElement>(null);
 
     const handleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
         setFileName(file.name);
+        setFileObj(file);
         setIsUploading(true);
+        setErrorMsg('');
 
-        const reader = new FileReader();
-        reader.onload = (evt) => {
-            const bstr = evt.target?.result;
-            const wb = XLSX.read(bstr, { type: 'binary' });
-            const wsname = wb.SheetNames[0];
-            const ws = wb.Sheets[wsname];
-            const data = XLSX.utils.sheet_to_json(ws);
-            setFileData(data);
+        // For Excel: parse client-side just to show record count preview
+        const ext = file.name.split('.').pop()?.toLowerCase();
+        if (ext === 'xlsx' || ext === 'xls') {
+            const reader = new FileReader();
+            reader.onload = (evt) => {
+                try {
+                    const wb = XLSX.read(evt.target?.result, { type: 'binary' });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const data = XLSX.utils.sheet_to_json(ws);
+                    setRecordCount(data.length);
+                } catch (_) {
+                    setRecordCount(0);
+                }
+                setIsUploading(false);
+                setStep(2);
+            };
+            reader.readAsBinaryString(file);
+        } else {
+            // For PDF / CSV: we don't know the count until AI processes it
+            setRecordCount(0);
             setIsUploading(false);
             setStep(2);
-        };
-        reader.readAsBinaryString(file);
+        }
     };
 
     const startAnalysis = async () => {
+        if (!fileObj) return;
         setStep(3);
-        setAnalyzeProgress(10);
+        setAnalyzeProgress(15);
+        setErrorMsg('');
+
+        // Animate progress while AI works
+        const progressInterval = setInterval(() => {
+            setAnalyzeProgress(prev => {
+                if (prev >= 85) { clearInterval(progressInterval); return prev; }
+                return prev + Math.random() * 8;
+            });
+        }, 800);
 
         try {
-            const host = window.location.hostname;
-            const response = await fetch(`http://${host}:3001/payroll/upload-local`, {
+            const formData = new FormData();
+            formData.append('file', fileObj);
+            formData.append('tenantId', 'default');
+
+            const response = await fetch('/api/upload-payroll', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    fileName,
-                    periodDate: new Date().toISOString(),
-                    data: fileData
-                })
+                body: formData,
             });
 
+            clearInterval(progressInterval);
+
             if (response.ok) {
+                const result = await response.json();
+                setRecordCount(result.count || 0);
                 setAnalyzeProgress(100);
-                setTimeout(() => setStep(4), 1000);
+                setTimeout(() => setStep(4), 800);
             } else {
-                const errData = await response.json().catch(() => ({}));
-                alert(`Erro no Servidor: ${errData.message || 'Erro desconhecido'}`);
-                setStep(1);
+                const err = await response.json().catch(() => ({}));
+                setErrorMsg(err.error || `Erro ${response.status}: Processamento falhou.`);
+                setStep(2);
             }
-        } catch (err) {
-            const host = window.location.hostname;
-            alert(`Falha na comunicação. Verifique se o backend está rodando.`);
-            setStep(1);
+        } catch (err: any) {
+            clearInterval(progressInterval);
+            setErrorMsg('Erro de comunicação. Verifique sua conexão e tente novamente.');
+            setStep(2);
         }
     };
 
@@ -76,7 +104,6 @@ export default function SnapshotsPage() {
             { id: 2, nome: "Carla Mendes", cargo: "Designer de Produto Pl", salario: 8200.00 },
             { id: 3, nome: "Ricardo Oliveira", cargo: "Gerente de RH", salario: 12800.00 }
         ];
-
         const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "Payroll");
@@ -142,20 +169,21 @@ export default function SnapshotsPage() {
                                         }}
                                         onMouseOver={e => e.currentTarget.style.borderColor = '#4f46e5'}
                                         onMouseOut={e => e.currentTarget.style.borderColor = '#e2e8f0'}
+                                        onClick={() => inputRef.current?.click()}
                                     >
                                         <div style={{ width: 80, height: 80, background: 'white', borderRadius: 24, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px', boxShadow: '0 10px 20px rgba(0,0,0,0.05)' }}>
                                             <Upload size={32} color="#4f46e5" />
                                         </div>
                                         <h3 style={{ fontSize: 24, fontWeight: 800, color: '#1e293b', marginBottom: 12 }}>Upload de Folha de Pagamento</h3>
                                         <p style={{ color: '#64748b', marginBottom: 32, maxWidth: 450, margin: '0 auto 32px', lineHeight: 1.6 }}>
-                                            Arraste sua folha (.xlsx ou .csv) ou clique para navegar. <br/>
+                                            Arraste sua folha (.xlsx, .pdf ou .csv) ou clique para navegar. <br/>
                                             Garantimos a segurança ponta-a-ponta dos seus dados de remuneração.
                                         </p>
 
-                                        <input type="file" id="file-upload" style={{ display: 'none' }} onChange={handleUpload} />
-                                        <label htmlFor="file-upload" className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '16px 32px', fontSize: 16, fontWeight: 700, borderRadius: 16 }}>
+                                        <input type="file" ref={inputRef} style={{ display: 'none' }} onChange={handleUpload} accept=".xlsx,.xls,.pdf,.csv" />
+                                        <button className="btn btn-primary" style={{ display: 'inline-flex', alignItems: 'center', gap: 10, cursor: 'pointer', padding: '16px 32px', fontSize: 16, fontWeight: 700, borderRadius: 16 }}>
                                             {isUploading ? <Loader2 className="animate-spin" /> : <><FileText size={22} /> Selecionar Arquivo</>}
-                                        </label>
+                                        </button>
                                     </div>
                                     <div style={{ marginTop: 32, display: 'flex', justifyContent: 'center', gap: 24, color: '#94a3b8', fontSize: 12 }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}><ShieldCheck size={14} /> Criptografia AES-256</div>
@@ -173,27 +201,39 @@ export default function SnapshotsPage() {
                                             </div>
                                             <div>
                                                 <h3 style={{ fontSize: 20, fontWeight: 800, color: '#1e293b' }}>{fileName}</h3>
-                                                <p style={{ fontSize: 14, color: '#64748b' }}>Snaphot validado • <strong>{fileData.length} registros</strong> encontrados</p>
+                                                <p style={{ fontSize: 14, color: '#64748b' }}>
+                                                    {recordCount > 0 
+                                                        ? `Snapshot detectado • ${recordCount} registros encontrados`
+                                                        : `Arquivo pronto para extração inteligente.`}
+                                                </p>
                                             </div>
                                         </div>
                                         <button onClick={() => setStep(1)} style={{ padding: '8px 16px', borderRadius: 10, fontSize: 13, background: '#f1f5f9', border: 'none', color: '#475569', fontWeight: 700, cursor: 'pointer' }}>Alterar</button>
                                     </div>
 
+                                    {errorMsg && (
+                                        <div style={{ marginBottom: 24, padding: 16, background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 12, color: '#991b1b', fontSize: 14, display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <AlertCircle size={18} /> {errorMsg}
+                                        </div>
+                                    )}
+
                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24, marginBottom: 40 }}>
                                         <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
-                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Mapeamento de Campos</h4>
+                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Mapeamento AI</h4>
                                             <div style={{ display: 'grid', gap: 12 }}>
                                                 {[
-                                                    { label: 'Identificação', detected: true, key: 'id' },
-                                                    { label: 'Colaborador', detected: true, key: 'nome' },
-                                                    { label: 'Cargo Atual', detected: true, key: 'cargo' },
-                                                    { label: 'Salário Base', detected: true, key: 'salario' }
+                                                    { label: 'Identificação', detected: true, key: 'Automático' },
+                                                    { label: 'Colaborador', detected: true, key: 'Automático' },
+                                                    { label: 'Cargo Atual', detected: true, key: 'Automático' },
+                                                    { label: 'Salário Base', detected: true, key: 'Automático' }
                                                 ].map(item => (
                                                     <div key={item.label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 14px', background: 'white', borderRadius: 12, border: '1px solid #e2e8f0' }}>
                                                         <span style={{ fontSize: 13, fontWeight: 700, color: '#475569' }}>{item.label}</span>
                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                                                             <code style={{ fontSize: 12, background: '#f1f5f9', padding: '2px 6px', borderRadius: 4, color: '#4f46e5' }}>{item.key}</code>
-                                                            <CheckCircle size={14} color="#10b981" />
+                                                            <div style={{ width: 14, height: 14, borderRadius: '50%', background: '#10b981', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                                <CheckCircle size={10} color="white" />
+                                                            </div>
                                                         </div>
                                                     </div>
                                                 ))}
@@ -201,24 +241,13 @@ export default function SnapshotsPage() {
                                         </div>
 
                                         <div style={{ background: '#f8fafc', padding: 24, borderRadius: 20 }}>
-                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Amostra de Integridade</h4>
-                                            <div style={{ borderRadius: 12, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                                <table style={{ width: '100%', fontSize: 11, background: 'white', borderCollapse: 'collapse' }}>
-                                                    <thead style={{ background: '#f1f5f9' }}>
-                                                        <tr>
-                                                            <th style={{ padding: 10, textAlign: 'left' }}>Nome</th>
-                                                            <th style={{ padding: 10, textAlign: 'right' }}>Salário</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                        {fileData.slice(0, 3).map((row, i) => (
-                                                            <tr key={i} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                                                                <td style={{ padding: 10, fontWeight: 600 }}>{row.nome || row.name || 'N/A'}</td>
-                                                                <td style={{ padding: 10, textAlign: 'right' }}>R$ {(row.salario || 0).toLocaleString()}</td>
-                                                            </tr>
-                                                        ))}
-                                                    </tbody>
-                                                </table>
+                                            <h4 style={{ fontSize: 13, fontWeight: 800, color: '#64748b', textTransform: 'uppercase', marginBottom: 20, letterSpacing: '0.05em' }}>Abordagem de Extração</h4>
+                                            <div style={{ padding: 20, background: 'white', borderRadius: 16, border: '1px solid #e2e8f0', textAlign: 'center' }}>
+                                                <Brain size={32} color="#4f46e5" style={{ margin: '0 auto 16px' }} />
+                                                <p style={{ fontSize: 13, color: '#1e293b', fontWeight: 700, marginBottom: 8 }}>Motor "Zero-Touch" Ativo</p>
+                                                <p style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                                                    Não é necessário configurar colunas. Nossa IA estruturará seus dados automaticamente.
+                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -234,13 +263,13 @@ export default function SnapshotsPage() {
                                     <div style={{ width: 140, height: 140, margin: '0 auto 32px', position: 'relative' }}>
                                         <Loader2 className="animate-spin" size={140} color="#4f46e5" strokeWidth={1.5} />
                                         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', textAlign: 'center' }}>
-                                            <div style={{ fontWeight: 900, fontSize: 32, color: '#0f172a' }}>{analyzeProgress}%</div>
+                                            <div style={{ fontWeight: 900, fontSize: 32, color: '#0f172a' }}>{Math.round(analyzeProgress)}%</div>
                                         </div>
                                     </div>
                                     <h3 style={{ fontSize: 24, fontWeight: 900, color: '#0f172a', marginBottom: 12 }}>
-                                        {analyzeProgress < 40 ? 'Sincronizando Dados...' : 'Gerando Matriz Curitina...'}
+                                        {analyzeProgress < 40 ? 'Extraindo dados com IA...' : 'Mapeando remuneração...'}
                                     </h3>
-                                    <p style={{ color: '#64748b', fontSize: 17 }}>Carolina está processando cada cargo contra 200+ fontes de mercado.</p>
+                                    <p style={{ color: '#64748b', fontSize: 17 }}>Carolina está estruturando sua folha para análise de mercado.</p>
                                 </div>
                             )}
 
@@ -254,7 +283,7 @@ export default function SnapshotsPage() {
                                     </motion.div>
                                     <h3 style={{ fontSize: 32, fontWeight: 900, color: '#0f172a', marginBottom: 16 }}>Análise Concluída!</h3>
                                     <p style={{ color: '#64748b', fontSize: 18, marginBottom: 48, maxWidth: 500, margin: '0 auto 48px', lineHeight: 1.6 }}>
-                                        Identificamos <strong>{fileData.length} colaboradores</strong>. O diagnóstico preliminar está pronto para sua revisão.
+                                        Identificamos <strong>{recordCount} colaboradores</strong>. O diagnóstico preliminar está pronto para sua revisão.
                                     </p>
                                     <div style={{ display: 'flex', gap: 16, justifyContent: 'center' }}>
                                         <Link href="/job-match" className="btn btn-primary" style={{ padding: '18px 36px', borderRadius: 16, fontWeight: 800, fontSize: 16, display: 'flex', alignItems: 'center', gap: 10 }}>
