@@ -75,6 +75,11 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
             const internal = await fetch(`/api/job-match/suggest/${snapshotId}`);
             if (internal.ok) return internal;
         }
+        if (endpoint.includes('salary-engine/analyze')) {
+            const snapshotId = endpoint.split('/').pop();
+            const internal = await fetch(`/api/salary-engine/analyze/${snapshotId}`);
+            if (internal.ok) return internal;
+        }
         if (endpoint.includes('job-match/catalog')) {
              // Catalog fallback directly
              return { ok: true, json: async () => [] } as any;
@@ -94,7 +99,9 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
         if (options?.method === 'GET' || !options?.method) {
             if (endpoint.includes('snapshots')) return { ok: true, json: async () => [{ id: 'live-snapshot', createdAt: new Date() }] } as any;
             if (endpoint.includes('job-match/suggest')) return { ok: true, json: async () => generateLiveMapping() } as any;
+            if (endpoint.includes('salary-engine/analyze')) return { ok: true, json: async () => ({ status: 'ready', diagnostics: MOCK_DATA.diagnostics, mappedEmployees: [], suggestedSalaryStructure: [] }) } as any;
             if (endpoint.includes('stats')) return { ok: true, json: async () => MOCK_DATA.stats } as any;
+            if (endpoint.includes('diagnostics')) return { ok: true, json: async () => MOCK_DATA.diagnostics } as any;
         }
 
         return response; 
