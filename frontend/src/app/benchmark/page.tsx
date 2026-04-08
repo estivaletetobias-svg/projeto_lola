@@ -74,13 +74,13 @@ export default function BenchmarkExplorerPage() {
         setLoading(true);
         try {
             const params = new URLSearchParams({
-                page: String(page),
-                pageSize: String(pageSize),
+                page: page.toString(),
+                pageSize: '10',
                 ...(search && { search }),
                 ...(levelFilter !== 'ALL' && { level: levelFilter }),
             });
-            const baseUrl = getBackendUrl();
-            const res = await safeFetch(`${baseUrl}/market-benchmark?${params}`);
+            // Usar API nativa do frontend para estabilidade máxima no pitch
+            const res = await fetch(`/api/market-benchmark?${params}`);
             if (res.ok) {
                 const json: ApiResponse = await res.json();
                 setBenchmarks(json.data || []);

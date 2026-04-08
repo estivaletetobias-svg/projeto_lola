@@ -70,6 +70,10 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
             const internal = await fetch('/api/snapshots');
             if (internal.ok) return internal;
         }
+        if (endpoint.includes('market-benchmark')) {
+            const internal = await fetch(`/api/market-benchmark?${endpoint.split('?')[1] || ''}`);
+            if (internal.ok) return internal;
+        }
         if (endpoint.includes('job-match/suggest')) {
             const snapshotId = endpoint.split('/').pop();
             const internal = await fetch(`/api/job-match/suggest/${snapshotId}`);
