@@ -148,7 +148,7 @@ export default function DiagnosticsPage() {
 
             {/* AI Strategic Assessment */}
             <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 40 }}>
-                <motion.div variants={{ hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1 } }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #030712 100%)', padding: '48px', borderRadius: 24, border: '1px solid rgba(0,0,0,0.03)', position: 'relative', overflow: 'hidden' }}>
+                <motion.div variants={{ hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1 } }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #030712 100%)', padding: '48px', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'relative', zIndex: 2 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
                             <div style={{ width: 32, height: 32, background: 'linear-gradient(135deg, #818cf8 0%, #6366f1 100%)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -156,29 +156,29 @@ export default function DiagnosticsPage() {
                             </div>
                             <span style={{ fontSize: 12, fontWeight: 900, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.15em' }}>Carolina AI Analysis</span>
                         </div>
-                        <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 20, maxWidth: '85%', lineHeight: 1.15, color: '#1e293b' }}>
+                        <h2 style={{ fontSize: 32, fontWeight: 900, marginBottom: 20, maxWidth: '85%', lineHeight: 1.15, color: '#f8fafc' }}>
                             {analysis.diagnostics.recommendation}
                         </h2>
                         
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 40, marginTop: 48, maxWidth: 600 }}>
                             <div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aderência Interna</div>
-                                <div style={{ fontSize: 32, fontWeight: 950, color: '#1e293b' }}>{(analysis.diagnostics.regressionCurve.rSquared * 100).toFixed(1)}%</div>
-                                <div style={{ fontSize: 11, color: '#afbcf4', marginTop: 4, fontWeight: 700 }}>Coeficiente de Equilíbrio</div>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Aderência Interna</div>
+                                <div style={{ fontSize: 32, fontWeight: 950, color: '#ffffff' }}>{(analysis.diagnostics.regressionCurve.rSquared * 100).toFixed(1)}%</div>
+                                <div style={{ fontSize: 11, color: '#818cf8', marginTop: 4, fontWeight: 700 }}>Coeficiente de Equilíbrio</div>
                             </div>
                             <div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gap vs Mercado</div>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gap vs Mercado</div>
                                 <div style={{ fontSize: 32, fontWeight: 950, color: (analysis.diagnostics.avgGap || 0) < 0 ? '#fb7185' : '#34d399' }}>
                                     {Math.abs(analysis.diagnostics.avgGap || 0).toFixed(1)}%
                                 </div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, fontWeight: 700 }}>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, fontWeight: 700 }}>
                                     {(analysis.diagnostics.avgGap || 0) < 0 ? 'Déficit Competitivo' : 'Superávit Retentivo'}
                                 </div>
                             </div>
                             <div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Auditado</div>
-                                <div style={{ fontSize: 32, fontWeight: 950, color: '#334155' }}>{analysis.diagnostics.pointsCount}</div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginTop: 4, fontWeight: 700 }}>Snapshots Ativos</div>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 8, fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Total Auditado</div>
+                                <div style={{ fontSize: 32, fontWeight: 950, color: '#f1f5f9' }}>{analysis.diagnostics.pointsCount}</div>
+                                <div style={{ fontSize: 11, color: '#94a3b8', marginTop: 4, fontWeight: 700 }}>Snapshots Ativos</div>
                             </div>
                         </div>
                     </div>
@@ -190,8 +190,8 @@ export default function DiagnosticsPage() {
                             <TrendingDown size={32} color="#f43f5e" />
                         </div>
                         <div>
-                            <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Risco de Saída</div>
-                            <div style={{ fontSize: 24, fontWeight: 950, color: '#fef2f2' }}>
+                            <div style={{ fontSize: 11, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Risco de Saída</div>
+                            <div style={{ fontSize: 24, fontWeight: 950, color: '#1e293b' }}>
                                 {analysis.mappedEmployees.filter((e: any) => {
                                     const mid = analysis.suggestedSalaryStructure.find((s: any) => s.grade === `G${e.grade}`)?.midpoint || 0;
                                     return mid > 0 && (e.salary / mid) < 0.85;
@@ -204,8 +204,8 @@ export default function DiagnosticsPage() {
                             <DollarSign size={32} color="#10b981" />
                         </div>
                         <div>
-                            <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Saúde Financeira</div>
-                            <div style={{ fontSize: 24, fontWeight: 950, color: '#f0fdf4' }}>{analysis.diagnostics.avgGap > 0 ? 'High Burn' : 'Operational Efficiency'}</div>
+                            <div style={{ fontSize: 11, color: '#64748b', fontWeight: 800, textTransform: 'uppercase', marginBottom: 4 }}>Saúde Financeira</div>
+                            <div style={{ fontSize: 24, fontWeight: 950, color: '#1e293b' }}>{analysis.diagnostics.avgGap > 0 ? 'High Burn' : 'Operational Efficiency'}</div>
                         </div>
                     </motion.div>
                 </div>
