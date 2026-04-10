@@ -34,7 +34,7 @@ export default function Sidebar() {
         {
             label: 'Estratégia Financeira',
             items: [
-                { name: 'Estrutura de Grades', icon: <Layers size={18} />, href: '/salary-structure' },
+                { name: 'Automação PCS', icon: <Briefcase size={18} />, href: '/pcs' },
                 { name: 'Simulador de Mérito', icon: <Zap size={18} />, href: '/merit' },
             ]
         },

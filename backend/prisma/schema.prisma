@@ -114,6 +114,7 @@ model Compensation {
   snapshot_id    String
   snapshot       PayrollSnapshot @relation(fields: [snapshot_id], references: [id])
   base_salary    Float
+  hours          Float    @default(160)
   benefits_value Float    @default(0)
   variable_value Float    @default(0)
   overtime_value Float    @default(0)

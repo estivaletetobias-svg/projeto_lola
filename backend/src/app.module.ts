@@ -18,6 +18,7 @@ import { BullModule } from '@nestjs/bullmq';
 import { LoggerModule } from 'nestjs-pino';
 import { StorageModule } from './storage/storage.module';
 import { SalaryEngineModule } from './salary-engine/salary-engine.module';
+import { PcsModule } from './pcs/pcs.module';
 
 @Module({
   imports: [
@@ -52,6 +53,7 @@ import { SalaryEngineModule } from './salary-engine/salary-engine.module';
     PrismaModule,
     StorageModule,
     SalaryEngineModule,
+    PcsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
