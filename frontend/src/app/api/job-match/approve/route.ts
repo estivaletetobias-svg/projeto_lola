@@ -20,6 +20,7 @@ export async function POST(req: Request) {
                 where: { id: existing.id },
                 data: { 
                     job_catalog_id: jobCatalogId || null,
+                    snapshot_id: snapshotId,
                     confidence: 100,
                     method: 'MANUAL'
                 }
@@ -28,6 +29,7 @@ export async function POST(req: Request) {
             await prisma.jobMatch.create({
                 data: {
                     employee_id: employeeId,
+                    snapshot_id: snapshotId,
                     job_catalog_id: jobCatalogId,
                     confidence: 100,
                     method: 'MANUAL'
