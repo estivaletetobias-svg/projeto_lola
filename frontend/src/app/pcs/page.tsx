@@ -196,7 +196,11 @@ function AnalysisView({ data, hours }: any) {
                             <XAxis type="number" dataKey="grade" name="Grade" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
                             <YAxis type="number" dataKey="salary" name="Salary" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} unit="R$" />
                             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                            <Scatter name="Employees" data={(data.details || []).filter((d: any) => d.status !== 'NOT_MAPPED')} fill="#6366f1">
+                            <Scatter 
+                                name="Colaboradores" 
+                                data={data.details || []} 
+                                fill="#4f46e5"
+                            >
                                 {(data.details || []).map((entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={entry.status === 'BELOW' ? '#f43f5e' : entry.status === 'ABOVE' ? '#818cf8' : '#10b981'} />
                                 ))}

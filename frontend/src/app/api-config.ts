@@ -107,9 +107,13 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
             const internal = await fetch(`/api/pcs/impact/${snapshotId}${query}`);
             if (internal.ok) return internal;
         }
-        if (endpoint.includes('job-match/catalog')) {
-             // Catalog fallback directly
-             return { ok: true, json: async () => [] } as any;
+        if (endpoint.includes('job-match/approve')) {
+            const internal = await fetch('/api/job-match/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: options?.body
+            });
+            if (internal.ok) return internal;
         }
         return null;
     };
