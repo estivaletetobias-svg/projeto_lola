@@ -157,10 +157,13 @@ let PayrollService = class PayrollService {
                     area: String(rawArea),
                 }
             });
+            const hoursVal = getVal(['carga horária', 'carga horaria', 'horas', 'h/m', 'jornada', 'hours', 'working hours']);
+            const hours = parseFloat(String(hoursVal).replace(/[^\d.]/g, '')) || 160;
             compensationData.push({
                 employee_id: newEmp.id,
                 snapshot_id: snapshot.id,
                 base_salary: salary,
+                hours: hours,
                 benefits_value: 0,
                 variable_value: 0,
                 total_cash: salary,

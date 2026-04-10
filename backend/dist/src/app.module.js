@@ -25,6 +25,7 @@ const config_1 = require("@nestjs/config");
 const nestjs_pino_1 = require("nestjs-pino");
 const storage_module_1 = require("./storage/storage.module");
 const salary_engine_module_1 = require("./salary-engine/salary-engine.module");
+const pcs_module_1 = require("./pcs/pcs.module");
 let AppModule = class AppModule {
 };
 exports.AppModule = AppModule;
@@ -46,6 +47,7 @@ exports.AppModule = AppModule = __decorate([
             prisma_module_1.PrismaModule,
             storage_module_1.StorageModule,
             salary_engine_module_1.SalaryEngineModule,
+            pcs_module_1.PcsModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

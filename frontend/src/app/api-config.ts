@@ -1,5 +1,5 @@
 export const getBackendUrl = () => {
-    // Força o ambiente de produção como solicitado pelo usuário (sem localhost fallbacks)
+    // Força o ambiente de produção como solicitado pelo usuário
     return process.env.NEXT_PUBLIC_BACKEND_URL || 'https://projeto-lola-mxos.vercel.app';
 };
 
