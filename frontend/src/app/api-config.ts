@@ -84,6 +84,25 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
             const internal = await fetch(`/api/salary-engine/analyze/${snapshotId}`);
             if (internal.ok) return internal;
         }
+        if (endpoint.includes('pcs/salary-table')) {
+            const query = endpoint.includes('?') ? `?${endpoint.split('?')[1]}` : '';
+            const internal = await fetch(`/api/pcs/salary-table${query}`);
+            if (internal.ok) return internal;
+        }
+        if (endpoint.includes('pcs/analysis/')) {
+            const pathParts = endpoint.split('?')[0].split('/');
+            const snapshotId = pathParts[pathParts.length - 1];
+            const query = endpoint.includes('?') ? `?${endpoint.split('?')[1]}` : '';
+            const internal = await fetch(`/api/pcs/analysis/${snapshotId}${query}`);
+            if (internal.ok) return internal;
+        }
+        if (endpoint.includes('pcs/impact/')) {
+            const pathParts = endpoint.split('?')[0].split('/');
+            const snapshotId = pathParts[pathParts.length - 1];
+            const query = endpoint.includes('?') ? `?${endpoint.split('?')[1]}` : '';
+            const internal = await fetch(`/api/pcs/impact/${snapshotId}${query}`);
+            if (internal.ok) return internal;
+        }
         if (endpoint.includes('job-match/catalog')) {
              // Catalog fallback directly
              return { ok: true, json: async () => [] } as any;
