@@ -48,9 +48,29 @@ export async function GET(
             });
         });
 
+        // Map to quickly find global job matches by internal cargo title
+        const allJobMatches = await prisma.jobMatch.findMany({
+            include: { job_catalog: true }
+        });
+        const globalTitleMap = new Map();
+        // We need the original employee titles to link them
+        const allEmployees = await prisma.employee.findMany();
+        const empTitleMap = new Map(allEmployees.map(e => [e.id, e.area])); // Using area as title proxy if needed, but let's be more precise
+        
+        allJobMatches.forEach(jm => {
+            // Find the employee title for this match
+            const emp = allEmployees.find(e => e.id === jm.employee_id);
+            if (emp && emp.area && !globalTitleMap.has(emp.area)) {
+                globalTitleMap.set(emp.area, jm.job_catalog);
+            }
+        });
+
         const analysis = compensations.map(c => {
-            const jobMatch = c.employee.job_matches[0];
-            let grade = jobMatch?.job_catalog?.grade;
+            const directMatch = c.employee.job_matches[0];
+            // Fallback to global title map if direct match is missing
+            const jobCatalog = directMatch?.job_catalog || globalTitleMap.get(c.employee.area);
+            
+            let grade = jobCatalog?.grade;
             
             // HEURISTIC: If not mapped, guestimate grade based on salary to at least show on chart
             if (!grade) {
