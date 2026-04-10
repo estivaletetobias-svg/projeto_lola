@@ -48,52 +48,55 @@ export async function GET(
             });
         });
 
-        // Map to quickly find global job matches by internal cargo title
-        const allJobMatches = await prisma.jobMatch.findMany({
+        // Smart Lookup: Find ANY mapping for same-named roles across the tenant
+        const allMatches = await prisma.jobMatch.findMany({
             include: { job_catalog: true }
         });
-        const globalTitleMap = new Map();
-        // We need the original employee titles to link them
-        const allEmployees = await prisma.employee.findMany();
-        const empTitleMap = new Map(allEmployees.map(e => [e.id, e.area])); // Using area as title proxy if needed, but let's be more precise
         
-        allJobMatches.forEach(jm => {
-            // Find the employee title for this match
-            const emp = allEmployees.find(e => e.id === jm.employee_id);
-            if (emp && emp.area && !globalTitleMap.has(emp.area)) {
-                globalTitleMap.set(emp.area, jm.job_catalog);
+        // Build a global title-to-grade map
+        const titleToCatalog = new Map();
+        const employees = await prisma.employee.findMany();
+        allMatches.forEach(m => {
+            const emp = employees.find(e => e.id === m.employee_id);
+            if (emp?.area) {
+                const normalizedTitle = emp.area.trim().toLowerCase();
+                if (!titleToCatalog.has(normalizedTitle)) {
+                    titleToCatalog.set(normalizedTitle, m.job_catalog);
+                }
             }
         });
 
         const analysis = compensations.map(c => {
-            const directMatch = c.employee.job_matches[0];
-            // Fallback to global title map if direct match is missing
-            const jobCatalog = directMatch?.job_catalog || globalTitleMap.get(c.employee.area);
+            const directMatchIdx = c.employee.job_matches.length - 1;
+            const directMatch = directMatchIdx >= 0 ? c.employee.job_matches[directMatchIdx] : null;
+            
+            const normalizedTitle = (c.employee.area || '').trim().toLowerCase();
+            const jobCatalog = directMatch?.job_catalog || titleToCatalog.get(normalizedTitle);
             
             let grade = jobCatalog?.grade;
             
-            // HEURISTIC: If not mapped, guestimate grade based on salary to at least show on chart
+            // HEURISTIC (Same as Diagnostic Pro): If NO mapping at all, estimate based on salary distribution
             if (!grade) {
+                // Approximate grade based on common salary bands in this snapshot
                 if (c.base_salary < 3000) grade = 10;
                 else if (c.base_salary < 4500) grade = 12;
-                else if (c.base_salary < 7000) grade = 15;
-                else if (c.base_salary < 10000) grade = 18;
+                else if (c.base_salary < 7500) grade = 15;
+                else if (c.base_salary < 12000) grade = 18;
                 else grade = 21;
             }
 
             const targetTableGrade = tableMap.get(grade);
-
-            // SAFE HOURS: If database has 0 or null, assume 220h (standard CLT)
             const empHours = (c as any).hours || 220;
             const normalizedSalary = (c.base_salary / empHours) * targetHours;
             
             if (!targetTableGrade) {
                 return {
                     name: c.employee.full_name,
+                    jobTitle: jobCatalog?.title_std || c.employee.area || 'Cargo não mapeado',
                     salary: c.base_salary,
                     actualHours: empHours,
                     normalizedSalary: Math.round(normalizedSalary * 100) / 100,
-                    grade: grade || 'N/A',
+                    grade: grade,
                     status: 'NOT_MAPPED',
                     gap: 0
                 };
