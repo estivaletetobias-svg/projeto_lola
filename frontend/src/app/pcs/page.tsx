@@ -169,14 +169,22 @@ function TabButton({ active, onClick, icon, label }: any) {
 }
 
 function AnalysisView({ data, hours }: any) {
+    if (!data || !data.summary || !data.details) return (
+        <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#64748b', fontWeight: 600 }}>Dados indisponíveis para este snapshot.</p>
+        </div>
+    );
+
+    const avgGap = data.summary?.avgGap || 0;
+
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: 24 }}>
             {/* Summary Stats Row */}
             <div style={{ gridColumn: 'span 2', display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 20 }}>
-                <SummaryStat label="Aderência da Curva" value={`${(data.summary.avgGap < 0 ? 100 + data.summary.avgGap : 100 - data.summary.avgGap).toFixed(1)}%`} icon={<Activity size={20} />} color="#6366f1" />
-                <SummaryStat label="Gap Médio vs Mid" value={`${data.summary.avgGap}%`} icon={<TrendingUp size={20} />} color={data.summary.avgGap < 0 ? "#f43f5e" : "#10b981"} />
-                <SummaryStat label="Total Auditado" value={data.summary.totalEmployees} icon={<Users size={20} />} color="#64748b" />
-                <SummaryStat label="Abaixo do Piso" value={data.summary.belowCount} icon={<AlertCircle size={20} />} color="#f43f5e" />
+                <SummaryStat label="Aderência da Curva" value={`${(avgGap < 0 ? 100 + avgGap : 100 - avgGap).toFixed(1)}%`} icon={<Activity size={20} />} color="#6366f1" />
+                <SummaryStat label="Gap Médio vs Mid" value={`${avgGap}%`} icon={<TrendingUp size={20} />} color={avgGap < 0 ? "#f43f5e" : "#10b981"} />
+                <SummaryStat label="Total Auditado" value={data.summary?.totalEmployees || 0} icon={<Users size={20} />} color="#64748b" />
+                <SummaryStat label="Abaixo do Piso" value={data.summary?.belowCount || 0} icon={<AlertCircle size={20} />} color="#f43f5e" />
             </div>
 
             <div className="card" style={{ padding: 40 }}>
@@ -188,8 +196,8 @@ function AnalysisView({ data, hours }: any) {
                             <XAxis type="number" dataKey="grade" name="Grade" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} />
                             <YAxis type="number" dataKey="salary" name="Salary" axisLine={false} tickLine={false} tick={{ fontSize: 11 }} unit="R$" />
                             <Tooltip cursor={{ strokeDasharray: '3 3' }} />
-                            <Scatter name="Employees" data={data.details.filter((d: any) => d.status !== 'NOT_MAPPED')} fill="#6366f1">
-                                {data.details.map((entry: any, index: number) => (
+                            <Scatter name="Employees" data={(data.details || []).filter((d: any) => d.status !== 'NOT_MAPPED')} fill="#6366f1">
+                                {(data.details || []).map((entry: any, index: number) => (
                                     <Cell key={`cell-${index}`} fill={entry.status === 'BELOW' ? '#f43f5e' : entry.status === 'ABOVE' ? '#818cf8' : '#10b981'} />
                                 ))}
                             </Scatter>
@@ -213,28 +221,28 @@ function AnalysisView({ data, hours }: any) {
                             </tr>
                         </thead>
                         <tbody>
-                            {data.details?.map((emp: any, i: number) => (
+                            {(data.details || []).map((emp: any, i: number) => (
                                 <tr key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)' }}>
                                     <td style={{ padding: '16px 0' }}>
-                                        <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b' }}>{emp.name}</div>
+                                        <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b' }}>{emp.name || 'N/A'}</div>
                                         <div style={{ fontSize: 11, color: '#64748b' }}>{emp.jobTitle} (G{emp.grade})</div>
                                     </td>
                                     <td style={{ padding: '16px 0', textAlign: 'center' }}>
-                                        <div style={{ fontSize: 11, fontWeight: 800, background: '#f8fafc', padding: '4px 8px', borderRadius: 6, display: 'inline-block' }}>{emp.actualHours}h</div>
+                                        <div style={{ fontSize: 11, fontWeight: 800, background: '#f8fafc', padding: '4px 8px', borderRadius: 6, display: 'inline-block' }}>{emp.actualHours || 0}h</div>
                                     </td>
-                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 700 }}>R$ {emp.salary.toLocaleString()}</td>
-                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 900, color: '#6366f1' }}>R$ {emp.normalizedSalary.toLocaleString()}</td>
+                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 700 }}>R$ {(emp.salary || 0).toLocaleString()}</td>
+                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 900, color: '#6366f1' }}>R$ {(emp.normalizedSalary || 0).toLocaleString()}</td>
                                     <td style={{ padding: '16px 0', textAlign: 'center' }}>
                                         <span style={{ 
                                             padding: '4px 10px', borderRadius: 8, fontSize: 10, fontWeight: 900,
                                             background: emp.status === 'BELOW' ? '#f43f5e10' : (emp.status === 'ABOVE' ? '#6366f110' : '#10b98110'),
                                             color: emp.status === 'BELOW' ? '#f43f5e' : (emp.status === 'ABOVE' ? '#6366f1' : '#10b981')
                                         }}>
-                                            {emp.currentStep} ({emp.status})
+                                            {emp.currentStep || 'N/A'} ({emp.status})
                                         </span>
                                     </td>
-                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 950, color: emp.gap < 0 ? '#f43f5e' : '#10b981' }}>
-                                        {emp.gap > 0 ? '+' : ''}{emp.gap}%
+                                    <td style={{ padding: '16px 0', textAlign: 'right', fontSize: 13, fontWeight: 950, color: (emp.gap || 0) < 0 ? '#f43f5e' : '#10b981' }}>
+                                        {emp.gap > 0 ? '+' : ''}{emp.gap || 0}%
                                     </td>
                                 </tr>
                             ))}
@@ -252,12 +260,18 @@ function StatRow({ label, count, color }: any) {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 700, color: '#64748b' }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: color }} /> {label}
             </div>
-            <div style={{ fontWeight: 900, fontSize: 16 }}>{count}</div>
+            <div style={{ fontWeight: 900, fontSize: 16 }}>{count || 0}</div>
         </div>
     );
 }
 
 function TableView({ data }: any) {
+    if (!Array.isArray(data)) return (
+        <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#64748b', fontWeight: 600 }}>Tabela indisponível.</p>
+        </div>
+    );
+    
     return (
         <div className="card" style={{ padding:0, overflow: 'hidden' }}>
             <div style={{ padding: '24px 40px', borderBottom: '1px solid rgba(0,0,0,0.05)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -282,11 +296,11 @@ function TableView({ data }: any) {
                         {data.map((row: any) => (
                             <tr key={row.grade} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)' }}>
                                 <td style={{ padding: '20px 40px', fontWeight: 950, color: '#0f172a' }}>G{row.grade}</td>
-                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {row.steps[0].value.toLocaleString()}</td>
-                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {row.steps[2].value.toLocaleString()}</td>
-                                <td style={{ padding: '20px 20px', fontSize: 14, fontWeight: 900, color: '#6366f1', background: 'rgba(99, 102, 241, 0.02)' }}>R$ {row.midpoint.toLocaleString()}</td>
-                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {row.steps[6].value.toLocaleString()}</td>
-                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {row.steps[8].value.toLocaleString()}</td>
+                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {(row.steps?.[0]?.value || 0).toLocaleString()}</td>
+                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {(row.steps?.[2]?.value || 0).toLocaleString()}</td>
+                                <td style={{ padding: '20px 20px', fontSize: 14, fontWeight: 900, color: '#6366f1', background: 'rgba(99, 102, 241, 0.02)' }}>R$ {(row.midpoint || 0).toLocaleString()}</td>
+                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {(row.steps?.[6]?.value || 0).toLocaleString()}</td>
+                                <td style={{ padding: '20px 20px', fontSize: 13, fontWeight: 700, color: '#64748b' }}>R$ {(row.steps?.[8]?.value || 0).toLocaleString()}</td>
                             </tr>
                         ))}
                     </tbody>
@@ -297,6 +311,12 @@ function TableView({ data }: any) {
 }
 
 function ImpactView({ data }: any) {
+    if (!data) return (
+        <div style={{ height: 400, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <p style={{ color: '#64748b', fontWeight: 600 }}>Simulação de impacto indisponível.</p>
+        </div>
+    );
+
     return (
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
@@ -314,18 +334,18 @@ function ImpactView({ data }: any) {
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 24 }}>
                         <div>
                             <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 4 }}>Impacto Mensal</div>
-                            <div style={{ fontSize: 28, fontWeight: 950, color: '#0f172a' }}>R$ {data.monthlyImpact.toLocaleString()}</div>
+                            <div style={{ fontSize: 28, fontWeight: 950, color: '#0f172a' }}>R$ {(data.monthlyImpact || 0).toLocaleString()}</div>
                         </div>
                         <div>
                             <div style={{ fontSize: 10, fontWeight: 800, color: '#94a3b8', textTransform: 'uppercase', marginBottom: 4 }}>Impacto Anual (c/ Encargos)</div>
-                            <div style={{ fontSize: 28, fontWeight: 950, color: '#0f172a' }}>R$ {data.annualImpact.toLocaleString()}</div>
+                            <div style={{ fontSize: 28, fontWeight: 950, color: '#0f172a' }}>R$ {(data.annualImpact || 0).toLocaleString()}</div>
                         </div>
                     </div>
 
                     <div style={{ marginTop: 40, padding: 24, background: '#0f172a', borderRadius: 20, color: 'white' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
                             <span style={{ fontSize: 12, fontWeight: 700, opacity: 0.7 }}>Aderência da Folha</span>
-                            <span style={{ fontSize: 12, fontWeight: 900 }}>{((1 - data.affectedCount / 50) * 100).toFixed(1)}%</span>
+                            <span style={{ fontSize: 12, fontWeight: 900 }}>{((1 - (data.affectedCount || 0) / 50) * 100).toFixed(1)}%</span>
                         </div>
                         <div style={{ height: 8, background: 'rgba(255,255,255,0.1)', borderRadius: 4, overflow: 'hidden' }}>
                             <div style={{ height: '100%', width: '75%', background: '#6366f1' }} />
@@ -336,7 +356,7 @@ function ImpactView({ data }: any) {
                 <div className="card" style={{ padding: 32 }}>
                     <h4 style={{ fontSize: 14, fontWeight: 900, marginBottom: 20 }}>Destaques da Simulação</h4>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        <HighlightItem icon={<CheckCircle2 size={16} color="#10b981" />} text={`Identificamos ${data.affectedCount} colaboradores abaixo da faixa mínima.`} />
+                        <HighlightItem icon={<CheckCircle2 size={16} color="#10b981" />} text={`Identificamos ${data.affectedCount || 0} colaboradores abaixo da faixa mínima.`} />
                         <HighlightItem icon={<AlertCircle size={16} color="#f59e0b" />} text="O realinhamento reduz o risco de churn crítico em 42%." />
                         <HighlightItem icon={<DollarSign size={16} color="#6366f1" />} text="O impacto anual representa 2.4% da massa salarial total." />
                     </div>
@@ -348,14 +368,14 @@ function ImpactView({ data }: any) {
                     <h3 style={{ fontSize: 16, fontWeight: 900 }}>Lista de Enquadramento Necessário</h3>
                 </div>
                 <div style={{ maxHeight: 600, overflowY: 'auto' }}>
-                    {data.details.map((item: any, i: number) => (
+                    {(data.details || []).map((item: any, i: number) => (
                         <div key={i} style={{ padding: '20px 32px', borderBottom: '1px solid rgba(0,0,0,0.02)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <div style={{ fontSize: 13, fontWeight: 900 }}>{item.name}</div>
-                                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{item.percentIncrease}% de ajuste sugerido</div>
+                                <div style={{ fontSize: 13, fontWeight: 900 }}>{item.name || 'N/A'}</div>
+                                <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>{item.percentIncrease || 0}% de ajuste sugerido</div>
                             </div>
                             <div style={{ textAlign: 'right' }}>
-                                <div style={{ fontSize: 13, fontWeight: 900, color: '#f43f5e' }}>+ R$ {item.increase.toLocaleString()}</div>
+                                <div style={{ fontSize: 13, fontWeight: 900, color: '#f43f5e' }}>+ R$ {(item.increase || 0).toLocaleString()}</div>
                                 <div style={{ fontSize: 10, color: '#94a3b8' }}>Mensal</div>
                             </div>
                         </div>
