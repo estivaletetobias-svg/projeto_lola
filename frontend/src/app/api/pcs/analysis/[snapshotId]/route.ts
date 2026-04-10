@@ -115,7 +115,7 @@ export async function GET(
 
             return {
                 name: c.employee.full_name,
-                jobTitle: jobMatch?.job_catalog?.title_std || 'Cargo não mapeado',
+                jobTitle: jobCatalog?.title_std || 'Cargo não mapeado',
                 salary: c.base_salary,
                 actualHours: empHours,
                 normalizedSalary: Math.round(normalizedSalary * 100) / 100,
@@ -123,7 +123,7 @@ export async function GET(
                 midpoint: Math.round(midpoint),
                 gap: Math.round(gap * 100) / 100,
                 currentStep: closestStep.step,
-                status: jobMatch ? (gap < -10 ? 'BELOW' : (gap > 10 ? 'ABOVE' : 'ALIGNED')) : 'NOT_MAPPED'
+                status: jobCatalog ? (gap < -10 ? 'BELOW' : (gap > 10 ? 'ABOVE' : 'ALIGNED')) : 'NOT_MAPPED'
             };
         });
 
