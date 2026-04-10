@@ -66,6 +66,10 @@ export const safeFetch = async (endpoint: string, options?: RequestInit) => {
         
         console.warn(`Tentando recuperação nativa para ${endpoint} (Code: ${errCode})`);
         
+        if (endpoint.includes('diagnostics/dashboard-stats')) {
+            const internal = await fetch('/api/diagnostics/dashboard-stats');
+            if (internal.ok) return internal;
+        }
         if (endpoint.includes('snapshots')) {
             const internal = await fetch('/api/snapshots');
             if (internal.ok) return internal;
