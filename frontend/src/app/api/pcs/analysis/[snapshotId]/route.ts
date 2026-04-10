@@ -50,20 +50,35 @@ export async function GET(
 
         const analysis = compensations.map(c => {
             const jobMatch = c.employee.job_matches[0];
-            const grade = jobMatch?.job_catalog?.grade;
+            let grade = jobMatch?.job_catalog?.grade;
+            
+            // HEURISTIC: If not mapped, guestimate grade based on salary to at least show on chart
+            if (!grade) {
+                if (c.base_salary < 3000) grade = 10;
+                else if (c.base_salary < 4500) grade = 12;
+                else if (c.base_salary < 7000) grade = 15;
+                else if (c.base_salary < 10000) grade = 18;
+                else grade = 21;
+            }
+
             const targetTableGrade = tableMap.get(grade);
 
-            if (!grade || !targetTableGrade) {
+            // SAFE HOURS: If database has 0 or null, assume 220h (standard CLT)
+            const empHours = (c as any).hours || 220;
+            const normalizedSalary = (c.base_salary / empHours) * targetHours;
+            
+            if (!targetTableGrade) {
                 return {
                     name: c.employee.full_name,
                     salary: c.base_salary,
+                    actualHours: empHours,
+                    normalizedSalary: Math.round(normalizedSalary * 100) / 100,
                     grade: grade || 'N/A',
                     status: 'NOT_MAPPED',
                     gap: 0
                 };
             }
 
-            const normalizedSalary = (c.base_salary / (c as any).hours) * targetHours;
             const midpoint = targetTableGrade.midpoint;
             const gap = (normalizedSalary / midpoint - 1) * 100;
             
@@ -80,15 +95,15 @@ export async function GET(
 
             return {
                 name: c.employee.full_name,
-                jobTitle: jobMatch.job_catalog.title_std,
+                jobTitle: jobMatch?.job_catalog?.title_std || 'Cargo não mapeado',
                 salary: c.base_salary,
-                actualHours: (c as any).hours || 160,
+                actualHours: empHours,
                 normalizedSalary: Math.round(normalizedSalary * 100) / 100,
                 grade: grade,
                 midpoint: Math.round(midpoint),
                 gap: Math.round(gap * 100) / 100,
                 currentStep: closestStep.step,
-                status: gap < -10 ? 'BELOW' : (gap > 10 ? 'ABOVE' : 'ALIGNED')
+                status: jobMatch ? (gap < -10 ? 'BELOW' : (gap > 10 ? 'ABOVE' : 'ALIGNED')) : 'NOT_MAPPED'
             };
         });
 
