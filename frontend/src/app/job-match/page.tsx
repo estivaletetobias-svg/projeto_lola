@@ -122,7 +122,8 @@ export default function JobMatchPage() {
         setAutoApproving(true);
         try {
             const baseUrl = getBackendUrl();
-            await safeFetch(`${baseUrl}/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
+            // Use local API first for speed
+            await fetch(`/api/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
             await fetchData();
         } finally {
             setAutoApproving(false);
@@ -131,7 +132,7 @@ export default function JobMatchPage() {
 
     const pending = groups.filter(g => !g.existingMatch);
     const mappedCount = groups.filter(g => g.existingMatch).length;
-    const totalEmployees = groups.reduce((s, g) => s + g.count, 0);
+    const totalEmployees = groups.reduce((s, g) => s + (g.employees || 0), 0);
 
     const filteredCatalog = (title: string) => {
         const q = (search[title] || '').toLowerCase();
