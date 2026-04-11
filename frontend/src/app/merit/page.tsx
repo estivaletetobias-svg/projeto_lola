@@ -53,7 +53,7 @@ export default function MeritCyclePage() {
             const analysisRes = await safeFetch(`${baseUrl}/salary-engine/analyze/${snapshotId}`);
             const analysis = await analysisRes.json();
 
-            if (analysis.status !== 'success' || !analysis.mappedEmployees?.length) {
+            if (!analysis.mappedEmployees?.length) {
                 setError('Nenhum colaborador mapeado encontrado. Vá em Mapeamento de Cargos.');
                 setLoading(false);
                 return;
