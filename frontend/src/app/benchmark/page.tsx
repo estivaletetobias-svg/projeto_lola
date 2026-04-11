@@ -131,7 +131,7 @@ export default function BenchmarkExplorerPage() {
                     <div>
                         <h1 style={{ fontSize: 40, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.04em', lineHeight: 1 }}>Benchmark Explorer</h1>
                         <p style={{ color: '#64748b', fontSize: 16, marginTop: 12 }}>
-                            Acesso a <strong style={{ color: '#1e293b' }}>{total.toLocaleString()} benchmarks</strong> atualizados para TI & Tech.
+                            Acesso a <strong style={{ color: '#1e293b' }}>{total.toLocaleString()} benchmarks</strong> atualizados para múltiplas categorias de mercado.
                         </p>
                     </div>
                 </div>
