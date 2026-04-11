@@ -34,7 +34,7 @@ export async function POST(
 
             if (!existing) {
                 // Find a catalog item that matches the title (area) or just pick one by grade heuristic
-                const internalTitle = comp.employee.area.toLowerCase();
+                const internalTitle = (comp.employee.area || 'Conhecido').toLowerCase();
                 let match = catalog.find(c => internalTitle.includes(c.title_std.toLowerCase()) || c.title_std.toLowerCase().includes(internalTitle));
                 
                 // Fallback to salary-based grade matching if no title match

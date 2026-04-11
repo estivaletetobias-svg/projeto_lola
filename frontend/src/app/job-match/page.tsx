@@ -124,7 +124,8 @@ export default function JobMatchPage() {
             const baseUrl = getBackendUrl();
             // Use local API first for speed
             await fetch(`/api/job-match/auto-approve/${snapshotId}`, { method: 'POST' });
-            await fetchData();
+            // Hard refresh to ensure all states are cleared
+            window.location.reload();
         } finally {
             setAutoApproving(false);
         }
