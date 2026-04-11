@@ -66,6 +66,9 @@ export async function GET(
             }
         });
 
+        // SORTED LIST for percentile calculation (same as Diagnostic Pro)
+        const sortedCompensations = [...compensations].sort((a, b) => a.base_salary - b.base_salary);
+
         const analysis = compensations.map(c => {
             const directMatchIdx = c.employee.job_matches.length - 1;
             const directMatch = directMatchIdx >= 0 ? c.employee.job_matches[directMatchIdx] : null;
@@ -75,14 +78,10 @@ export async function GET(
             
             let grade = jobCatalog?.grade;
             
-            // HEURISTIC (Same as Diagnostic Pro): If NO mapping at all, estimate based on salary distribution
+            // HEURISTIC (Syncing with Diagnostic Pro):
             if (!grade) {
-                // Approximate grade based on common salary bands in this snapshot
-                if (c.base_salary < 3000) grade = 10;
-                else if (c.base_salary < 4500) grade = 12;
-                else if (c.base_salary < 7500) grade = 15;
-                else if (c.base_salary < 12000) grade = 18;
-                else grade = 21;
+                const position = sortedCompensations.findIndex(sc => sc.id === c.id);
+                grade = 10 + Math.floor((position / sortedCompensations.length) * 10);
             }
 
             const targetTableGrade = tableMap.get(grade);
