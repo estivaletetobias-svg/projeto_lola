@@ -11,19 +11,34 @@ const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
 });
 
-const AI_SYSTEM_PROMPT = `You are an elite payroll data extraction engine. 
-You will receive raw text from a payroll document.
-Extract ALL employee rows. Ignore headers, empty rows, totals, and decorative lines.
+const AI_SYSTEM_PROMPT = `You are an elite payroll and HR data extraction engine.
+You will receive raw text from a Brazilian HR spreadsheet (Estrutura de Cargos / Folha de Pagamento).
+
+CRITICAL STRUCTURAL RULES for NODETech-style spreadsheets:
+- The spreadsheet uses EMPLOYEE CODES (numeric IDs like 15, 50, 104) as identifiers — NOT employee names.
+- There is a column for the MANAGER NAME ("Este cargo reporta para: NOME do Gestor") — this is the BOSS, NOT the employee.
+- Do NOT use the manager's name as the employee's full_name. That field belongs to the supervisor.
+- Since there is no employee name column, set full_name to: "Cód. [employee_code]" (e.g., "Cód. 15").
+- The employee_key should be the employee numeric code as a string (e.g., "15", "104").
+- Extract the manager_name as a separate field when available.
+
+Extract ALL employee rows. Ignore headers, empty rows, totals, and decorative/example lines.
 Ensure salary numbers are floats (e.g., 5000.00 not "5.000,00").
 Return a strictly valid JSON object with a single root key 'employees' containing an array.
 Each object MUST match exactly:
 {
-  employee_key: string,   // CPF, ID, or generate unique if missing
-  full_name: string,      // full name
-  area: string,           // job title, role, or department
-  base_salary: number,    // base salary as float
-  benefits: number,       // sum of benefits or 0
-  variable: number        // sum of variable pay or 0
+  employee_key: string,    // Employee numeric code as string (e.g., "15", "104")
+  full_name: string,       // "Cód. [code]" when no name column exists (e.g., "Cód. 15")
+  area: string,            // Cargo Atual (job title) + Senioridade if available (e.g., "Engenheiro de Software Full Stack - Sênior")
+  department: string,      // Área ou Departamento (e.g., "DEV", "Administrativo")
+  seniority: string,       // Senioridade (e.g., "Júnior", "Pleno", "Sênior")
+  manager_name: string,    // Nome do Gestor (the supervisor's name, NOT the employee)
+  base_salary: number,     // Salário base as float
+  benefits: number,        // sum of benefits or 0
+  variable: number,        // sum of variable pay or 0
+  monthly_hours: number,   // Carga Horária Mensal (e.g., 160, 220)
+  gender: string,          // Gênero (masculino/feminino)
+  contract_type: string    // Tipo de Contratação (e.g., "CLT", "PJ")
 }`;
 
 export async function POST(request: NextRequest) {
@@ -111,26 +126,40 @@ export async function POST(request: NextRequest) {
 
             // Upsert Employees and create Compensation
             for (const e of employees) {
+                const employeeKey = String(e.id || e.employee_key);
                 const emp = await prisma.employee.upsert({
                     where: { 
                         tenant_id_employee_key: { 
                             tenant_id: tenant.id, 
-                            employee_key: String(e.id || e.employee_key) 
+                            employee_key: employeeKey
                         } 
                     },
                     update: {
-                        full_name: e.full_name,
+                        full_name: e.full_name || `Cód. ${employeeKey}`,
                         area: e.area,
+                        department: e.department || null,
+                        seniority: e.seniority || null,
+                        manager_name: e.manager_name || null,
+                        gender: e.gender || null,
+                        contract_type: e.contract_type || null,
+                        monthly_hours: e.monthly_hours ? Number(e.monthly_hours) : null,
                         status: 'ACTIVE',
                     },
                     create: {
                         tenant_id: tenant.id,
-                        employee_key: String(e.id || e.employee_key),
-                        full_name: e.full_name,
+                        employee_key: employeeKey,
+                        full_name: e.full_name || `Cód. ${employeeKey}`,
                         area: e.area,
+                        department: e.department || null,
+                        seniority: e.seniority || null,
+                        manager_name: e.manager_name || null,
+                        gender: e.gender || null,
+                        contract_type: e.contract_type || null,
+                        monthly_hours: e.monthly_hours ? Number(e.monthly_hours) : null,
                         status: 'ACTIVE',
                     }
                 });
+
 
                 await prisma.compensation.create({
                     data: {

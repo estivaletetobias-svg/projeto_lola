@@ -322,8 +322,31 @@ export default function DiagnosticsPage() {
                                 return (
                                     <tr key={i} style={{ borderBottom: '1px solid rgba(0,0,0,0.02)', transition: 'background 0.2s' }}>
                                         <td style={{ padding: '20px 40px' }}>
-                                            <div style={{ fontWeight: 800, fontSize: 14, color: '#1e293b' }}>{emp.name}</div>
-                                            <div style={{ fontSize: 12, color: '#64748b', marginTop: 4 }}>{emp.jobTitle} (Grade {emp.grade})</div>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{ 
+                                                    width: 38, height: 38, borderRadius: 10,
+                                                    background: emp.gender === 'feminino' ? 'rgba(236,72,153,0.1)' : 'rgba(99,102,241,0.1)',
+                                                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                                    fontSize: 13, fontWeight: 900,
+                                                    color: emp.gender === 'feminino' ? '#ec4899' : '#6366f1',
+                                                    flexShrink: 0
+                                                }}>
+                                                    {emp.employeeCode || emp.name?.replace('Cód. ', '') || '?'}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 800, fontSize: 13, color: '#1e293b' }}>
+                                                        {emp.name}
+                                                    </div>
+                                                    <div style={{ fontSize: 11, color: '#64748b', marginTop: 2 }}>
+                                                        {emp.jobTitle} · Grade {emp.grade}
+                                                    </div>
+                                                    {emp.managerName && (
+                                                        <div style={{ fontSize: 10, color: '#94a3b8', marginTop: 2, display: 'flex', alignItems: 'center', gap: 4 }}>
+                                                            <span style={{ opacity: 0.6 }}>Gestor:</span> {emp.managerName}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
                                         </td>
                                         <td style={{ padding: '20px 40px' }}>
                                             <div style={{ 

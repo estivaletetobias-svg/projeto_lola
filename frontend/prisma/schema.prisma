@@ -89,9 +89,15 @@ model Employee {
   id             String    @id @default(uuid())
   tenant_id      String
   tenant         Tenant    @relation(fields: [tenant_id], references: [id])
-  employee_key   String    // identifying code internal to tenant
-  full_name      String?   // masked maybe
-  area           String
+  employee_key   String    // identifying code internal to tenant (e.g., "15", "104")
+  full_name      String?   // "Cód. 15" when no name available — employee code label
+  area           String    // job title + seniority (e.g., "Engenheiro Full Stack - Sênior")
+  department     String?   // Área ou Departamento (e.g., "DEV", "Administrativo")
+  seniority      String?   // Senioridade (Júnior, Pleno, Sênior)
+  manager_name   String?   // Nome do Gestor (supervisor) — NOT the employee's name
+  gender         String?   // Gênero (masculino/feminino)
+  contract_type  String?   // Tipo de Contratação (CLT, PJ)
+  monthly_hours  Int?      // Carga Horária Mensal (160, 220)
   location_city  String?
   location_state String?
   status         String?   // ACTIVE, TERMINATED

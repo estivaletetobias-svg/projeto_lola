@@ -23,14 +23,23 @@ export async function GET(
         const mappedEmployees = sorted.map((comp, i) => {
             // Heuristic Grade: 10 to 20 based on position in salary list
             const grade = 10 + Math.floor((i / sorted.length) * 10);
+            const emp = comp.employee;
+            // Use employee_key as the display label when it's a code-based system
+            const displayName = emp.full_name || `Cód. ${emp.employee_key}`;
             return {
-                name: comp.employee.full_name || 'Colaborador',
-                jobTitle: comp.employee.area,
+                name: displayName,
+                employeeCode: emp.employee_key,
+                jobTitle: emp.area, // area already stores "Cargo - Senioridade"
+                seniority: emp.seniority || null,
+                department: emp.department || null,
+                managerName: emp.manager_name || null,
+                gender: emp.gender || null,
                 grade: grade,
                 salary: comp.base_salary,
                 employeeId: comp.employee_id
             };
         });
+
 
         // 2. Generate Market Curve (Suggested Salary Structure)
         // Midpoint = Median salary for that grade bucket
