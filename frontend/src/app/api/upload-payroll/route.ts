@@ -182,12 +182,12 @@ export async function POST(request: NextRequest) {
         } catch (dbErr: any) {
             console.error('Database persistence failed:', dbErr);
             return NextResponse.json({
-                status: 'success',
-                count: employees.length,
-                dbStatus: 'persistence_failed',
-                employees: employees,
-            });
+                status: 'error',
+                message: 'Falha ao salvar no banco de dados. Verifique se as migrations foram aplicadas.',
+                error: dbErr.message
+            }, { status: 500 });
         }
+
 
     } catch (error: any) {
         console.error('Upload API error:', error);
