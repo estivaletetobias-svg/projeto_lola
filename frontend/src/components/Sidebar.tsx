@@ -8,7 +8,7 @@ import {
     Home, Users, BarChart2, TrendingUp, Settings, 
     FileText, Briefcase, Zap, Menu, X, Layers, 
     ShieldCheck, Cpu, Database, ChevronRight,
-    Sparkles, LogOut
+    Sparkles, LogOut, BookOpen
 } from 'lucide-react';
 
 export default function Sidebar() {
@@ -42,6 +42,7 @@ export default function Sidebar() {
             label: 'Configurações',
             items: [
                 { name: 'Sistema & Admin', icon: <Settings size={18} />, href: '/roadmap' },
+                { name: 'Manual de Uso', icon: <BookOpen size={18} />, href: '/manual' },
             ]
         }
     ];
