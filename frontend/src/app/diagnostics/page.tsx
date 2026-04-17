@@ -225,7 +225,7 @@ export default function DiagnosticsPage() {
                         <ResponsiveContainer width="100%" height="100%">
                             <ScatterChart margin={{ top: 20, right: 30, bottom: 20, left: 20 }}>
                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                                <XAxis type="number" dataKey="grade" name="Grade" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} domain={['auto', 'auto']} />
+                                <XAxis type="number" dataKey="grade" name="Grade" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} domain={['auto', 'auto']} tickFormatter={(v: number) => `G${v}`} label={{ value: 'Faixa Salarial (Grade)', position: 'insideBottom', offset: -12, fontSize: 11, fill: '#94a3b8', fontWeight: 700 }} />
                                 <YAxis type="number" dataKey="salary" name="Salary" axisLine={false} tickLine={false} tick={{ fontSize: 11, fill: '#64748b' }} unit="R$" />
                                 <Tooltip 
                                     cursor={{ strokeDasharray: '4 4', stroke: 'rgba(255,255,255,0.2)' }} 
