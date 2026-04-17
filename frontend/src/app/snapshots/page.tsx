@@ -1,7 +1,7 @@
 'use client';
 import { safeFetch } from "@/app/api-config";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, Dispatch, SetStateAction } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     Upload, FileText, CheckCircle, AlertCircle,
@@ -37,7 +37,7 @@ export default function SnapshotsPage() {
     // ── File handlers ────────────────────────────────────────────
     const handleFile = (
         file: File,
-        setter: (s: FileState) => void
+        setter: Dispatch<SetStateAction<FileState>>
     ) => {
         setter({ file, name: file.name, recordCount: 0, status: 'reading' });
         const ext = file.name.split('.').pop()?.toLowerCase();
