@@ -1,44 +1,81 @@
 import { NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
+const LEVEL_LABELS: Record<string, string> = {
+    ANY: 'Indiferente', JUNIOR: 'Júnior', PLENO: 'Pleno',
+    SENIOR: 'Sênior', INTERN: 'Estagiário',
+    COORD: 'Coordenador', MANAGER: 'Gerente', DIRECTOR: 'Diretor',
+};
+
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url);
-        const search = searchParams.get('search')?.toLowerCase() || '';
+        const search = searchParams.get('search')?.toLowerCase().trim() || '';
+        const level  = searchParams.get('level')?.toUpperCase() || '';
+        const page   = Math.max(1, parseInt(searchParams.get('page') || '1'));
+        const pageSize = 50;
 
-        // EXPANDED DATA: Including roles found in current user snapshot and general admin/sales roles
-        const SEED_BENCHMARKS = [
-            // TECH
-            { id: 'b1', job_catalog: { title_std: 'Software Engineer', level: 'SENIOR', family: 'Engineering', grade: 16 }, p25: 14500, p50: 16800, p75: 19500, n: 482, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b2', job_catalog: { title_std: 'Software Engineer', level: 'PLENO', family: 'Engineering', grade: 14 }, p25: 10200, p50: 12500, p75: 14800, n: 1240, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b22', job_catalog: { title_std: 'Analista Frontend', level: 'JUNIOR', family: 'Engineering', grade: 12 }, p25: 4500, p50: 5200, p75: 6100, n: 342, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b3', job_catalog: { title_std: 'Product Manager', level: 'SENIOR', family: 'Product', grade: 16 }, p25: 15800, p50: 18500, p75: 22000, n: 312, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            
-            // MARKETING & DESIGN
-            { id: 'b5', job_catalog: { title_std: 'UX Designer', level: 'PLENO', family: 'Design', grade: 14 }, p25: 9800, p50: 11200, p75: 13500, n: 245, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b55', job_catalog: { title_std: 'Assistente de Marketing', level: 'SENIOR', family: 'Marketing', grade: 12 }, p25: 4200, p50: 4800, p75: 5600, n: 184, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            
-            // SALES
-            { id: 'b6', job_catalog: { title_std: 'Analista de Pré-Vendas', level: 'JUNIOR', family: 'Sales', grade: 11 }, p25: 3200, p50: 3800, p75: 4500, n: 215, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b7', job_catalog: { title_std: 'Executivo de Contas', level: 'PLENO', family: 'Sales', grade: 15 }, p25: 8500, p50: 9800, p75: 12100, n: 890, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            
-            // ADMIN & OPS
-            { id: 'b8', job_catalog: { title_std: 'Assistente Administrativo', level: 'PLENO', family: 'Admin', grade: 10 }, p25: 2800, p50: 3200, p75: 3800, n: 3420, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b9', job_catalog: { title_std: 'Analista Financeiro', level: 'SENIOR', family: 'Finance', grade: 15 }, p25: 7800, p50: 9100, p75: 10800, n: 567, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b10', job_catalog: { title_std: 'Gerente de Operações', level: 'MANAGER', family: 'Ops', grade: 18 }, p25: 14200, p50: 16500, p75: 19800, n: 124, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' },
-            { id: 'b4', job_catalog: { title_std: 'Cientista de Dados', level: 'SENIOR', family: 'Data', grade: 17 }, p25: 16500, p50: 19200, p75: 23500, n: 156, as_of_date: '2025-03-01', source_tag: 'Lola Intelligence' }
-        ];
+        // Filtra no banco, com busca por título ou família
+        const where: any = {};
 
-        const filtered = SEED_BENCHMARKS.filter(b => 
-            b.job_catalog.title_std.toLowerCase().includes(search) || 
-            b.job_catalog.family.toLowerCase().includes(search)
-        );
+        if (search) {
+            where.OR = [
+                { title_std: { contains: search, mode: 'insensitive' } },
+                { family:    { contains: search, mode: 'insensitive' } },
+            ];
+        }
+
+        if (level && level !== 'ALL') {
+            where.level = level;
+        }
+
+        const [total, catalogs] = await Promise.all([
+            prisma.jobCatalog.count({ where }),
+            prisma.jobCatalog.findMany({
+                where,
+                skip:  (page - 1) * pageSize,
+                take:  pageSize,
+                orderBy: [{ family: 'asc' }, { grade: 'asc' }, { title_std: 'asc' }],
+                include: {
+                    market_benchmarks: {
+                        orderBy: { as_of_date: 'desc' },
+                        take: 1, // Pega o mais recente por cargo
+                    }
+                }
+            })
+        ]);
+
+        // Formata no mesmo shape que o frontend espera
+        const data = catalogs
+            .filter(c => c.market_benchmarks.length > 0)
+            .map(c => {
+                const bm = c.market_benchmarks[0];
+                return {
+                    id: bm.id,
+                    job_catalog: {
+                        id:        c.id,
+                        title_std: c.title_std,
+                        level:     c.level,
+                        level_label: LEVEL_LABELS[c.level] || c.level,
+                        family:    c.family,
+                        grade:     c.grade,
+                        cbo_code:  c.cbo_code,
+                    },
+                    p25:        Math.round(bm.p25),
+                    p50:        Math.round(bm.p50),
+                    p75:        Math.round(bm.p75),
+                    n:          bm.n,
+                    as_of_date: bm.as_of_date,
+                    source_tag: bm.source_tag,
+                };
+            });
 
         return NextResponse.json({
-            data: filtered,
-            total: filtered.length,
-            page: 1,
-            pageSize: 10
+            data,
+            total,
+            page,
+            pageSize,
+            totalPages: Math.ceil(total / pageSize),
         });
 
     } catch (error: any) {

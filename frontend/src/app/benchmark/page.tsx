@@ -36,6 +36,7 @@ interface ApiResponse {
     total: number;
     page: number;
     pageSize: number;
+    totalPages: number;
 }
 
 const LEVEL_LABELS: Record<string, string> = {
@@ -66,32 +67,33 @@ export default function BenchmarkExplorerPage() {
     const [benchmarks, setBenchmarks] = useState<Benchmark[]>([]);
     const [loading, setLoading] = useState(true);
     const [total, setTotal] = useState(0);
+    const [totalPages, setTotalPages] = useState(1);
     const [page, setPage] = useState(1);
     const [selected, setSelected] = useState<Benchmark | null>(null);
-    const pageSize = 15;
+    const PAGE_SIZE = 50;
 
     const fetchData = useCallback(async () => {
         setLoading(true);
         try {
             const params = new URLSearchParams({
                 page: page.toString(),
-                pageSize: '10',
+                pageSize: PAGE_SIZE.toString(),
                 ...(search && { search }),
                 ...(levelFilter !== 'ALL' && { level: levelFilter }),
             });
-            // Usar API nativa do frontend para estabilidade máxima no pitch
             const res = await fetch(`/api/market-benchmark?${params}`);
             if (res.ok) {
                 const json: ApiResponse = await res.json();
                 setBenchmarks(json.data || []);
                 setTotal(json.total || 0);
+                setTotalPages(json.totalPages || 1);
             }
         } catch (e) {
             console.error('Erro ao buscar benchmarks:', e);
         } finally {
             setLoading(false);
         }
-    }, [search, levelFilter, page]);
+    }, [search, levelFilter, page, PAGE_SIZE]);
 
     useEffect(() => {
         const timer = setTimeout(fetchData, 300);
@@ -238,26 +240,78 @@ export default function BenchmarkExplorerPage() {
                             </table>
                         </div>
 
-                        {/* Pagination Terminal */}
-                        <div style={{ padding: '20px 24px', background: 'white', borderTop: '1px solid #334155', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        {/* Pagination */}
+                        <div style={{ padding: '16px 24px', background: 'white', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div style={{ fontSize: 12, fontWeight: 600, color: '#64748b' }}>
-                                Visão <strong style={{ color: '#1e293b' }}>{((page - 1) * pageSize) + 1}–{Math.min(page * pageSize, total)}</strong> de {total.toLocaleString()} registros
+                                Exibindo <strong style={{ color: '#1e293b' }}>{((page - 1) * PAGE_SIZE) + 1}–{Math.min(page * PAGE_SIZE, total)}</strong> de <strong style={{ color: '#1e293b' }}>{total.toLocaleString()}</strong> cargos
                             </div>
-                            <div style={{ display: 'flex', gap: 10 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                 <button
                                     onClick={() => setPage(p => Math.max(1, p - 1))}
                                     disabled={page === 1}
-                                    style={{ padding: '10px 18px', borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, opacity: page === 1 ? 0.4 : 1 }}
+                                    style={{
+                                        padding: '8px 16px', borderRadius: 10,
+                                        border: '1px solid #e2e8f0', background: 'white',
+                                        cursor: page === 1 ? 'not-allowed' : 'pointer',
+                                        fontSize: 13, fontWeight: 700,
+                                        opacity: page === 1 ? 0.4 : 1,
+                                        transition: 'all 0.15s'
+                                    }}
                                 >
-                                    Anterior
+                                    ← Anterior
                                 </button>
+
+                                {/* Page number pills */}
+                                <div style={{ display: 'flex', gap: 6 }}>
+                                    {Array.from({ length: Math.min(totalPages, 7) }, (_, i) => {
+                                        // Windowed pagination: always show first, last, current ±2
+                                        let pg: number;
+                                        if (totalPages <= 7) {
+                                            pg = i + 1;
+                                        } else if (page <= 4) {
+                                            pg = i + 1;
+                                        } else if (page >= totalPages - 3) {
+                                            pg = totalPages - 6 + i;
+                                        } else {
+                                            pg = page - 3 + i;
+                                        }
+                                        const isActive = pg === page;
+                                        return (
+                                            <button
+                                                key={pg}
+                                                onClick={() => setPage(pg)}
+                                                style={{
+                                                    width: 36, height: 36, borderRadius: 10,
+                                                    border: isActive ? 'none' : '1px solid #e2e8f0',
+                                                    background: isActive ? '#4f46e5' : 'white',
+                                                    color: isActive ? 'white' : '#475569',
+                                                    fontWeight: 800, fontSize: 13,
+                                                    cursor: 'pointer', transition: 'all 0.15s'
+                                                }}
+                                            >
+                                                {pg}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
                                 <button
-                                    onClick={() => setPage(p => p + 1)}
-                                    disabled={page * pageSize >= total}
-                                    style={{ padding: '10px 18px', borderRadius: 12, border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 700, display: 'flex', alignItems: 'center', gap: 8, opacity: page * pageSize >= total ? 0.4 : 1 }}
+                                    onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={page >= totalPages}
+                                    style={{
+                                        padding: '8px 16px', borderRadius: 10,
+                                        border: '1px solid #e2e8f0', background: 'white',
+                                        cursor: page >= totalPages ? 'not-allowed' : 'pointer',
+                                        fontSize: 13, fontWeight: 700,
+                                        opacity: page >= totalPages ? 0.4 : 1,
+                                        transition: 'all 0.15s'
+                                    }}
                                 >
-                                    Próxima
+                                    Próxima →
                                 </button>
+                            </div>
+                            <div style={{ fontSize: 12, fontWeight: 600, color: '#94a3b8' }}>
+                                Página {page} de {totalPages}
                             </div>
                         </div>
                     </motion.div>

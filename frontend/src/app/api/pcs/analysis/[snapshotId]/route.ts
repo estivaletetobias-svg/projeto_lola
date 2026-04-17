@@ -18,7 +18,7 @@ export async function GET(
         const { snapshotId } = await params;
         const { searchParams } = new URL(request.url);
         const inpc = parseFloat(searchParams.get('inpc') || '0');
-        const targetHours = parseInt(searchParams.get('hours') || '160');
+        const targetHours = parseInt(searchParams.get('hours') || '220');
 
         const compensations = await prisma.compensation.findMany({
             where: { snapshot_id: snapshotId },
@@ -85,7 +85,21 @@ export async function GET(
             }
 
             const targetTableGrade = tableMap.get(grade);
-            const empHours = (c as any).hours || 220;
+            // Usa a carga horária real extraída da folha de pagamento
+            const empHours = c.employee.monthly_hours;
+            if (!empHours) {
+                return {
+                    name: c.employee.full_name,
+                    jobTitle: jobCatalog?.title_std || c.employee.area || 'Cargo não mapeado',
+                    salary: c.base_salary,
+                    actualHours: null,
+                    normalizedSalary: null,
+                    grade,
+                    status: 'MISSING_HOURS',
+                    gap: 0,
+                    error: 'Carga horária não encontrada na folha. Verifique a coluna correspondente.'
+                };
+            }
             const normalizedSalary = (c.base_salary / empHours) * targetHours;
             
             if (!targetTableGrade) {

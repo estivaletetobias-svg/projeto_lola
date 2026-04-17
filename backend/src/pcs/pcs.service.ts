@@ -39,7 +39,7 @@ export class PcsService {
     /**
      * Generates a Salary Table adjusted by INPC and Hours
      */
-    calculateAdjustedTable(inpcAccumulatedPercent: number = 0, targetHours: number = 160) {
+    calculateAdjustedTable(inpcAccumulatedPercent: number = 0, targetHours: number = 220) {
         const inpcFactor = 1 + (inpcAccumulatedPercent / 100);
         const hoursFactor = targetHours / 160;
 
@@ -65,7 +65,7 @@ export class PcsService {
     /**
      * Analyzes individual employee positioning against the adjusted table
      */
-    async analyzeSalaryPositioning(snapshotId: string, inpcPercent: number = 0, targetHours: number = 160) {
+    async analyzeSalaryPositioning(snapshotId: string, inpcPercent: number = 0, targetHours: number = 220) {
         const adjustedTable = this.calculateAdjustedTable(inpcPercent, targetHours);
         const tableMap = new Map(adjustedTable.map(t => [t.grade, t]));
 
@@ -98,8 +98,17 @@ export class PcsService {
                 };
             }
 
-            // Normalization: Compare employee salary adjusted to the table's hours base
-            // If table is 160h and employee is 220h, we deflate employee salary to 160h base
+            // Usa a carga horária real extraída da folha de pagamento (campo monthly_hours)
+            if (!c.hours) {
+                return {
+                    name: c.employee.full_name,
+                    salary: c.base_salary,
+                    grade: grade || 'N/A',
+                    status: 'MISSING_HOURS',
+                    gap: 0,
+                    error: 'Carga horária não encontrada na folha. Verifique a coluna correspondente.'
+                };
+            }
             const normalizedSalary = (c.base_salary / c.hours) * targetHours;
 
             const midpoint = targetTableGrade.midpoint;
@@ -147,7 +156,7 @@ export class PcsService {
     /**
      * Calculates the financial impact of moving everyone to at least the minimum of their grade
      */
-    async calculateImpact(snapshotId: string, inpcPercent: number = 0, targetHours: number = 160) {
+    async calculateImpact(snapshotId: string, inpcPercent: number = 0, targetHours: number = 220) {
         const positioning = await this.analyzeSalaryPositioning(snapshotId, inpcPercent, targetHours);
         const adjustedTable = this.calculateAdjustedTable(inpcPercent, targetHours);
         const tableMap = new Map(adjustedTable.map(t => [t.grade, t]));
