@@ -52,9 +52,9 @@ export default function SnapshotsPage() {
                     ) || wb.SheetNames[0];
                     const ws = wb.Sheets[sheetName];
                     const data = XLSX.utils.sheet_to_json(ws);
-                    setter(prev => ({ ...prev, recordCount: data.length, status: 'ready' }));
+                    setter((prev: FileState) => ({ ...prev, recordCount: data.length, status: 'ready' }));
                 } catch {
-                    setter(prev => ({ ...prev, status: 'ready' }));
+                    setter((prev: FileState) => ({ ...prev, status: 'ready' }));
                 }
             };
             reader.readAsBinaryString(file);
