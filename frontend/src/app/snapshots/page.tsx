@@ -73,7 +73,7 @@ export default function SnapshotsPage() {
         if (f) handleFile(f, setResearch);
     };
 
-    const canProceed = payroll.status === 'ready';
+    const canProceed = payroll.status === 'ready' && research.status === 'ready';
 
     // ── Main analysis flow ───────────────────────────────────────
     const startAnalysis = async () => {
@@ -295,11 +295,14 @@ export default function SnapshotsPage() {
                             <div className="card" style={{ padding: 40, border: 'none', boxShadow: '0 4px 24px rgba(0,0,0,0.04)' }}>
                                 <div style={{ marginBottom: 28 }}>
                                     <div style={{ fontSize: 11, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#4f46e5', marginBottom: 8 }}>
-                                        Documentos Necessários
+                                        Documentos Obrigatórios
                                     </div>
                                     <h2 style={{ fontSize: 22, fontWeight: 900, color: '#1e293b', letterSpacing: '-0.02em' }}>
                                         Folha de Pagamento + Pesquisa Salarial
                                     </h2>
+                                    <p style={{ fontSize: 13, color: '#94a3b8', marginTop: 8 }}>
+                                        Ambos os documentos são necessários. A pesquisa é a base de comparação — sem ela, nenhuma análise é gerada.
+                                    </p>
                                 </div>
 
                                 {/* Dois drop zones lado a lado */}
@@ -322,7 +325,7 @@ export default function SnapshotsPage() {
                                     </div>
                                     <div>
                                         <div style={{ fontSize: 11, fontWeight: 900, color: '#475569', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 10 }}>
-                                            📊 Pesquisa Salarial <span style={{ color: '#94a3b8', fontWeight: 600, textTransform: 'none', fontSize: 10 }}>(opcional)</span>
+                                            📊 Pesquisa Salarial <span style={{ color: '#ef4444' }}>*</span>
                                         </div>
                                         <DropZone
                                             tag="research"
@@ -353,10 +356,10 @@ export default function SnapshotsPage() {
                                     </div>
                                     <div style={{ width: 1, height: 20, background: '#e2e8f0' }} />
                                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flex: 1 }}>
-                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: research.status === 'ready' ? '#10b981' : '#f59e0b' }} />
+                                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: research.status === 'ready' ? '#10b981' : '#ef4444' }} />
                                         <span style={{ fontSize: 12, fontWeight: 700, color: '#64748b' }}>Pesquisa Salarial</span>
-                                        <span style={{ fontSize: 12, color: research.status === 'ready' ? '#10b981' : '#94a3b8', fontWeight: 700 }}>
-                                            {research.status === 'ready' ? '✓ Pronta' : 'Opcional'}
+                                        <span style={{ fontSize: 12, color: research.status === 'ready' ? '#10b981' : '#ef4444', fontWeight: 700 }}>
+                                            {research.status === 'ready' ? '✓ Pronta' : 'Obrigatória'}
                                         </span>
                                     </div>
                                 </div>
@@ -375,6 +378,11 @@ export default function SnapshotsPage() {
                                 >
                                     Revisar e Confirmar <ArrowRight size={18} />
                                 </button>
+                                {!canProceed && (payroll.status === 'ready' || research.status === 'ready') && (
+                                    <p style={{ textAlign: 'center', fontSize: 12, color: '#ef4444', fontWeight: 700, marginTop: 12 }}>
+                                        {payroll.status !== 'ready' ? '⚠ Adicione a Folha de Pagamento para continuar.' : '⚠ Adicione a Pesquisa Salarial para continuar — ela é a base do diagnóstico.'}
+                                    </p>
+                                )}
                             </div>
 
                             {/* Sidebar */}
@@ -399,9 +407,9 @@ export default function SnapshotsPage() {
                                     </div>
                                     <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                                         {[
-                                            { icon: '📋', label: 'Sobe a folha', desc: 'A IA extrai colaboradores, cargos e salários automaticamente' },
-                                            { icon: '📊', label: 'Sobe a pesquisa', desc: 'Os P25/P50/P75 são importados e associados ao benchmark' },
-                                            { icon: '🔍', label: 'Diagnóstico', desc: 'O sistema compara internos vs. mercado instantaneamente' },
+                                            { icon: '📊', label: 'Sobe a pesquisa', desc: 'Os P25/P50/P75 da pesquisa salarial são importados e definem a única base de comparação' },
+                                            { icon: '📋', label: 'Sobe a folha', desc: 'A IA extrai colaboradores, cargos e salários da folha de pagamento automaticamente' },
+                                            { icon: '🔍', label: 'Diagnóstico', desc: 'A folha é comparada exclusivamente contra a pesquisa enviada — sem benchmarks externos' },
                                         ].map(item => (
                                             <div key={item.label} style={{ display: 'flex', gap: 12, alignItems: 'flex-start' }}>
                                                 <span style={{ fontSize: 18, flexShrink: 0 }}>{item.icon}</span>
@@ -474,11 +482,11 @@ export default function SnapshotsPage() {
                                         </div>
                                     </div>
                                     <span style={{
-                                        background: research.status === 'ready' ? '#10b98120' : '#f1f5f9',
-                                        color: research.status === 'ready' ? '#10b981' : '#94a3b8',
+                                        background: '#10b98120',
+                                        color: '#10b981',
                                         borderRadius: 20, padding: '3px 12px', fontSize: 11, fontWeight: 800
                                     }}>
-                                        {research.status === 'ready' ? '✓ Será importada' : 'Usará benchmarks globais'}
+                                        ✓ Base exclusiva de comparação
                                     </span>
                                 </div>
                             </div>

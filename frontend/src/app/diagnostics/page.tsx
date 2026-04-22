@@ -12,7 +12,8 @@ import {
     TrendingDown, Users, Target, DollarSign, 
     ChevronRight, Sparkles, ShieldAlert, Activity,
     Cpu, AlertCircle, Filter, LayoutGrid, ListChecks,
-    Zap, Gem, ArrowUpRight, ArrowDownRight, Info
+    Zap, Gem, ArrowUpRight, ArrowDownRight, Info,
+    Database, Globe2
 } from 'lucide-react';
 import Link from 'next/link';
 import { getBackendUrl } from '../api-config';
@@ -22,6 +23,7 @@ export default function DiagnosticsPage() {
     const [snapshot, setSnapshot] = useState<any>(null);
     const [analysis, setAnalysis] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
+    const [activeTab, setActiveTab] = useState<'research' | 'global'>('research');
 
     useEffect(() => {
         const fetchData = async () => {
@@ -136,7 +138,42 @@ export default function DiagnosticsPage() {
                   </h1>
                 </div>
                 
-                <div style={{ display: 'flex', gap: 12 }}>
+            <div style={{ display: 'flex', gap: 12 }}>
+                    {/* Tab Switcher */}
+                    <div style={{
+                        display: 'flex', gap: 4, padding: 4,
+                        background: '#f1f5f9', borderRadius: 14,
+                        border: '1px solid #e2e8f0'
+                    }}>
+                        <button
+                            onClick={() => setActiveTab('research')}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                padding: '10px 18px', borderRadius: 10, border: 'none',
+                                fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                background: activeTab === 'research' ? 'white' : 'transparent',
+                                color: activeTab === 'research' ? '#4f46e5' : '#64748b',
+                                boxShadow: activeTab === 'research' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                            }}
+                        >
+                            <Database size={15} /> Pesquisa Enviada
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('global')}
+                            style={{
+                                display: 'flex', alignItems: 'center', gap: 8,
+                                padding: '10px 18px', borderRadius: 10, border: 'none',
+                                fontWeight: 800, fontSize: 13, cursor: 'pointer',
+                                transition: 'all 0.2s',
+                                background: activeTab === 'global' ? 'white' : 'transparent',
+                                color: activeTab === 'global' ? '#64748b' : '#64748b',
+                                boxShadow: activeTab === 'global' ? '0 2px 8px rgba(0,0,0,0.08)' : 'none',
+                            }}
+                        >
+                            <Globe2 size={15} /> Benchmarks Globais
+                        </button>
+                    </div>
                     <button onClick={() => window.location.reload()} style={{ padding: '12px 20px', borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)', background: 'rgba(0,0,0,0.02)', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8, color: '#94a3b8' }}>
                         <RefreshCw size={16} /> Recalcular Engine
                     </button>
@@ -146,8 +183,63 @@ export default function DiagnosticsPage() {
                 </div>
             </motion.div>
 
-            {/* AI Strategic Assessment */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 40 }}>
+            {/* Source Context Banner */}
+            <AnimatePresence mode="wait">
+                {activeTab === 'research' ? (
+                    <motion.div
+                        key="research-banner"
+                        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 14,
+                            padding: '16px 24px', marginBottom: 32,
+                            background: 'linear-gradient(135deg, #eef2ff 0%, #f0fdf4 100%)',
+                            borderRadius: 16, border: '1px solid #c7d2fe',
+                        }}
+                    >
+                        <div style={{ width: 36, height: 36, background: '#4f46e5', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Database size={18} color="white" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 13, fontWeight: 900, color: '#3730a3' }}>
+                                Modo Ativo: Pesquisa Salarial Enviada
+                            </div>
+                            <div style={{ fontSize: 12, color: '#4f46e5', fontWeight: 600 }}>
+                                Todos os gaps e análises abaixo usam exclusivamente os benchmarks da pesquisa que você enviou no upload.
+                            </div>
+                        </div>
+                    </motion.div>
+                ) : (
+                    <motion.div
+                        key="global-banner"
+                        initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }}
+                        style={{
+                            display: 'flex', alignItems: 'center', gap: 14,
+                            padding: '16px 24px', marginBottom: 32,
+                            background: '#fffbeb',
+                            borderRadius: 16, border: '1px solid #fde68a',
+                        }}
+                    >
+                        <div style={{ width: 36, height: 36, background: '#f59e0b', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                            <Globe2 size={18} color="white" />
+                        </div>
+                        <div>
+                            <div style={{ fontSize: 13, fontWeight: 900, color: '#92400e' }}>
+                                Visualização: Benchmarks Globais (referência)
+                            </div>
+                            <div style={{ fontSize: 12, color: '#b45309', fontWeight: 600 }}>
+                                Estes dados são benchmarks de referência genéricos e NÃO são usados nos cálculos de comparação da folha.
+                            </div>
+                        </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Main Content — conditional by tab */}
+            {activeTab === 'global' ? (
+                <GlobalBenchmarksView />
+            ) : (
+            <>{/* AI Strategic Assessment */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.8fr 1fr', gap: 24, marginBottom: 40 }}>
                 <motion.div variants={{ hidden: { opacity: 0, scale: 0.98 }, show: { opacity: 1, scale: 1 } }} style={{ background: 'linear-gradient(135deg, #1e293b 0%, #030712 100%)', padding: '48px', borderRadius: 24, border: '1px solid rgba(255,255,255,0.05)', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'relative', zIndex: 2 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 24 }}>
@@ -378,6 +470,92 @@ export default function DiagnosticsPage() {
                     </table>
                 </div>
             </motion.div>
+            </>
+            )}
+        </motion.div>
+    );
+}
+
+// ── GlobalBenchmarksView ─────────────────────────────────────────
+function GlobalBenchmarksView() {
+    const [benchmarks, setBenchmarks] = useState<any[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const { safeFetch, getBackendUrl } = await import('@/app/api-config');
+                const res = await safeFetch(`${getBackendUrl()}/market-benchmark?pageSize=50`);
+                const data = await res.json();
+                setBenchmarks(data.data || []);
+            } catch { setBenchmarks([]); }
+            finally { setLoading(false); }
+        };
+        load();
+    }, []);
+
+    const filtered = benchmarks.filter(b =>
+        !search || b.job_catalog?.title_std?.toLowerCase().includes(search.toLowerCase())
+    );
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }}
+            style={{ paddingBottom: 80 }}
+        >
+            <div className="card" style={{ padding: 0, overflow: 'hidden', border: '1px solid #fde68a' }}>
+                <div style={{ padding: '28px 36px', borderBottom: '1px solid #fde68a', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#fffbeb' }}>
+                    <div>
+                        <h3 style={{ fontSize: 18, fontWeight: 900, color: '#92400e', marginBottom: 4 }}>
+                            Benchmarks Globais — Apenas Referência
+                        </h3>
+                        <p style={{ fontSize: 12, color: '#b45309', fontWeight: 600 }}>
+                            Estes dados NÃO são usados nos cálculos de comparação. São referências de mercado genéricas.
+                        </p>
+                    </div>
+                    <input
+                        type="text" placeholder="Buscar cargo..."
+                        value={search} onChange={e => setSearch(e.target.value)}
+                        style={{ padding: '10px 16px', borderRadius: 10, border: '1px solid #fde68a', background: 'white', fontSize: 13, fontWeight: 600, outline: 'none', width: 220 }}
+                    />
+                </div>
+                {loading ? (
+                    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+                        <Loader2 size={36} color="#f59e0b" className="animate-spin" />
+                    </div>
+                ) : filtered.length === 0 ? (
+                    <div style={{ padding: 60, textAlign: 'center', color: '#94a3b8', fontWeight: 600 }}>
+                        Nenhum benchmark global encontrado. Importe uma pesquisa primeiro.
+                    </div>
+                ) : (
+                    <div style={{ overflowX: 'auto' }}>
+                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                            <thead>
+                                <tr style={{ background: '#fffbeb' }}>
+                                    {['Cargo', 'Família', 'Nível', 'Grade', 'P25', 'Mediana (P50)', 'P75', 'Fonte'].map(h => (
+                                        <th key={h} style={{ padding: '14px 24px', fontSize: 11, fontWeight: 900, color: '#b45309', textTransform: 'uppercase', textAlign: h === 'Cargo' ? 'left' : 'right', whiteSpace: 'nowrap' }}>{h}</th>
+                                    ))}
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filtered.map((b: any, i: number) => (
+                                    <tr key={i} style={{ borderBottom: '1px solid #fef9c3' }}>
+                                        <td style={{ padding: '16px 24px', fontWeight: 700, fontSize: 13, color: '#1e293b' }}>{b.job_catalog?.title_std || '—'}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 12, color: '#64748b', fontWeight: 600 }}>{b.job_catalog?.family || '—'}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 12, color: '#64748b', fontWeight: 600 }}>{b.job_catalog?.level || '—'}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 12, color: '#64748b', fontWeight: 800 }}>G{b.job_catalog?.grade || '?'}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>R$ {Number(b.p25 || 0).toLocaleString('pt-BR')}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 14, fontWeight: 900, color: '#d97706' }}>R$ {Number(b.p50 || 0).toLocaleString('pt-BR')}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 13, fontWeight: 700, color: '#f59e0b' }}>R$ {Number(b.p75 || 0).toLocaleString('pt-BR')}</td>
+                                        <td style={{ padding: '16px 24px', textAlign: 'right', fontSize: 11, color: '#94a3b8', fontWeight: 600, maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{b.source_tag || 'Global'}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
         </motion.div>
     );
 }

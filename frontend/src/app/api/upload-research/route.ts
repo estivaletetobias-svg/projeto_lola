@@ -116,8 +116,10 @@ export async function POST(request: Request) {
 
         const dataRows = rows.slice(headerIdx + 1);
 
-        // Remove benchmarks antigos (globais sem snapshot vinculado) para não misturar
-        // Se tiver snapshotId, os novos benchmarks ficam marcados com a tag do snapshot
+        // A pesquisa enviada é SEMPRE a base exclusiva de comparação.
+        // Apaga todos os benchmarks anteriores para evitar contaminação.
+        await prisma.marketBenchmark.deleteMany({});
+
         const sourceTag = `Pesquisa ${file.name.replace(/\.(xlsx?|xls)$/i, '')} — base ${targetHours}h`;
 
         let imported = 0;
